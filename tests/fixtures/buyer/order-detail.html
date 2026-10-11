@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture: every name, address, phone number, e-mail address, id and price is made up.
+  accounts.booth.pm/orders/30000001, reconstructed from third-party parsers, NOT captured
+  (TODO(PLAN §7-1): replace with a real, scrubbed capture; LOW confidence).
+  Structure: OptoCloud/AssetDownloader AssetDownloader/HtmlScrapers/Booth/BoothAccountOrderScraper.cs (2024:
+  div.u-mt-500 > div.l-row > div.l-col-pc-* label/value columns, div.l-order-detail-by-shop,
+  div.l-order-detail-sheet-group-header > b > a, div.sheet-group > div[class*=mobile],
+  div.u-tpg-title4 > b > a, div.list > div.legacy-list-item, div.u-flex-1 > b, div.u-flex-none a[href*=downloadables]);
+  item block class `sheet sheet--p400 mobile:pt-[13px] mobile:px-16 mobile:pb-8` per
+  Myrkie/BoothDownloader BoothDownloader/src/Web/BoothPageParser.cs (verified live by its author in September 2026).
+  The `variation-name` class and the お届け先 block are NOT backed by any source: the former exercises the
+  best-effort variation field, the latter is fake PII that must never reach the parser output.
+-->
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="csrf-token" content="REDACTED-FIXTURE"><title>注文詳細 - BOOTH</title></head>
+<body>
+<main>
+<div class="manage-page-body">
+  <div class="container">
+    <h1 class="u-tpg-title1">注文詳細</h1>
+    <div class="u-mt-500">
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">注文番号</div><div class="l-col-pc-9">30000001</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">注文日時</div><div class="l-col-pc-9">2026/09/14 21:05:33</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">お支払い方法</div><div class="l-col-pc-9">クレジットカード決済</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">お支払い状況</div><div class="l-col-pc-9">支払済み</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">お支払い金額</div><div class="l-col-pc-9">¥ 2,300</div></div>
+    </div>
+
+    <div class="u-mt-500">
+      <h2 class="u-tpg-title3">お届け先</h2>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">お名前</div><div class="l-col-pc-9">架空 太郎</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">住所</div><div class="l-col-pc-9">〒123-4567 東京都架空区1-2-3 架空ハイツ101</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">電話番号</div><div class="l-col-pc-9">000-0000-0000</div></div>
+      <div class="l-row"><div class="l-col-pc-3 u-tpg-caption1">メールアドレス</div><div class="l-col-pc-9">kakuu.taro@example.com</div></div>
+    </div>
+
+    <div class="l-order-detail-by-shop u-mt-500">
+      <div class="sheet-group">
+        <div class="l-order-detail-sheet-group-header"><b><a href="https://kakuu-shop.booth.pm/">架空ショップ</a></b></div>
+        <div class="sheet sheet--p400 mobile:pt-[13px] mobile:px-16 mobile:pb-8">
+          <div class="u-d-flex">
+            <div class="u-flex-none u-mr-300"><a href="https://kakuu-shop.booth.pm/items/1000001"><img src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="72" height="72"></a></div>
+            <div class="u-flex-1">
+              <div class="u-tpg-title4"><b><a href="https://kakuu-shop.booth.pm/items/1000001">架空ドレス【しなの・桔梗対応】</a></b></div>
+              <div class="u-tpg-caption1 variation-name">しなの用</div>
+              <div class="u-tpg-caption1">¥ 1,500 × 1</div>
+            </div>
+          </div>
+          <div class="list u-mt-300">
+            <div class="legacy-list-item">
+              <div class="u-d-flex u-align-items-center">
+                <div class="u-flex-1"><b>KakuuDress_Shinano_v1.2.zip</b></div>
+                <div class="u-flex-none"><a class="btn small" href="https://booth.pm/downloadables/2000001">ダウンロード</a></div>
+              </div>
+            </div>
+            <div class="legacy-list-item">
+              <div class="u-d-flex u-align-items-center">
+                <div class="u-flex-1"><b>KakuuDress_Manual.pdf</b></div>
+                <div class="u-flex-none"><a class="btn small" href="https://booth.pm/downloadables/2000002">ダウンロード</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sheet-group">
+        <div class="l-order-detail-sheet-group-header"><b><a href="https://kakuu-hair.booth.pm/">架空ヘア工房</a></b></div>
+        <div class="sheet sheet--p400 mobile:pt-[13px] mobile:px-16 mobile:pb-8">
+          <div class="u-d-flex">
+            <div class="u-flex-none u-mr-300"><a href="https://kakuu-hair.booth.pm/items/1000002"><img src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000002/i/1000002/10000000-0000-4000-8000-000000000002_base_resized.jpg" alt="" width="72" height="72"></a></div>
+            <div class="u-flex-1">
+              <div class="u-tpg-title4"><b><a href="https://kakuu-hair.booth.pm/items/1000002">架空ヘア Short Bob</a></b></div>
+              <div class="u-tpg-caption1">¥ 800 × 1</div>
+            </div>
+          </div>
+          <div class="list u-mt-300">
+            <div class="legacy-list-item">
+              <div class="u-d-flex u-align-items-center">
+                <div class="u-flex-1"><b>KakuuHair_ShortBob.unitypackage</b></div>
+                <div class="u-flex-none"><a class="btn small" href="https://booth.pm/downloadables/2000003">ダウンロード</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+</body>
+</html>

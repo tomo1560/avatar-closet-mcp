@@ -1,10 +1,22 @@
-import { mkdir } from "node:fs/promises";
 import { chromium, type BrowserContext, type Page } from "playwright-core";
-import { BoothError } from "../errors.js";
-import { getProfileDir } from "../profile.js";
+import { BoothError, firstLineOf } from "../errors.js";
+import { getProfileDir, getSessionFile } from "../profile.js";
 import { persistBoothSession } from "../session-state.js";
+import { prepareProfileDir } from "./profile-dir.js";
+import { ACCOUNT_SETTINGS_URL, isSignInUrl } from "./url-policy.js";
+import { isBoothHost } from "./read-only-guard.js";
 
-const MANAGE_ORIGIN = "https://manage.booth.pm";
+export const LOGIN_START_URL = ACCOUNT_SETTINGS_URL;
+export const DEFAULT_LOGIN_TIMEOUT_MS = 10 * 60_000;
+const POLL_INTERVAL_MS = 1_000;
+const REOPEN_INTERVAL_MS = 15_000;
+
+export type LoginPageState = "logged_in" | "signing_in" | "booth" | "other";
+
+export interface ReopenTracker {
+  sawSignIn: boolean;
+  lastReopenAt: number | undefined;
+}
 
 export type LoginBrowserCandidate =
   | { label: string; executablePath: string }
@@ -20,58 +32,103 @@ export function getLoginBrowserCandidates(env: NodeJS.ProcessEnv = process.env):
   return candidates;
 }
 
-export async function runInteractiveLogin(timeoutMs = 10 * 60_000): Promise<void> {
-  const profileDir = getProfileDir();
-  await mkdir(profileDir, { recursive: true, mode: 0o700 });
-  const context = await launchLoginBrowser(profileDir);
+/**
+ * Logged in = a page sits on accounts.booth.pm and is not a sign-in page. Sign-in pages on BOOTH
+ * and any pixiv page (OAuth) mean the user is still signing in.
+ * TODO(PLAN §7): verify against the real post-OAuth redirect chain.
+ */
+export function classifyLoginUrl(value: string): LoginPageState {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return "other";
+  }
+  if (isSignInUrl(url)) return "signing_in";
+  if (url.protocol !== "https:" || !isBoothHost(url.hostname)) return "other";
+  return url.hostname === "accounts.booth.pm" ? "logged_in" : "booth";
+}
+
+/**
+ * After pixiv OAuth, BOOTH may land on booth.pm instead of accounts.booth.pm. Once the sign-in flow
+ * has been seen and no page is still in it, reopen the settings page (throttled to every 15s).
+ */
+export function shouldReopenSettings(states: readonly LoginPageState[], tracker: ReopenTracker, nowMs: number): boolean {
+  if (!tracker.sawSignIn || states.includes("signing_in") || !states.includes("booth")) return false;
+  return tracker.lastReopenAt === undefined || nowMs - tracker.lastReopenAt >= REOPEN_INTERVAL_MS;
+}
+
+/**
+ * Opens Chrome/Edge with a dedicated persistent profile at the buyer settings page and waits for the
+ * user to sign in manually (pixiv OAuth; credentials are never automated or read). On success the
+ * BOOTH-only cookies (plus adult=t) are saved to session.json.
+ */
+export async function runInteractiveLogin(
+  timeoutMs = DEFAULT_LOGIN_TIMEOUT_MS,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<void> {
+  const profileDir = getProfileDir(env);
+  await prepareProfileDir(profileDir);
+  const context = await launchLoginBrowser(profileDir, env);
   try {
     const page = context.pages()[0] ?? (await context.newPage());
-    await page.goto(`${MANAGE_ORIGIN}/`, { waitUntil: "domcontentloaded" });
-    if (!(await isAuthenticated(page))) {
-      process.stderr.write("브라우저에서 BOOTH 로그인을 완료해 주세요. 로그인 정보는 booth-library-mcp가 읽지 않습니다.\n");
-      const deadline = Date.now() + timeoutMs;
-      let authenticated = false;
-      while (Date.now() < deadline) {
-        for (const candidate of context.pages()) {
-          if (await isAuthenticated(candidate)) {
-            authenticated = true;
-            break;
-          }
-        }
-        if (authenticated) break;
-        await new Promise((resolve) => setTimeout(resolve, 1_000));
-      }
-      if (!authenticated) throw new BoothError("AUTH_REQUIRED", "10분 안에 로그인이 완료되지 않았습니다.");
+    await page.goto(LOGIN_START_URL, { waitUntil: "domcontentloaded" });
+    if (!hasLoggedInPage(context)) {
+      process.stderr.write(
+        "ブラウザで BOOTH（pixiv アカウント）へのログインを完了してください。ID・パスワードを booth-library-mcp が読み取ることはありません。\n",
+      );
+      await waitForLogin(context, timeoutMs);
     }
-    await persistBoothSession(context);
+    await persistBoothSession(context, getSessionFile(env));
   } finally {
-    await context.close();
+    await context.close().catch(() => undefined);
   }
 }
 
-async function launchLoginBrowser(profileDir: string): Promise<BrowserContext> {
+async function waitForLogin(context: BrowserContext, timeoutMs: number): Promise<void> {
+  let closed = false;
+  context.once("close", () => {
+    closed = true;
+  });
+  const tracker: ReopenTracker = { sawSignIn: false, lastReopenAt: undefined };
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (closed) throw new BoothError("AUTH_REQUIRED", "ログインが完了する前にブラウザが閉じられました。");
+    if (hasLoggedInPage(context)) return;
+    await reopenSettingsIfReturned(context.pages(), tracker);
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+  throw new BoothError("AUTH_REQUIRED", `${Math.round(timeoutMs / 1_000)} 秒以内にログインが完了しませんでした。`);
+}
+
+function hasLoggedInPage(context: BrowserContext): boolean {
+  return context.pages().some((page) => classifyLoginUrl(page.url()) === "logged_in");
+}
+
+async function reopenSettingsIfReturned(pages: Page[], tracker: ReopenTracker): Promise<void> {
+  const states = pages.map((page) => classifyLoginUrl(page.url()));
+  if (states.includes("signing_in")) tracker.sawSignIn = true;
+  const now = Date.now();
+  if (!shouldReopenSettings(states, tracker, now)) return;
+  tracker.lastReopenAt = now;
+  const target = pages[states.indexOf("booth")];
+  await target?.goto(LOGIN_START_URL, { waitUntil: "domcontentloaded" }).catch(() => undefined);
+}
+
+async function launchLoginBrowser(profileDir: string, env: NodeJS.ProcessEnv): Promise<BrowserContext> {
   const failures: string[] = [];
-  for (const candidate of getLoginBrowserCandidates()) {
+  for (const candidate of getLoginBrowserCandidates(env)) {
     try {
       return await chromium.launchPersistentContext(profileDir, {
         headless: false,
-        locale: "en-US",
-        ...("executablePath" in candidate
-          ? { executablePath: candidate.executablePath }
-          : { channel: candidate.channel }),
+        locale: "ja-JP",
+        ...("executablePath" in candidate ? { executablePath: candidate.executablePath } : { channel: candidate.channel }),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message.split("\n", 1)[0] : String(error);
-      failures.push(`${candidate.label}: ${message}`);
+      failures.push(`${candidate.label}: ${firstLineOf(error)}`);
     }
   }
-
   throw new Error(
-    `로그인에 사용할 Chrome 또는 Edge를 실행하지 못했습니다. 브라우저를 설치하거나 BOOTH_MCP_BROWSER_PATH에 Chromium 계열 브라우저 실행 파일을 지정해 주세요.\n${failures.join("\n")}`,
+    `ログイン用の Chrome / Edge を起動できませんでした。どちらかをインストールするか、BOOTH_MCP_BROWSER_PATH に Chromium 系ブラウザの実行ファイルを指定してください。\n${failures.join("\n")}`,
   );
-}
-
-async function isAuthenticated(page: Page): Promise<boolean> {
-  if (new URL(page.url()).hostname !== "manage.booth.pm") return false;
-  return (await page.locator('a[href="/orders"], a[href="https://manage.booth.pm/orders"]').count()) > 0;
 }

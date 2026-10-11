@@ -14,7 +14,7 @@ describe("stdio MCP contract", () => {
     client = undefined;
   });
 
-  it("publishes the login action and all read-only tools with schemas", async () => {
+  it("publishes the buyer auth tools with schemas and annotations", async () => {
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: ["--import", "tsx", "src/cli.ts"],
@@ -25,27 +25,19 @@ describe("stdio MCP contract", () => {
     await client.connect(transport);
     expect(client.getServerVersion()).toMatchObject({ name: "booth-library-mcp", version: packageVersion });
     const response = await client.listTools();
-    expect(response.tools.map((tool) => tool.name)).toEqual([
-      "booth_login",
-      "booth_auth_status",
-      "booth_get_dashboard",
-      "booth_list_items",
-      "booth_get_item",
-      "booth_list_orders",
-      "booth_get_order",
-      "booth_get_sales",
-      "booth_list_conversations",
-      "booth_get_conversation",
-      "booth_get_shop_settings",
-    ]);
+    expect(response.tools.map((tool) => tool.name)).toEqual(["booth_login", "booth_auth_status", "booth_logout"]);
+    const expectedAnnotations: Record<string, object> = {
+      booth_login: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+      booth_logout: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+    };
     for (const tool of response.tools) {
       expect(tool.inputSchema.type).toBe("object");
       expect(tool.outputSchema?.type).toBe("object");
       expect(tool.annotations).toMatchObject(
-        tool.name === "booth_login"
-          ? { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true }
-          : { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+        expectedAnnotations[tool.name] ?? { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
       );
     }
+    const login = response.tools.find((tool) => tool.name === "booth_login");
+    expect(Object.keys(login?.inputSchema.properties ?? {})).toEqual(["timeout_sec"]);
   });
 });

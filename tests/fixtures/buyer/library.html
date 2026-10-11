@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture: every name, id, shop and file below is made up.
+  accounts.booth.pm/library?page=2 (middle page of 3), reconstructed from third-party parsers, NOT captured
+  (TODO(PLAN §7-1): replace with a real, scrubbed capture).
+  Card / file-row markup: Soloflighter1010/Hoard-Asset-Manager tests/test_readers.py (BOOTH_2026, "as served in
+  September 2026") and hoard/library.py BOOTH_JS; studio-projecta/library-finder-for-booth extension/content.js
+  (div.bg-white.p-16, .font-bold.break-all, img.l-library-item-thumbnail, .text-text-gray600, .mt-16 .min-w-0 .text-14);
+  ribeKim/booth-library-manager utils/parser.ts (main > div.w-full > div.bg-white.p-16, desktop:rounded-8);
+  tomacheese/booth-purchased-items-manager src/booth.ts (desktop:flex row);
+  iamlinggggg/cl-booth-library-manager src/scraper.lisp (data-test="downloadable").
+  Japanese button labels and the tab names: 00b7ce/Stashly src-tauri/src/booth_download_bridge.js.
+  Relative data-href: 00b7ce/Stashly src/booth-download-bridge.test.ts. Pager: Kaminari markup as in the real
+  tests/fixtures/public/search.html; `nav-item last-page` per Myrkie/BoothDownloader BoothPageParser.cs.
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="csrf-token" content="REDACTED-FIXTURE">
+<title>ライブラリ - BOOTH</title>
+</head>
+<body>
+<header class="l-header">
+  <a href="https://booth.pm/ja">BOOTH</a>
+  <a href="https://accounts.booth.pm/settings">アカウント設定</a>
+</header>
+<main class="mx-auto desktop:w-[1024px]">
+  <div class="w-full">
+    <nav class="flex gap-24 mb-24">
+      <a class="font-bold" href="https://accounts.booth.pm/library">購入した商品</a>
+      <a href="https://accounts.booth.pm/library/gifts">ギフト</a>
+      <a href="https://accounts.booth.pm/library/free_downloads">無料ダウンロード</a>
+    </nav>
+
+    <div class="desktop:rounded-8 bg-white p-16 mb-16">
+      <div class="flex gap-16">
+        <a href="https://booth.pm/ja/items/1000001"><img class="l-library-item-thumbnail" src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="72" height="72"></a>
+        <div class="min-w-0">
+          <a class="no-underline" href="https://booth.pm/ja/items/1000001"><div class="text-text-default font-bold text-16 mb-8 break-all">架空ドレス【しなの・桔梗対応】</div></a>
+          <a class="no-underline" href="https://kakuu-shop.booth.pm/"><div class="text-14 text-text-gray600 break-all">架空ショップ</div></a>
+          <a class="text-12" href="https://accounts.booth.pm/orders/30000001">注文詳細</a>
+        </div>
+      </div>
+      <div class="mt-16">
+        <div class="desktop:flex desktop:justify-between desktop:items-center">
+          <div class="min-w-0"><div class="text-14 break-all">KakuuDress_Shinano_v1.2.zip</div></div>
+          <div class="flex gap-8">
+            <div class="js-download-button" data-href="https://booth.pm/downloadables/2000001?browse=1" data-label="ブラウザで開く" data-test="browsable"></div>
+            <div class="js-download-button" data-href="https://booth.pm/downloadables/2000001" data-label="ダウンロード" data-test="downloadable"></div>
+            <div class="js-download-button w-full" data-label="その他のDL方法" data-test="other-downloads-button" data-dropdown-items='[{"deeplinkDownloadableUrl":"https://booth.pm/downloadables/2000001/deeplink?client=booth-library-manager"}]'></div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-16">
+        <div class="desktop:flex desktop:justify-between desktop:items-center">
+          <div class="min-w-0"><div class="text-14 break-all">KakuuDress_Manual.pdf</div></div>
+          <div class="flex gap-8">
+            <a class="btn" href="https://booth.pm/downloadables/2000002">ダウンロード</a>
+            <a href="https://booth.pm/downloadables/2000002/deeplink?client=booth-library-manager">BOOTH Library で開く</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="desktop:rounded-8 bg-white p-16 mb-16">
+      <div class="flex gap-16">
+        <a href="https://kakuu-hair.booth.pm/items/1000002"><img class="l-library-item-thumbnail" src="//booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000002/i/1000002/10000000-0000-4000-8000-000000000002_base_resized.jpg" alt="" width="72" height="72"></a>
+        <div class="min-w-0">
+          <a class="no-underline" href="https://kakuu-hair.booth.pm/items/1000002"><div class="text-text-default font-bold text-16 mb-8 break-all">架空ヘア Short Bob</div></a>
+          <a class="no-underline" href="https://kakuu-hair.booth.pm/"><div class="text-14 text-text-gray600 break-all">架空ヘア工房</div></a>
+        </div>
+      </div>
+      <div class="mt-16">
+        <div class="desktop:flex desktop:justify-between desktop:items-center">
+          <div class="min-w-0"><div class="text-14 break-all">KakuuHair_ShortBob.unitypackage</div></div>
+          <div class="flex gap-8">
+            <div class="js-download-button" data-href="/downloadables/2000003" data-label="ダウンロード" data-test="downloadable"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="desktop:rounded-8 bg-white p-16 mb-16">
+      <div class="flex gap-16">
+        <a href="https://booth.pm/en/items/1000003"><img class="l-library-item-thumbnail" src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000003/i/1000003/10000000-0000-4000-8000-000000000003_base_resized.jpg" alt="" width="72" height="72"></a>
+        <div class="min-w-0">
+          <a class="no-underline" href="https://booth.pm/en/items/1000003"><div class="text-text-default font-bold text-16 mb-8 break-all">架空アクセサリーセット</div></a>
+          <a class="no-underline" href="https://kakuu-shop.booth.pm/"><div class="text-14 text-text-gray600 break-all">架空ショップ</div></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="desktop:rounded-8 bg-white p-16 mb-16">
+      <div class="flex gap-16">
+        <a href="https://booth.pm/ja/items/1000001"><img class="l-library-item-thumbnail" src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="72" height="72"></a>
+        <div class="min-w-0">
+          <a class="no-underline" href="https://booth.pm/ja/items/1000001"><div class="text-text-default font-bold text-16 mb-8 break-all">架空ドレス【しなの・桔梗対応】</div></a>
+          <a class="no-underline" href="https://kakuu-shop.booth.pm/"><div class="text-14 text-text-gray600 break-all">架空ショップ</div></a>
+          <a class="text-12" href="https://accounts.booth.pm/orders/30000003">注文詳細</a>
+        </div>
+      </div>
+      <div class="mt-16">
+        <div class="desktop:flex desktop:justify-between desktop:items-center">
+          <div class="min-w-0"><div class="text-14 break-all">KakuuDress_Kikyo_v1.2.zip</div></div>
+          <div class="flex gap-8">
+            <div class="js-download-button" data-href="https://booth.pm/downloadables/2000004" data-label="ダウンロード" data-test="downloadable"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pager"><nav><ul><li><a class="nav-item first-page" href="/library"><i class="icon-angle-double-left no-margin s-1x"></i></a></li><li><a rel="prev" class="nav-item" href="/library"><i class="icon-arrow-open-left no-margin s-1x"></i></a></li><li><a class="nav-item" href="/library">1</a></li><li class="current"><a class="nav-item" href="/library?page=2">2</a></li><li><a class="nav-item" href="/library?page=3">3</a></li><li><a rel="next" class="nav-item" href="/library?page=3"><i class="icon-arrow-open-right no-margin s-1x"></i></a></li><li><a class="nav-item last-page" href="/library?page=3"><i class="icon-angle-double-right no-margin s-1x"></i></a></li></ul></nav></div>
+  </div>
+</main>
+<footer class="l-footer"><a href="https://booth.pm/ja/terms">利用規約</a></footer>
+</body>
+</html>

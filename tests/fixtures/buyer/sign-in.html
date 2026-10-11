@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture. The BOOTH sign-in page that logged-out requests to accounts.booth.pm are redirected to.
+  Form action per PLAN §2.1 (`form[action="/users/auth/pixiv"]`); URL per tomacheese/booth-purchased-items-manager
+  src/booth.ts (https://accounts.booth.pm/users/sign_in). TODO(PLAN §7-1): verify against real page.
+-->
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="csrf-token" content="REDACTED-FIXTURE"><title>ログイン - BOOTH</title></head>
+<body>
+<main>
+  <div class="container">
+    <h1>BOOTHにログイン</h1>
+    <form action="/users/auth/pixiv" method="post">
+      <input type="hidden" name="authenticity_token" value="REDACTED-FIXTURE">
+      <button type="submit" class="btn primary">pixivでログイン</button>
+    </form>
+  </div>
+</main>
+</body>
+</html>

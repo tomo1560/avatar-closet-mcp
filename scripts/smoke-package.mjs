@@ -52,8 +52,10 @@ try {
     throw new Error(`packaged server version mismatch: ${JSON.stringify(server)}`);
   }
   const tools = await client.listTools();
-  if (tools.tools.length !== 11 || !tools.tools.some((tool) => tool.name === "booth_get_sales")) {
-    throw new Error("packaged server did not expose the expected BOOTH tools");
+  const toolNames = new Set(tools.tools.map((tool) => tool.name));
+  const missingTools = ["booth_login", "booth_auth_status", "booth_logout"].filter((name) => !toolNames.has(name));
+  if (missingTools.length > 0) {
+    throw new Error(`packaged server did not expose the expected BOOTH tools: ${missingTools.join(", ")}`);
   }
 
   process.stdout.write(`Packaged MCP ${server.version} initialized with ${tools.tools.length} tools.\n`);

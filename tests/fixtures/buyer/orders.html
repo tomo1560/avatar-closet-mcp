@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture: names, ids, prices and dates are made up.
+  accounts.booth.pm/orders (page 1 of 2), reconstructed from a single 2024 source, NOT captured
+  (TODO(PLAN §7-1): replace with a real, scrubbed capture; LOW confidence).
+  Structure: OptoCloud/AssetDownloader AssetDownloader/HtmlScrapers/Booth/BoothAccountOrdersScraper.cs
+  (div.manage-page-body > div.container, div.l-orders-index > div.sheet, a[href="/orders/{id}"], a[href*=items],
+  div.u-tpg-caption1 = item name, div.u-tpg-caption2 = order date, div.pager > nav > ul).
+  The status badge and the "合計" line are NOT backed by any source; they only exercise the best-effort fields.
+  Order link regex: Myrkie/BoothDownloader RegexStore.cs (OrdersRegex).
+-->
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="csrf-token" content="REDACTED-FIXTURE"><title>注文履歴 - BOOTH</title></head>
+<body>
+<main>
+<div class="manage-page-body">
+  <div class="container">
+    <h1 class="u-tpg-title1">注文履歴</h1>
+    <div class="l-orders-index">
+
+      <div class="sheet u-mb-400">
+        <div class="u-d-flex u-align-items-center u-mb-300">
+          <div class="u-flex-1">
+            <div class="u-tpg-caption2 u-text-gray-500">注文日時: 2026/09/14 21:05:33</div>
+            <div class="u-tpg-caption2 u-text-gray-500">注文番号: <a href="/orders/30000001">30000001</a></div>
+          </div>
+          <div class="u-flex-none"><span class="badge">支払済み</span></div>
+        </div>
+        <div class="u-d-flex u-mb-200">
+          <div class="u-flex-none u-mr-300"><a href="https://booth.pm/ja/items/1000001"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="48" height="48"></a></div>
+          <div class="u-flex-1"><div class="u-tpg-caption1">架空ドレス【しなの・桔梗対応】</div><div class="u-tpg-caption2">¥ 1,500</div></div>
+        </div>
+        <div class="u-d-flex u-mb-200">
+          <div class="u-flex-none u-mr-300"><a href="https://kakuu-hair.booth.pm/items/1000002"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000002/i/1000002/10000000-0000-4000-8000-000000000002_base_resized.jpg" alt="" width="48" height="48"></a></div>
+          <div class="u-flex-1"><div class="u-tpg-caption1">架空ヘア Short Bob</div><div class="u-tpg-caption2">¥ 800</div></div>
+        </div>
+        <div class="u-text-right"><span>合計</span> <b>¥ 2,300</b></div>
+      </div>
+
+      <div class="sheet u-mb-400">
+        <div class="u-d-flex u-align-items-center u-mb-300">
+          <div class="u-flex-1">
+            <div class="u-tpg-caption2 u-text-gray-500">注文日時: 2026/08/02 09:15:00</div>
+            <div class="u-tpg-caption2 u-text-gray-500">注文番号: <a href="https://accounts.booth.pm/orders/30000002">30000002</a></div>
+          </div>
+          <div class="u-flex-none"><span class="badge">支払待ち</span></div>
+        </div>
+        <div class="u-d-flex u-mb-200">
+          <div class="u-flex-none u-mr-300"><a href="https://booth.pm/ja/items/1000006"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000006/i/1000006/10000000-0000-4000-8000-000000000006_base_resized.jpg" alt="" width="48" height="48"></a></div>
+          <div class="u-flex-1"><div class="u-tpg-caption1">架空アクリルキーホルダー</div><div class="u-tpg-caption2">¥ 1,200</div></div>
+        </div>
+      </div>
+
+      <div class="sheet u-mb-400">
+        <div class="u-d-flex u-align-items-center u-mb-300">
+          <div class="u-flex-1">
+            <div class="u-tpg-caption2 u-text-gray-500">注文日時: 2026/07/30 23:59:59</div>
+            <div class="u-tpg-caption2 u-text-gray-500">注文番号: <a href="/orders/30000003">30000003</a></div>
+          </div>
+        </div>
+        <div class="u-d-flex u-mb-200">
+          <div class="u-flex-none u-mr-300"><a href="https://booth.pm/ja/items/1000001"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="48" height="48"></a></div>
+          <div class="u-flex-1"><div class="u-tpg-caption1">架空ドレス【しなの・桔梗対応】</div><div class="u-tpg-caption2">¥ 0</div></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="pager"><nav><ul><li class="current"><a class="nav-item" href="/orders">1</a></li><li><a class="nav-item" href="/orders?page=2">2</a></li><li><a rel="next" class="nav-item" href="/orders?page=2"><i class="icon-arrow-open-right no-margin s-1x"></i></a></li><li><a class="nav-item last-page" href="/orders?page=2"><i class="icon-angle-double-right no-margin s-1x"></i></a></li></ul></nav></div>
+  </div>
+</div>
+</main>
+</body>
+</html>

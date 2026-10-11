@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { isAllowedBoothRequest, isBoothHost } from "../src/browser/read-only-guard.js";
 import { redactSensitiveText } from "../src/privacy.js";
-import { LOGIN_ANNOTATIONS, READ_ONLY_ANNOTATIONS } from "../src/server.js";
+import { LOGIN_ANNOTATIONS, LOGOUT_ANNOTATIONS, READ_ONLY_ANNOTATIONS } from "../src/server.js";
 
 describe("read-only security boundary", () => {
   it("recognizes BOOTH hosts without accepting lookalikes", () => {
     expect(isBoothHost("booth.pm")).toBe(true);
-    expect(isBoothHost("manage.booth.pm")).toBe(true);
+    expect(isBoothHost("accounts.booth.pm")).toBe(true);
     expect(isBoothHost("booth.pm.example.com")).toBe(false);
   });
 
   it.each(["POST", "PUT", "PATCH", "DELETE"])("blocks %s requests to BOOTH", (method) => {
-    expect(isAllowedBoothRequest(method, "https://manage.booth.pm/items/1")).toBe(false);
+    expect(isAllowedBoothRequest(method, "https://accounts.booth.pm/library")).toBe(false);
   });
 
   it("allows BOOTH read methods", () => {
-    expect(isAllowedBoothRequest("GET", "https://manage.booth.pm/items")).toBe(true);
+    expect(isAllowedBoothRequest("GET", "https://accounts.booth.pm/library")).toBe(true);
+    expect(isAllowedBoothRequest("HEAD", "https://booth.pm/ja/items/1.json")).toBe(true);
   });
 
   it("marks every tool with conservative read-only annotations", () => {
@@ -33,6 +34,15 @@ describe("read-only security boundary", () => {
       destructiveHint: false,
       idempotentHint: false,
       openWorldHint: true,
+    });
+  });
+
+  it("marks logout as a destructive, local-only, idempotent action", () => {
+    expect(LOGOUT_ANNOTATIONS).toEqual({
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
     });
   });
 

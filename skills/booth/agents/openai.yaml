@@ -1,13 +1,13 @@
 interface:
-  display_name: "BOOTH"
-  short_description: "Read BOOTH seller products, orders, sales, and messages"
-  default_prompt: "Use $booth to summarize my BOOTH shop and recent sales."
+  display_name: "BOOTH Library"
+  short_description: "Unofficial: connect and read your own BOOTH buyer account"
+  default_prompt: "Use $booth to check whether my BOOTH account is connected."
 
 dependencies:
   tools:
     - type: "mcp"
       value: "booth"
-      description: "Bundled read-only BOOTH seller MCP server"
+      description: "Bundled read-only BOOTH buyer MCP server (unofficial, not affiliated with pixiv or BOOTH)"
       transport: "stdio"
 
 policy:

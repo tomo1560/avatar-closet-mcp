@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture. accounts.booth.pm/library?page=3 (last page of 3); same card markup and sources as library.html.
+  The last page of a Kaminari pager has no rel="next" and no `last-page` link (as on real BOOTH search pages).
+  TODO(PLAN §7-1): replace with a real, scrubbed capture.
+-->
+<html lang="ja">
+<head><meta charset="utf-8"><title>ライブラリ - BOOTH</title></head>
+<body>
+<main class="mx-auto desktop:w-[1024px]">
+  <div class="w-full">
+    <nav class="flex gap-24 mb-24">
+      <a class="font-bold" href="https://accounts.booth.pm/library">購入した商品</a>
+      <a href="https://accounts.booth.pm/library/gifts">ギフト</a>
+      <a href="https://accounts.booth.pm/library/free_downloads">無料ダウンロード</a>
+    </nav>
+    <div class="desktop:rounded-8 bg-white p-16 mb-16">
+      <div class="flex gap-16">
+        <a href="https://booth.pm/ja/items/1000009"><img class="l-library-item-thumbnail" src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000009/i/1000009/10000000-0000-4000-8000-000000000009_base_resized.jpg" alt="" width="72" height="72"></a>
+        <div class="min-w-0">
+          <a class="no-underline" href="https://booth.pm/ja/items/1000009"><div class="text-text-default font-bold text-16 mb-8 break-all">架空シェーダー</div></a>
+          <a class="no-underline" href="https://kakuu-tools.booth.pm/"><div class="text-14 text-text-gray600 break-all">架空ツール店</div></a>
+        </div>
+      </div>
+      <div class="mt-16">
+        <div class="desktop:flex desktop:justify-between desktop:items-center">
+          <div class="min-w-0"><div class="text-14 break-all">KakuuShader_2.0.0.unitypackage</div></div>
+          <div class="flex gap-8">
+            <div class="js-download-button" data-href="https://booth.pm/downloadables/2000009" data-label="ダウンロード" data-test="downloadable"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pager"><nav><ul><li><a class="nav-item first-page" href="/library"><i class="icon-angle-double-left no-margin s-1x"></i></a></li><li><a rel="prev" class="nav-item" href="/library?page=2"><i class="icon-arrow-open-left no-margin s-1x"></i></a></li><li><a class="nav-item" href="/library">1</a></li><li><a class="nav-item" href="/library?page=2">2</a></li><li class="current"><a class="nav-item" href="/library?page=3">3</a></li></ul></nav></div>
+  </div>
+</main>
+</body>
+</html>

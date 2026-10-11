@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<!-- Fictional fixture. TODO(PLAN §7): replace with an anonymized capture of https://accounts.booth.pm/settings -->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="csrf-token" content="fictional-csrf-token">
+    <title>アカウント設定 - BOOTH</title>
+  </head>
+  <body>
+    <main>
+      <h1>アカウント設定</h1>
+      <form action="/settings" method="post">
+        <label for="user_nickname">ニックネーム</label>
+        <input id="user_nickname" name="user[nickname]" type="text" value="  Fictional  Buyer  ">
+        <label for="user_email">メールアドレス</label>
+        <input id="user_email" name="user[email]" type="email" value="buyer@example.com">
+      </form>
+    </main>
+  </body>
+</html>

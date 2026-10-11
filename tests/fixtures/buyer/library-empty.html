@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture. accounts.booth.pm/library for an account without purchases.
+  No source shows BOOTH's empty-state markup; Hoard (hoard/library.py booth_cards) and studio-projecta
+  (extension/content.js collectSection) both treat "no item cards" as the end of the list, so the parser relies on
+  the absence of item links, not on the message text below.
+  TODO(PLAN §7-1): replace with a real, scrubbed capture of an empty library.
+-->
+<html lang="ja">
+<head><meta charset="utf-8"><title>ライブラリ - BOOTH</title></head>
+<body>
+<main class="mx-auto desktop:w-[1024px]">
+  <div class="w-full">
+    <nav class="flex gap-24 mb-24">
+      <a class="font-bold" href="https://accounts.booth.pm/library">購入した商品</a>
+      <a href="https://accounts.booth.pm/library/gifts">ギフト</a>
+      <a href="https://accounts.booth.pm/library/free_downloads">無料ダウンロード</a>
+    </nav>
+    <div class="desktop:rounded-8 bg-white p-16 text-center text-text-gray600">購入した商品はまだありません</div>
+  </div>
+</main>
+</body>
+</html>
