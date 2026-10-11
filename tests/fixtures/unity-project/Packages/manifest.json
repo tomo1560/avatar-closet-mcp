@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "com.unity.ugui": "1.0.0",
+    "com.unity.modules.animation": "1.0.0",
+    "nadena.dev.modular-avatar": "file:nadena.dev.modular-avatar"
+  },
+  "scopedRegistries": []
+}
