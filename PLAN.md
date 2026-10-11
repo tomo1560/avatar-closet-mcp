@@ -370,11 +370,12 @@ tests/
 - MCP ツール 15 個（オプトイン時は `booth_download` を加えて 16 個）。CLI は同じ service 層を使う
 - lint / typecheck / build / check:distribution / check:package すべて通過。テスト約 1000 件（live テストは除外）
 - 依存の追加なし（upstream の 4 依存のまま）
+- **本物の経路での確認（2026-10-12、リクエスト 1 回）**: ビルドした CLI で `item 4866933 --vrchat` を実行。実 HTTP クライアント → BOOTH の items JSON → スキーマ検証 → キャッシュ → 対応判定まで通った。続く `compat 4866933 桔梗` はキャッシュから「supported（high、根拠: バリエーション名 Kikyo ほか）」と回答。Cloudflare による 403 は発生しなかった
 
 ### 9.2 要ユーザー操作（ログインが必要なためエージェントでは実施不可）
 
-1. `bun run dev login` でログインする（実ブラウザが開くので pixiv で手動ログイン）
-2. `bun scripts/capture-fixtures.ts` で実ページを `tests/fixtures/private/`（gitignore 済み）に保存する
+1. `bun run build && node dist/cli.js login` でログインする（実ブラウザが開くので pixiv で手動ログイン。node で動くことは確認済み。Playwright を bun で動かした場合は未検証）
+2. `bun scripts/capture-fixtures.ts` で実ページを `tests/fixtures/private/`（gitignore 済み）に保存する（bun での起動とセッション確認までは確認済み。node は `.js` の import を解決できず起動しない。bun の Playwright で失敗したら `npx tsx scripts/capture-fixtures.ts` を使う）
 3. 保存した HTML と `tests/fixtures/buyer/*.html`（OSS から再構成した架空 HTML）の構造を比べる。違いがあれば `src/parsers/library.ts` / `buyer-orders.ts` / `buyer-common.ts` の `TODO(PLAN §7-1)` 箇所を直し、**個人情報を架空データに置き換えて**から fixture を差し替える
 4. `BOOTH_MCP_LIVE=1 bun run test:live` を手動で 1 回実行する
 5. 自分のライブラリで `sync` → `library --avatar <自分のアバター>` を実行し、対応アバター抽出の精度を確かめる（§7-11）

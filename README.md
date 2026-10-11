@@ -20,6 +20,24 @@
 
 ## インストール
 
+> **npm にはまだ公開していません。** 公開までは下の「ソースからビルドして使う」の手順を使ってください。`npx -y booth-library-mcp` は公開後に使える手順です。
+
+### ソースからビルドして使う
+
+```bash
+bun install
+bun run build
+# Claude Code に登録（パスは clone した場所の dist/cli.js の絶対パスに置き換える）
+claude mcp add booth -- node /absolute/path/to/booth-mcp/dist/cli.js
+# CLI として使う
+node dist/cli.js login
+node dist/cli.js library --all
+```
+
+Claude Desktop などでは `"command": "node"`, `"args": ["/absolute/path/to/booth-mcp/dist/cli.js"]` を指定します。
+
+### npm 公開後
+
 Claude Code:
 
 ```bash
