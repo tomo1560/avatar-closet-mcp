@@ -1,6 +1,6 @@
 # booth-mcp 作成プラン（購入者向け BOOTH MCP + CLI）
 
-調査日: 2026-10-12（同日 VRChat 購入者向け機能を追記: §0.1, §3.5, Phase 2.5）/ ステータス: 計画のみ（未実装）
+調査日: 2026-10-12（同日 VRChat 購入者向け機能を追記: §0.1, §3.5, Phase 2.5）/ ステータス: **Phase 0〜5 実装済み（ブランチ `feat/buyer-mcp`）。ログインが必要な実ページでの検証のみ未了 → §9**
 
 ---
 
@@ -250,57 +250,60 @@ tests/
 ## 5. フェーズ計画
 
 ### Phase 0: ベース確立と実ページ調査（最優先）
-- [ ] cstria0106/booth-mcp をフォーク（`C:\dev\booth-mcp` には既に PLAN.md があるので、`git init` → `git remote add upstream https://github.com/cstria0106/booth-mcp.git` → `git pull upstream main`、または別ディレクトリに clone して PLAN.md を移す）、パッケージ名変更、既存テストが通ることを確認
+- [x] cstria0106/booth-mcp をフォーク（`git init` → `upstream` 追加 → merge）、パッケージ名を `booth-library-mcp`（v0.1.0）に変更、既存テストが通ることを確認（Windows の CRLF でテストが落ちるため `.gitattributes` で LF 固定）
 - [ ] 実ブラウザでログインし、以下の**実 HTML を保存**して構造を確認（§7 の検証項目を潰す）:
   `accounts.booth.pm/library`, `/library/gifts`, `/orders`, `/orders/{id}`, `/wish_lists`, 検索結果ページ
-- [ ] `downloadables/{id}` のリダイレクト先ホストを確認
-- [ ] 保存 HTML から個人情報を除去して `tests/fixtures/` に配置
-- **完了条件**: 全ページの抽出セレクタが確定し、fixture が揃っている
+  - [x] 検索結果ページ・`items/{id}.json` 14件・タグ補完は**ログイン不要分を実取得**（`tests/fixtures/public/`、2026-10-12、計20リクエスト）
+  - [ ] ログイン必須ページは**未取得（要ユーザー操作）**。取得スクリプト `scripts/capture-fixtures.ts` を用意済み（出力は gitignore の `tests/fixtures/private/`）
+- [ ] `downloadables/{id}` のリダイレクト先ホストを確認 → OSS 実装の調査では `s6.booth.pm` / `download.booth.pm`（S3 署名付き）。許可リストは `*.booth.pm`。**実ダウンロードでは未確認**
+- [~] 保存 HTML から個人情報を除去して `tests/fixtures/` に配置 → ログイン必須ページは Hoard（2026-09 時点の fixture）・BoothDownloader 等のソースから**再構成した架空 HTML**（`tests/fixtures/buyer/`）。実ページ取得後に差し替える
+- **完了条件**: 全ページの抽出セレクタが確定し、fixture が揃っている → 公開ページは達成。ログイン必須ページは §9 の手順待ち
 
 ### Phase 1: 認証の汎用化
-- [ ] ログイン先を `https://accounts.booth.pm/settings`（またはライブラリ）に変更、成功判定を「最終 URL が `accounts.booth.pm` 上」に変更
-- [ ] `adult=t` cookie を storageState に注入
-- [ ] `booth_auth_status`: `/settings` への GET で有効性確認
-- [ ] `booth_logout`: session.json と profile dir を削除
-- [ ] CLI: `login / status / logout`
+- [x] ログイン先を `https://accounts.booth.pm/settings`（またはライブラリ）に変更、成功判定を「最終 URL が `accounts.booth.pm` 上」に変更
+- [x] `adult=t` cookie を storageState に注入
+- [x] `booth_auth_status`: `/settings` への GET で有効性確認
+- [x] `booth_logout`: session.json と profile dir を削除（マーカーファイル付きの profile のみ削除。保護ディレクトリの祖先は拒否）
+- [x] CLI: `login / status / logout`
+- [x] 出品者専用ツール・パーサを削除（購入者専用フォーク）。session.json はアトミック書き込み・他プロセスの変更を上書きしない
 - **テスト**: リダイレクト=未ログイン判定、cookie 書き戻し、session ファイル権限
 
 ### Phase 2: 読み取りツール
-- [ ] `booth_get_item`, `booth_suggest_tags`（JSON 系、最も壊れにくいので先に）
-- [ ] `booth_search_items`（HTML パース、ページ上限 5）
-- [ ] `booth_list_library` / `booth_list_gifts`（ページング、`all=true` は最大 N ページで打ち切り）
-- [ ] `booth_list_orders` / `booth_get_order`（privacy マスク適用）
-- [ ] 429/503 指数バックオフ
+- [x] `booth_get_item`, `booth_suggest_tags`（JSON 系、最も壊れにくいので先に）
+- [x] `booth_search_items`（HTML パース、ページ上限 5）
+- [x] `booth_list_library` / `booth_list_gifts`（ページング、`all=true` は最大 20 ページで打ち切り。BOOTH は範囲外ページで最終ページを返すため「ページ番号不一致 or 新規 ID なし」でも停止）
+- [x] `booth_list_orders` / `booth_get_order`（privacy マスク適用。注文詳細は許可フィールドのみで再構築、状態・支払方法は既知語彙のみ）
+- [x] 429/503 指数バックオフ（2/4/8 秒、Retry-After は 30 秒上限）
 - **テスト（TDD）**: fixture → パーサの単体テストを先に書く。構造変化時に `BOOTH_CHANGED` を返すこと。カバレッジ 80% 以上
 
 ### Phase 2.5: VRChat 購入者向け機能（§3.5）
-- [ ] Phase 0 で保存したライブラリ内の実商品（衣装・アバター・小物）の items/{id}.json を集め、個人情報が無いことを確認して fixture 化（**抽出ロジックの評価用データセット**。正解ラベルを手で付ける）
-- [ ] `vrchat/compatibility.ts`: 抽出ロジックを TDD で実装（正解データセットで精度を測り、high の誤検出ゼロを目標）
-- [ ] `vrchat/avatars.ts`: 辞書 + ライブラリの 3Dキャラクターからの初期生成
-- [ ] `vrchat/dependencies.ts`, `kind.ts`
-- [ ] `cache/item-cache.ts` + CLI `sync` コマンド
-- [ ] ツール: `booth_get_item` 拡張, `booth_check_compatibility`, `booth_list_library` 拡張, `booth_list_my_avatars`, `booth_search_for_avatar`, `booth_sync_library_metadata`
+- [~] Phase 0 で保存したライブラリ内の実商品（衣装・アバター・小物）の items/{id}.json を集め、個人情報が無いことを確認して fixture 化（**抽出ロジックの評価用データセット**。正解ラベルを手で付ける）→ ログイン前のため**公開商品 14 件**（衣装 7・アバター 2・小物/髪 2・ツール 2・プレハブ 1）で代替し、`compat-labels.json` に正解ラベル。自分のライブラリでの評価は §9
+- [x] `vrchat/compatibility.ts`: 抽出ロジックを TDD で実装 → 14件で high の誤検出 0・再現率 110/110（ただし同じデータでチューニングしたため過学習の可能性あり。実ライブラリでの再評価が必要）
+- [x] `vrchat/avatars.ts`: 辞書（シード 56 体 + ユーザーの `avatars.json`）+ ライブラリの 3Dキャラクターからの初期生成（CLI `avatars init`）
+- [x] `vrchat/dependencies.ts`, `kind.ts`
+- [x] `cache/item-cache.ts` + CLI `sync` コマンド（TTL は `BOOTH_MCP_CACHE_TTL_DAYS`、既定 7 日。ファイル構成が変わった商品は `forceIds` で即時再取得）
+- [x] ツール: `booth_get_item` 拡張, `booth_check_compatibility`, `booth_list_library` 拡張, `booth_list_my_avatars`, `booth_search_for_avatar`, `booth_sync_library_metadata`
 - **完了条件**: 「持ってる衣装でしなの対応のものは？」「この URL の商品は桔梗に対応してる？」に根拠付きで答えられる。未知のケースは `unknown` を返す
 
 ### Phase 3: ダウンロード（オプトイン）
-- [ ] `BOOTH_MCP_ENABLE_DOWNLOAD=1` のときのみ `booth_download` を登録
-- [ ] `downloadables/{id}` → 302 の Location を検証（許可ホストのみ）→ ストリーミング保存
-- [ ] ファイル名サニタイズ・保存先外への書き込み禁止（パストラバーサル対策）・既存ファイルは上書きしない
-- [ ] 署名付き URL をログ・エラーメッセージに含めない
+- [x] `BOOTH_MCP_ENABLE_DOWNLOAD=1` のときのみ `booth_download` を登録（加えて `BOOTH_MCP_DOWNLOAD_DIR` の絶対パス指定が必須。CLI `download` も同じオプトインが必要）
+- [x] `downloadables/{id}` → 302 の Location を検証（許可ホストのみ）→ ストリーミング保存（署名付き URL には cookie を送らない。タイムアウトあり、既定上限 4 GiB）
+- [x] ファイル名サニタイズ・保存先外への書き込み禁止（パストラバーサル対策）・既存ファイルは上書きしない
+- [x] 署名付き URL をログ・エラーメッセージに含めない
 - **テスト**: 不正ファイル名、許可外ホストへのリダイレクト、オプトイン無効時にツールが存在しないこと
 
 ### Phase 4: CLI 整備
-- [ ] `booth-xxx library [--all] [--json]`, `gifts`, `orders`, `order <id>`, `item <id>`, `search <q>`, `download <id> --out <dir>`
-- [ ] 人間向け表形式 / `--json` 切替。MCP と同じ service 層を使い、ロジックを二重に持たない
+- [x] `booth-library-mcp library [--all] [--json]`, `gifts`, `orders`, `order <id>`, `item <id>`, `search <q>`, `download <id> --out <dir>`（ほかに `tags`, `compat`, `avatars [init]`, `sync`, `updates`, `unity-check`）
+- [x] 人間向け表形式 / `--json` 切替。MCP と同じ service 層を使い、ロジックを二重に持たない。終了コードはエラーコード別（README 参照）
 
 ### Phase 5（任意）: 便利機能
-- [ ] `booth_check_updates`: ライブラリの DL ファイル構成をローカルにキャッシュし差分検出（omnooth の `outdated` 相当）
-- [ ] Unity プロジェクトとの突き合わせ（§3.5.8）: まず isuzu-unity MCP との組み合わせで試し、足りなければ CLI `unity-check` を追加
-- [ ] 購入品の更新通知と対応アバターを組み合わせる（「しなの対応の購入品で更新があったもの」）
+- [x] `booth_check_updates`: ライブラリの DL ファイル構成をローカルにキャッシュし差分検出（omnooth の `outdated` 相当。全ページ取得できた場合のみ基準を更新）
+- [x] Unity プロジェクトとの突き合わせ（§3.5.8）: CLI `unity-check <projectPath>` を追加（`Assets/` の 2 階層までのフォルダ名と `vpm-manifest.json` / `manifest.json` のみ読む）。isuzu-unity MCP との組み合わせ運用は実プロジェクトで要試行
+- [x] 購入品の更新通知と対応アバターを組み合わせる（`booth_check_updates` / CLI `updates` の `avatar` 指定）
 
 ### 各フェーズ共通
-- code-reviewer / security-reviewer エージェントでレビュー（cookie・ファイル書き込み・外部通信を扱うため security レビュー必須）
-- live テストは手動実行のみ（CI では走らせない＝ BOOTH に負荷をかけない）
+- [x] code-reviewer / security-reviewer エージェントでレビュー → CRITICAL/HIGH なし。MEDIUM/LOW は修正済み（セッションのアトミック書き込み、`INTERNAL_ERROR`、ツール結果に信頼できない出品者テキストである旨の `_notice`、ダウンロード強化、ログアウト時の削除の安全化など）
+- [x] live テストは手動実行のみ（CI では走らせない＝ BOOTH に負荷をかけない）。開発中の BOOTH へのリクエストは公開ページの fixture 取得 20 回のみ
 
 ---
 
@@ -320,18 +323,26 @@ tests/
 ## 7. 検証が必要な項目（未確認・推測で実装しないこと）
 
 1. **ライブラリ/ギフト/注文ページの現行 HTML 構造** — BoothDownloader のセレクタ（`nav-item last-page`, `l-library-item-thumbnail`, 注文詳細の `sheet sheet--p400 ...`）が今も有効か
+   → 【2026-10-12 OSS 調査・実ページ未確認】ライブラリのカードは `div.bg-white.p-16`（Hoard の 2026-09 時点の fixture など 4 実装で一致。BoothDownloader PR #25 によると 2026-09 にクラスが変わった）。ID リンクから親要素をたどるフォールバックあり。注文ページは 2024 年の実装 1 件が根拠なので信頼度は低い。範囲外ページを要求すると最終ページが返る。`/library/free_downloads` タブもある
 2. **ウィッシュリストの一覧取得方法** — `accounts.booth.pm/wish_lists.json?item_ids[]=...` は**指定商品がお気に入り済みかの確認用**であって一覧 API ではない。一覧は `accounts.booth.pm/wish_lists` の HTML か別 API か未確認
+   → 【OSS 調査】`/wish_lists` は JS で描画される器だけ。一覧は `GET accounts.booth.pm/wish_list_name_items.json?page=N[&wish_list_name_code=]`（`items[]` と `pagination`）、リスト名は `/wish_list_names.json`。v1 では未実装（§9.3）
 3. **検索結果の JSON 版の有無** — 現状 HTML パース前提
+   → 【確認済み】JSON 版は無い（`items.json` は HTML 検索へ 302）。カードは `li.item-card[data-product-id]`、1 ページ 60 件
 4. **`downloadables/{id}` のリダイレクト先ホスト**
+   → 【OSS 調査・実ダウンロード未確認】`s6.booth.pm`（Stashly）や `download.booth.pm/...?X-Amz-Signature=`（omnooth のテスト）。cookie は不要。許可リストは `*.booth.pm`
 5. **"BOOTH Library Manager" の正体** — omnooth が `booth-library-manager://item-import?dlurl=...&item_id=...&order_id=...&variation_id=...` という URL スキームを登録しており、BOOTH 側にこのスキームへ受け渡す仕組みがあると推測されるが、**公式アプリかどうかは2回検索しても確認できず**。公式の受け渡し口なら DL 機能はこれに乗る方が安全な可能性あり
 6. **BOOTH 個別規約の冒頭〜第3条**（取得時に途切れて未読）
 7. **pixiv 登録商標ガイドライン上、ツール名・パッケージ名に「BOOTH」を含めてよいか**（非公式である旨の表記要件含む）
 8. **ログイン時の `items/{id}.json` の `order` / `gift` フィールドの中身** — 所有判定に使えるか
 9. セッション cookie の有効期限・ローテーション頻度
 10. **カテゴリ ID**: 208（3Dキャラクター）以外は Kyure-A/mcp-booth のコード由来で未確認。3D装飾品の ID は不明
+    → 【確認済み（items JSON）】208 3Dキャラクター、209 3D衣装、210 3D小道具、214 3Dテクスチャ、215 3Dツール・システム、216 3Dモーション・アニメーション、**217 3D装飾品**、230 3D髪型。検索 URL のカテゴリ指定は ID ではなく名前
 11. **対応アバター抽出の精度**: 実際の購入品データで正解率を測るまで、high/medium/low の閾値は仮
+    → 【公開 14 件で測定】high の誤検出 0、再現率 110/110（high のみなら 109/110）。同じデータで規則を調整したため、自分のライブラリで再評価が必要（§9.2）。items JSON の `description` は冒頭部分だけなので、本文にしか書かれていない対応アバターは拾えない
 12. **Hoard のローカルデータ形式**（保存場所・スキーマ・暗号化の有無）— §3.5.9 の代替案を採るかの判断材料
+    → 【OSS 調査】保存先は `%LOCALAPPDATA%\Hoard`（`HOARD_DATA_DIR` で変更可）。一覧は DL フォルダの平文 JSON `catalog.json`（`format:"hoard-catalog"`、version 3/4、改ざん検知の HMAC 付き、第三者が読む前提で文書化あり）と `<Store>/_manifest.json`（商品 ID ごとに DL ファイルの名前・サイズ・日時。内部形式で安定性は保証されない）。暗号化されているのはログイン cookie だけ（DPAPI 等）。**読み取りは可能**だが、ファイルごとのバージョン文字列は無く、Hoard で DL 済みの分しか見えない。→ v1 では自前取得を採用。Hoard 連携は将来の任意機能
 13. **ライブラリページに購入バリエーション名やダウンロードファイル名が出ているか** —「どのアバター版を持っているか」の判定に必要
+    → 【OSS 調査】ライブラリには DL ファイル名は出るがバリエーション名は出ない。注文詳細には商品ごとのバリエーション名がある。持っている版はファイル名（信頼度 medium）で判定
 
 ---
 
@@ -349,3 +360,28 @@ tests/
 - BOOTH Package Linker — 有料のライブラリ管理アプリ https://booth.pm/ja/items/8639617
 - VRCFinder — 説明文解析による対応アバター検索（Web） https://uhiyama-lab.com/en/product/vrcfinder/
 - pixiv 利用規約 https://policies.pixiv.net/
+
+---
+
+## 9. 実装状況と残作業（2026-10-12）
+
+### 9.1 実装済み（ブランチ `feat/buyer-mcp`、`main` は upstream と同一に保持）
+
+- MCP ツール 15 個（オプトイン時は `booth_download` を加えて 16 個）。CLI は同じ service 層を使う
+- lint / typecheck / build / check:distribution / check:package すべて通過。テスト約 1000 件（live テストは除外）
+- 依存の追加なし（upstream の 4 依存のまま）
+
+### 9.2 要ユーザー操作（ログインが必要なためエージェントでは実施不可）
+
+1. `bun run dev login` でログインする（実ブラウザが開くので pixiv で手動ログイン）
+2. `bun scripts/capture-fixtures.ts` で実ページを `tests/fixtures/private/`（gitignore 済み）に保存する
+3. 保存した HTML と `tests/fixtures/buyer/*.html`（OSS から再構成した架空 HTML）の構造を比べる。違いがあれば `src/parsers/library.ts` / `buyer-orders.ts` / `buyer-common.ts` の `TODO(PLAN §7-1)` 箇所を直し、**個人情報を架空データに置き換えて**から fixture を差し替える
+4. `BOOTH_MCP_LIVE=1 bun run test:live` を手動で 1 回実行する
+5. 自分のライブラリで `sync` → `library --avatar <自分のアバター>` を実行し、対応アバター抽出の精度を確かめる（§7-11）
+6. ダウンロードは `BOOTH_MCP_ENABLE_DOWNLOAD=1 BOOTH_MCP_DOWNLOAD_DIR=<絶対パス>` で 1 件試し、署名付き URL のホストが `*.booth.pm` 内か確かめる（§7-4）
+
+### 9.3 v1 の範囲外として見送ったもの
+
+- ウィッシュリスト一覧（§7-2 の調査で JSON API `accounts.booth.pm/wish_list_name_items.json` があると判明。read-only で追加は可能）
+- ライブラリの「無料ダウンロード」タブ（`/library/free_downloads`。調査で判明）
+- npm への公開（パッケージ名の商標可否 §7-7 が未確認のため、公開前に確認する）

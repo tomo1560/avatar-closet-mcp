@@ -57,7 +57,7 @@ npx -y booth-library-mcp login
 
 専用プロファイルの Chrome / Edge が開くので、**自分で** pixiv アカウントでログインしてください。このツールはパスワードを読み取ったり自動入力したりしません（reCAPTCHA や二段階認証もそのままブラウザで操作します）。ログインが確認できるとセッション cookie が `session.json` に保存され、以降の問い合わせではブラウザを起動しません。
 
-ブラウザが見つからない場合は `BOOTH_MCP_BROWSER_PATH` に実行ファイルのパスを指定します。
+ブラウザは既定で Google Chrome / Microsoft Edge を自動検出します。見つからない場合は `BOOTH_MCP_BROWSER_PATH` に Chromium 系ブラウザの実行ファイルのパスを指定します。
 
 ## MCP ツール
 
@@ -80,7 +80,7 @@ npx -y booth-library-mcp login
 | `booth_check_updates` | `item_ids?`（最大 100）, `avatar?` | 前回の確認からダウンロードファイル構成が変わった購入品（[更新チェック](#更新チェック)） | 要 |
 | `booth_download` | `downloadable_id`, `variation_id?`, `dest_subdir?` | 購入したファイルを保存。**オプトイン**（有効にしたときだけ表示） | 要 |
 
-結果は `{ data, meta }` 形式の JSON です。続きがある一覧は `meta.nextPage`、商品データが未取得の件数は `metadata_pending` / `remaining` で示します。`all=true` は最大 20 ページで打ち切ります。
+結果は `{ _notice, data, meta }` 形式の JSON です（`_notice` は BOOTH 側の文字列を信用しないよう促す注意書き）。失敗時は `{ _notice, error: { code, message } }` になります（[エラーコード](#エラーコードと終了コード)）。続きがある一覧は `meta.nextPage`、商品データが未取得の件数は `metadata_pending` / `remaining` で示します。`all=true` は最大 20 ページで打ち切ります。
 
 ツールは既定で 15 個、[ダウンロード](#ダウンロードオプトイン)を有効にすると `booth_download` が加わって 16 個です。
 
@@ -94,17 +94,18 @@ npx -y booth-library-mcp gifts   （library と同じオプション）
 npx -y booth-library-mcp orders [--page N] [--json]
 npx -y booth-library-mcp order <注文ID> [--json]
 npx -y booth-library-mcp item <商品ID|URL> [--vrchat] [--json]
-npx -y booth-library-mcp search <検索語> [--category C] [--tag T]... [--page N] [--json]
-npx -y booth-library-mcp tags <語>
+npx -y booth-library-mcp search <検索語> [--category C] [--tag T]... [--sort S] [--page N] [--free] [--adult] [--json]
+npx -y booth-library-mcp tags <語> [--json]
 npx -y booth-library-mcp compat <商品ID|URL> <アバター> [--json]
-npx -y booth-library-mcp avatars [--json]
-npx -y booth-library-mcp avatars init
-npx -y booth-library-mcp sync [--max N]
+npx -y booth-library-mcp avatars [init] [--json]
+npx -y booth-library-mcp sync [--max N] [--json]
 npx -y booth-library-mcp download <ダウンロードID> [--variation N] [--out <dir>] [--json]   （オプトイン）
 npx -y booth-library-mcp updates [--item <商品ID>]... [--avatar A] [--json]
 npx -y booth-library-mcp unity-check <Unityプロジェクトのフォルダ> [--json]
-npx -y booth-library-mcp login | status | logout | serve | help
+npx -y booth-library-mcp login [--timeout <秒>] | status [--json] | logout | serve | help
 ```
+
+`login` の `--timeout` は 30〜1800 秒（既定 600）。`status` は未ログインのとき終了コード 1 を返します（[終了コード](#エラーコードと終了コード)）。
 
 例: `library --all --avatar しなの --kind costume`（しなの対応の衣装）、`compat https://booth.pm/ja/items/123456 桔梗`。
 
@@ -150,10 +151,13 @@ npx -y booth-library-mcp unity-check ./MyAvatarProject --json
 
 | 環境変数 | 内容 |
 | --- | --- |
-| `BOOTH_MCP_ENABLE_DOWNLOAD` | `1` で有効（それ以外は無効） |
-| `BOOTH_MCP_DOWNLOAD_DIR` | 保存先の **絶対パス**。ファイルはこの中にだけ保存します（無ければ作成） |
-| `BOOTH_MCP_DOWNLOAD_HOSTS` | 任意。ダウンロード先として許可するホストのカンマ区切り（`s6.booth.pm` や `*.booth.pm`）。既定は `*.booth.pm` |
-| `BOOTH_MCP_DOWNLOAD_MAX_BYTES` | 任意。1 ファイルの上限バイト数（超えたら中止して一時ファイルを削除） |
+| `BOOTH_MCP_ENABLE_DOWNLOAD` | `1` で有効。未設定・それ以外は無効（既定: 無効） |
+| `BOOTH_MCP_DOWNLOAD_DIR` | 保存先の **絶対パス**（有効化するときは必須）。ファイルはこの中にだけ保存します（無ければ作成） |
+| `BOOTH_MCP_DOWNLOAD_HOSTS` | 任意。ダウンロード先として許可するホストのカンマ区切り（`s6.booth.pm` や `*.booth.pm`）。既定: `*.booth.pm`。`*.booth.pm` は `booth.pm` 自体を含まないサブドメインだけを許可します |
+| `BOOTH_MCP_DOWNLOAD_MAX_BYTES` | 任意。1 ファイルの上限バイト数（既定: 4 GiB = 4294967296。`0` で上限なし）。超えたら中止して一時ファイルを削除 |
+| `BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC` | 任意。1〜86400 の秒数。設定すると下記の 2 つの待ち時間の **両方** をこの値にします（未設定: 応答ヘッダーは 30 秒、データの途切れは 60 秒） |
+
+不正な値（相対パスの保存先、範囲外の数値、不正なホスト名など）があると、ダウンロードは無効のままになり、理由を起動時に標準エラーへ 1 回だけ出力します（fail closed）。
 
 ```json
 {
@@ -167,7 +171,9 @@ npx -y booth-library-mcp unity-check ./MyAvatarProject --json
 }
 ```
 
-- `downloadable_id` は `booth_get_order` / `booth_list_library` の結果に含まれます。`dest_subdir` は保存先の中のサブフォルダ（相対パス）で、外側は指定できません。
+- `downloadable_id` は `booth_get_order` / `booth_list_library` の結果に含まれます。
+- `dest_subdir` は保存先の中のサブフォルダ（相対パス）です。絶対パスや、保存先の外へ出る指定（`..`、シンボリックリンク・ジャンクションの先が外になる場合）は拒否します。各フォルダ名は次の条件を満たす必要があります: `..` ではない、`:` を含まない、`<>"/\|?*` や制御文字・双方向制御文字を含まない、Windows の予約名（CON・NUL・COM1・LPT1 など）ではない、末尾が `.` や空白ではない、UTF-8 で 200 バイト以内。条件に合わないときは何も作らずに `INVALID_INPUT` を返します。
+- 失敗の種類ごとのエラーコードは[エラーコードと終了コード](#エラーコードと終了コード)を参照してください（保存先の外の指定・同名ファイル・上限超過などは `INVALID_INPUT`、OS のファイル操作の失敗は `INTERNAL_ERROR`）。
 - `booth.pm/downloadables/{id}` をログイン済みセッションで 1 回だけ GET し、リダイレクト先（短時間だけ有効な署名付き URL）を **cookie を送らずに** 取得します。リダイレクト先が `https` かつ許可ホストでなければ拒否します（さらに 1 回までのリダイレクトも同じ検査をします）。
 - **既存のファイルは上書きしません。** 同名のファイルがあればエラーになります（移動・削除するか `dest_subdir` を変えてください）。ダウンロード中は `<ファイル名>.part` に書き、失敗したら削除します。
 - ファイル名は Content-Disposition かリダイレクト先 URL の末尾から取り、パス区切り・`..`・制御文字・Windows の予約名などを取り除きます。
@@ -228,8 +234,34 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 | --- | --- | --- |
 | `session.json` | BOOTH のセッション cookie（共有・コミットしないでください） | `BOOTH_MCP_SESSION_FILE` |
 | `browser-profile/` | ログイン用ブラウザプロファイル（pixiv の cookie を含む） | `BOOTH_MCP_PROFILE_DIR` |
-| `cache/` | 商品データのキャッシュ（`items/`）、更新チェックの基準（`library-snapshot.json`）、キャッシュ用のファイル構成の記録（`item-cache-snapshot.json`） | `BOOTH_MCP_CACHE_DIR` |
+| `cache/` | 商品データのキャッシュ（`items/{商品ID}.json`）、再取得を待つ商品の記録（`unavailable-items.json`）、更新チェックの基準（`library-snapshot.json`）、キャッシュ用のファイル構成の記録（`item-cache-snapshot.json`） | `BOOTH_MCP_CACHE_DIR` |
 | `avatars.json` | ユーザーのアバター辞書 | `BOOTH_MCP_AVATARS_FILE` |
+
+既定の場所はすべて `<アプリディレクトリ>` 直下です（`session.json`・`browser-profile/`・`cache/`・`avatars.json`）。`BOOTH_MCP_HOME` を変えるとこれらがまとめて移動します。
+
+### 注意: 設定の変更とログインのやり直し
+
+- **`session.json` の場所が変わりました。** 常に `<アプリディレクトリ>/session.json` に保存され、`BOOTH_MCP_PROFILE_DIR` の隣には作られません。`BOOTH_MCP_SESSION_FILE` で場所を指定できます。`BOOTH_MCP_PROFILE_DIR` を指定していた場合、以前の `session.json` は見つからないので、**`login`（または `booth_login`）をやり直してください。**
+- **`logout` が削除するブラウザプロファイルは限定されています。** `booth-library-mcp-profile.json`（ログイン時に本ツールが作成したプロファイルに付くマーカー）があるものだけを削除します。カスタムの `BOOTH_MCP_PROFILE_DIR` の場合は、さらに Chromium のプロファイルらしい（`Local State` か `Default/` がある）ことも必要です。マーカーが無い古いプロファイルや別の方法で作ったプロファイルは削除されず、警告が出ます。その場合は手動で削除してください（pixiv の cookie を含むため）。
+
+## 環境変数一覧
+
+ソースコードが読む `BOOTH_MCP_*` の一覧です。すべて任意で、未設定なら既定値を使います。
+
+| 環境変数 | 既定値 | 内容 |
+| --- | --- | --- |
+| `BOOTH_MCP_HOME` | OS ごとのアプリディレクトリ（[データの保存場所](#データの保存場所)） | 保存先の基準フォルダ |
+| `BOOTH_MCP_SESSION_FILE` | `<アプリディレクトリ>/session.json` | セッション cookie の場所 |
+| `BOOTH_MCP_PROFILE_DIR` | `<アプリディレクトリ>/browser-profile` | ログイン用ブラウザプロファイル |
+| `BOOTH_MCP_BROWSER_PATH` | 自動検出（Chrome / Edge） | ログイン用ブラウザの実行ファイル |
+| `BOOTH_MCP_CACHE_DIR` | `<アプリディレクトリ>/cache` | 商品データ・更新チェックの記録 |
+| `BOOTH_MCP_CACHE_TTL_DAYS` | `7`（`0.04`〜`365`） | 商品データのキャッシュ期間（日） |
+| `BOOTH_MCP_AVATARS_FILE` | `<アプリディレクトリ>/avatars.json` | アバター辞書 |
+| `BOOTH_MCP_ENABLE_DOWNLOAD` | 無効 | `1` でダウンロード機能を有効にする（[ダウンロード](#ダウンロードオプトイン)） |
+| `BOOTH_MCP_DOWNLOAD_DIR` | 未設定（有効化時は必須） | 保存先の絶対パス |
+| `BOOTH_MCP_DOWNLOAD_HOSTS` | `*.booth.pm` | 許可するダウンロード先ホスト |
+| `BOOTH_MCP_DOWNLOAD_MAX_BYTES` | `4294967296`（4 GiB）。`0` は上限なし | 1 ファイルの上限バイト数 |
+| `BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC` | 応答ヘッダー 30 秒・データ途切れ 60 秒 | 設定すると両方をこの秒数にする（1〜86400） |
 
 ## ログアウト
 
@@ -237,20 +269,41 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 npx -y booth-library-mcp logout
 ```
 
-`session.json` とログイン用ブラウザプロファイルを削除します（BOOTH には通信しません）。キャッシュと avatars.json は残るので、不要なら保存先のフォルダごと削除してください。
+`session.json` と、マーカー付きのログイン用ブラウザプロファイルを削除します（BOOTH には通信しません）。マーカーの無いプロファイルは削除せず、手動での削除を案内します（[注意](#注意-設定の変更とログインのやり直し)）。キャッシュと avatars.json は残るので、不要なら保存先のフォルダごと削除してください。
 
 ## エラーコードと終了コード
 
-<!-- TODO(orchestrator): エラーコード（INTERNAL_ERROR を含む）と CLI の終了コードの表をここにまとめる。 -->
+### MCP ツールのエラーコード
 
-| コード | 意味 |
-| --- | --- |
-| `AUTH_REQUIRED` | ログインが必要（`booth_login` / `login`） |
-| `NOT_FOUND` | 商品・注文が見つからない（削除・非公開を含む） |
-| `BOOTH_CHANGED` | BOOTH のページ構造・データ形式を認識できない |
-| `RATE_LIMITED` | BOOTH にリクエストを制限された |
-| `NETWORK_ERROR` | 通信エラー |
-| `INVALID_INPUT` | 入力が不正（ダウンロードでは保存先の外の指定、同名ファイルの存在、上限サイズ超過、無効な設定も含む） |
+失敗したツールは `{ _notice, error: { code, message } }` を返します。`message` に含まれるのは利用者向けの説明だけで、ローカルのパス・cookie・署名付き URL は含みません。
+
+| コード | 意味 | 対処 |
+| --- | --- | --- |
+| `AUTH_REQUIRED` | BOOTH にログインしていない、またはセッションが切れた | `booth_login`（CLI は `login`）でログインし、もう一度実行する |
+| `NOT_FOUND` | 商品・注文・ダウンロードが見つからない（削除・非公開を含む） | ID や URL が正しいか確認する。削除・非公開の商品は取得できません |
+| `BOOTH_CHANGED` | BOOTH のページ構造・データ形式・リダイレクトが想定と違う。ダウンロードでは許可リスト外のホストへのリダイレクトも含む | BOOTH 側の変更の可能性が高い。しばらく待って再実行し、続く場合は報告してください。ダウンロードで許可リスト外のホストが理由なら、信頼できる場合のみ `BOOTH_MCP_DOWNLOAD_HOSTS` に追加できます |
+| `RATE_LIMITED` | BOOTH に制限された（429 / 503 が再試行後も続いた） | 時間をおいてから再実行する。キャッシュがあれば `booth_get_item` は `stale: true` 付きで返します |
+| `NETWORK_ERROR` | 通信できない、タイムアウト、ダウンロードが途中で切れた | ネットワークを確認して再実行する |
+| `INVALID_INPUT` | 入力が不正。ダウンロードでは保存先の外の指定、同名ファイルや `.part` の存在、`dest_subdir` の不正、上限サイズ超過、ダウンロードの無効な設定を含む | 引数・環境変数を直す。同名ファイルは移動か削除をするか、`dest_subdir` を変える |
+| `INTERNAL_ERROR` | 本ツール内部のエラー、または OS のファイル操作の失敗（権限・空き容量など） | ローカルファイルの場合は message の errno コード（例: `EACCES`、`ENOSPC`）だけが示されます。保存先の権限・空き容量・ファイルの状態を確認する。再現する場合は報告する |
+
+ローカルのファイル操作の失敗は `INTERNAL_ERROR` になり、message にはパスは含まれず errno コードだけが入ります（パスには OS のユーザー名が含まれるため）。
+
+### CLI の終了コード
+
+| 終了コード | 意味 | 対応するエラーコード |
+| --- | --- | --- |
+| `0` | 成功 | — |
+| `1` | `status`: 未ログイン（`status` だけが返す値） | — |
+| `2` | 入力・使い方の誤り、無効な設定 | `INVALID_INPUT` |
+| `3` | ログインが必要 | `AUTH_REQUIRED` |
+| `4` | 見つからない | `NOT_FOUND` |
+| `5` | BOOTH による制限中 | `RATE_LIMITED` |
+| `6` | 通信エラー | `NETWORK_ERROR` |
+| `7` | BOOTH の仕様変更の可能性 | `BOOTH_CHANGED` |
+| `8` | 内部エラー・ローカルファイルの操作失敗、その他（想定外の例外も含む） | `INTERNAL_ERROR` |
+
+`booth-library-mcp help` の出力末尾にも同じ終了コードの一覧があります。
 
 ## 開発
 

@@ -18,7 +18,7 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Downloading purchased files is opt-in: `booth_download` exists only when the user enabled it (`BOOTH_MCP_ENABLE_DOWNLOAD=1` and an absolute `BOOTH_MCP_DOWNLOAD_DIR`). If it is not available, explain that instead of looking for another way to download.
 - Use `booth_download` only when the user explicitly asks, one file at a time, and only for the user's own purchases. Never bulk-download a library. It saves inside the configured directory, never overwrites an existing file, and returns the saved path to report back.
 - Requests are rate-limited (at most one per second). Prefer one well-targeted call over many, and do not crawl the store.
-- Call `booth_logout` only when the user explicitly asks to sign out or disconnect. It deletes the saved session and the dedicated login browser profile on this computer.
+- Call `booth_logout` only when the user explicitly asks to sign out or disconnect. It deletes the saved session and the dedicated login browser profile on this computer. The profile is deleted only when this tool created it (it carries a marker file); otherwise the result carries a warning and the user must delete the profile manually.
 - Preserve the redactions returned by the tools and mention material masking when it affects the answer.
 
 ## VRChat compatibility
