@@ -1,0 +1,351 @@
+# booth-mcp 作成プラン（購入者向け BOOTH MCP + CLI）
+
+調査日: 2026-10-12（同日 VRChat 購入者向け機能を追記: §0.1, §3.5, Phase 2.5）/ ステータス: 計画のみ（未実装）
+
+---
+
+## 0. 結論サマリ
+
+既存ツールを「出品者側 / 購入者側 / 公開データ」×「MCP / CLI・SDK」で整理すると以下の通り。
+
+| 用途 | MCP | CLI / SDK / その他 |
+|---|---|---|
+| **出品者側 read**（ダッシュボード・注文・売上・メッセージ） | ✅ [cstria0106/booth-mcp](https://github.com/cstria0106/booth-mcp)（npm `booth-mcp` 0.2.2, MIT, ブラウザログイン, 読み取り専用） | — |
+| **出品者側 write**（商品説明・価格・画像・DLファイル差し替え） | ✅ [quolu/booth-mcp](https://github.com/quolu/booth-mcp)（MIT, Chrome拡張でcookie同期, Windows前提, 3 commits） | — |
+| **購入者側**（ライブラリ・ギフト・注文履歴・購入品DL） | ❌ **存在しない** | [Myrkie/BoothDownloader](https://github.com/Myrkie/BoothDownloader)（C#, Windows, 44★, DL特化）／ [tukiminya/omnooth](https://github.com/tukiminya/omnooth)（Go, 実験段階・「ほぼ正しく動作しない」と明記）／ユーザースクリプト・ブラウザ拡張多数 |
+| **公開データ**（検索・商品詳細・タグ補完） | △ [Kyure-A/mcp-booth](https://github.com/Kyure-A/mcp-booth)（`search_by_keyword` 1本のみ, 正規表現でHTMLパース, GPL-3.0, README無し） | [booth-pm-sdk](https://github.com/thisoverride/BoothPM-SDK)（TS, MIT, 検索/商品詳細, pixivログイン可。ただしウィッシュリストはローカルJSONで本物のBOOTHと非連携） |
+
+**前提（仮定）**: Unity/VRChat アセット購入者としての利用を想定し、本プランは空白地帯である **「購入者側 MCP（+同じコアを使う CLI）」** を対象とする。
+→ もし出品者側が目的なら **cstria0106/booth-mcp をそのまま導入すれば足りる**（このプランは不要）。
+
+### 0.1 VRChat 購入者向けの既存ツール（GUI のみ・MCP は無し）
+
+| ツール | BOOTH 連携 | VRChat 向け機能 | CLI/API | 形態 |
+|---|---|---|---|---|
+| [Hoard](https://github.com/Soloflighter1010/Hoard-Asset-Manager)（MIT, Python） | ✅ ブラウザログイン（トークンは OS で暗号化）、購入一覧取得・DL | 更新検知と旧版保持、Unity プロジェクトに導入済みかの表示、lilToon/MA などの依存表示、VCC 経由の Unity 拡張 | △ `hoard-cli login/refresh/sync`。一覧表示や JSON 出力のコマンドは見当たらない | Win/Mac/Linux |
+| [KonoAsset](https://github.com/siloneco/KonoAsset)（MIT, Tauri, 101★） | △ 商品情報の取得 | アバター本体・アバター用アセット・ワールド用アセットに分類、zip 自動展開 | ❌ | Windows |
+| [VRC-Avatar-Explorer](https://github.com/puk06/VRC-Avatar-Explorer)（AGPL-3.0, C#） | △ 商品情報の自動取得 | 対応アバターを手動で紐付け、unitypackage の一括インポート | △ UI に依存しない Core ライブラリはあるが CLI は無い | Win/Mac/Linux |
+| [BOOTH Package Linker](https://booth.pm/ja/items/8639617)（¥500, 非公開） | ✅ ライブラリとギフトを一括取得 | 購入品の更新通知、ウィッシュリスト商品の値下げ通知、Unity へ直接送る | ❌ | Windows |
+| [VRCFinder](https://uhiyama-lab.com/en/product/vrcfinder/)（Web） | 公開商品のみ | 説明文の解析と手動キュレーションによる**対応アバター検索**（2022年以降・500いいね以上の商品のみ） | ❌ API 無し | Web |
+
+**空白地帯**: 「持ってる衣装のうちしなの対応はどれ？」「この商品は自分のアバターに対応してる？」に **Claude から答えられる手段が無い**。→ §3.5 で対応する。
+
+---
+
+## 1. 方針: cstria0106/booth-mcp をフォークして購入者機能を追加
+
+### 1.1 なぜフォークか（ソース確認済み）
+
+cstria0106/booth-mcp (MIT) の `src/` を確認した結果、再利用価値が高い:
+
+| 部品 | 実装 | 再利用可否 |
+|---|---|---|
+| ログイン | `playwright-core` の `chromium.launchPersistentContext(profileDir)` + システムの Chrome/Edge (`channel: "chrome" / "msedge"`)、`headless: false`、ユーザーが手動ログイン（パスワードを扱わない） | ◎ 汎用。ただしログイン先 `https://manage.booth.pm/` と成功判定（`/orders` リンク有無）が出品者専用 → **差し替え必要** |
+| セッション保存 | `context.storageState()` を取得後、cookie と localStorage origin を `isBoothHost`（`booth.pm` / `*.booth.pm`）で**ドメインフィルタ**して session.json に保存（pixiv.net の cookie は除外）。ファイル `0o600`、ディレクトリ `0o700` | ◎ そのまま。ただし**ログイン用の永続ブラウザ profile dir 側には pixiv の cookie も残る**ので、ログアウト時に profile dir ごと削除する。Windows では `chmod` が NTFS ACL に効かない点に注意 |
+| HTTP クライアント | Playwright `APIRequestContext`、直列キュー、`MIN_REQUEST_INTERVAL_MS = 1000`、30秒タイムアウト、手動リダイレクト（最大5回、**別ホストへ飛んだら AUTH_REQUIRED**） | ○ origin を `accounts.booth.pm` / `booth.pm` に広げる。DL の署名付き URL リダイレクトだけ例外処理が必要 |
+| 読み取り専用ガード | `*.booth.pm` へは `GET/HEAD/OPTIONS` のみ許可 | ◎ そのまま（購入者 v1 も read-only） |
+| エラー体系 | `AUTH_REQUIRED / NOT_FOUND / BOOTH_CHANGED / RATE_LIMITED / NETWORK_ERROR` | ◎ そのまま。429 時のリトライ/バックオフは**無い**ので追加 |
+| テスト | vitest + HTML fixture + `BOOTH_MCP_LIVE=1` で live テスト | ◎ 同じ流儀で購入者ページの fixture を追加 |
+| 配布 | bun build → npm、Codex plugin 定義、`skills/booth/SKILL.md` | ○ パッケージ名は要変更（下記） |
+
+代替案（フォールバック）: フォークが合わなくなった場合は新規 TS プロジェクトにし、認証は `booth-pm-sdk` の `login()`（puppeteer で pixiv OAuth → booth.pm cookie を `~/.booth-pm-sdk/session.json` に保存）を流用する。
+
+### 1.2 フォーク時の注意
+
+- **npm 名 `booth-mcp` は使用済み**（cstria0106）。例: `@<scope>/booth-mcp` や `booth-library-mcp` などに変更。
+- MIT のライセンス表記・原作者クレジットを保持。
+- 上流が「出品者ダッシュボード専用」を明確にしているため、上流への PR は「認証部分の汎用化」程度に留め、購入者機能はフォーク側で持つのが無難（PR するかは任意）。
+- 上流の README/メッセージは韓国語 → 日本語化。
+
+### 1.3 スタックは Node/TS 固定（理由あり）
+
+quolu/booth-mcp の README によると、BOOTH 側の Cloudflare が **Python の httpx / requests を TLS フィンガープリントで 403** にし、Node の fetch は通る。cstria0106 は Playwright の request context で実績あり。→ Python 実装は避ける。
+
+---
+
+## 2. BOOTH 側の判明済み仕様（実装者向けメモ）
+
+> ⚠ HTML 構造は非公式・無告知で変わる。下記セレクタは BoothDownloader のソース由来で、**現行ページで要再確認**。
+
+### 2.1 セッション
+
+- セッション cookie: **`_plaza_session_nktz7u`**（domain `.booth.pm`, path `/`）— BoothDownloader で確認
+- 年齢確認: cookie **`adult=t`** を付けないと年齢確認ウォールで一覧取得が失敗する（booth-pm-sdk は年齢確認ウォールで throw する）
+- 有効性チェック: `GET https://accounts.booth.pm/settings` → 200 かつ最終 URL が `accounts.booth.pm/settings` のまま（BoothDownloader 方式）。未ログインなら `booth.pm/users/sign_in` 等へリダイレクトされる
+- cookie はリクエストごとに更新され得る → **レスポンス後に storageState を書き戻す**（cstria0106 は実装済み）
+- ログインは pixiv OAuth（`https://booth.pm/users/sign_in` → `form[action="/users/auth/pixiv"]`）。reCAPTCHA/2FA があるので**自動ログイン（ID/パスワード投入）はやらない**。必ずユーザーが実ブラウザで操作
+
+### 2.2 公開データ（ログイン不要）
+
+| データ | エンドポイント | 形式 |
+|---|---|---|
+| 商品詳細 | `https://booth.pm/ja/items/{id}.json` | **JSON**（34キー確認済: `id, name, price, description, is_adult, shop{uuid,name,subdomain,url,verified}, category{id,name,parent}, images[{original,resized}], tags[{name,url}], variations[{id,type,price,status,downloadable,...}], wished, wish_lists_count, order, gift, published_at ...`） |
+| タグ補完 | `https://booth.pm/autocomplete/tag.json?term={q}` | JSON |
+| 検索 | `https://booth.pm/ja/search/{q}` または `https://booth.pm/ja/items?...`／カテゴリは `browse/{category}`（`page`, `sort`, `max_price`, `adult` パラメータ） | HTML（cheerio でパース） |
+
+→ 商品ページ HTML のスクレイピングは**禁止**し、必ず `.json` を使う。
+
+### 2.3 購入者データ（ログイン必須）
+
+| データ | URL | 抽出方法（BoothDownloader 由来・要再確認） |
+|---|---|---|
+| ライブラリ | `https://accounts.booth.pm/library?page=N` | 商品ID: `a[href]` を `booth\.pm(?:\/\w+)?\/items\/(\d+)` でマッチ／最終ページ: `//a[@class='nav-item last-page']` の href の `page=` 以降／サムネ: `img.l-library-item-thumbnail` |
+| ギフト | `https://accounts.booth.pm/library/gifts?page=N` | 同上 |
+| 注文一覧 | `https://accounts.booth.pm/orders?page=N` | 注文ID: `https://accounts\.booth\.pm\/orders\/(\d+)` |
+| 注文詳細 | `https://accounts.booth.pm/orders/{id}` | DLリンク: `https://booth\.pm\/downloadables\/(\d+)`（DOM クラスは「最も壊れやすい」と原作者コメントあり） |
+| ダウンロード | `https://booth.pm/downloadables/{id}` | **302 で署名付き URL へリダイレクト**。ファイル名はリダイレクト先パスの最後のセグメント。リダイレクト先ホストは未確認（別ホストなら cstria0106 の「別ホスト = AUTH_REQUIRED」判定に引っかかるので例外処理が必要） |
+
+### 2.4 規約上の制約 → 設計への反映
+
+- pixiv サービス共通利用規約 **第14条23号**（サーバーへの過度な負荷の禁止）、**第14条24号**（機械的・短時間大量の操作の禁止）
+- pixiv 登録商標ガイドライン「アプリケーション、各種サービス等への使用について」: **クローラー等で作品を収集する行為、極端な負荷をかける行為は禁止**。規約違反でなくても停止を求められる場合あり
+- BOOTH 個別規約の第7条（禁止行為）は出品者向けの内容のみで、自動アクセスに関する条項は見当たらず。ただし**冒頭〜第3条は未読（取得時に途切れた）→ 未確認**
+- robots.txt: `Disallow: /terms, /carts, /cart` のみ
+
+**設計上の帰結**:
+1. **自分のアカウントのデータのみ**扱う。カタログ全体のクロール機能は作らない（検索はユーザーの明示的クエリ 1回 = 1〜数ページまで）
+2. **全リクエスト直列 + 1 req/s 以上の間隔**、429/503 は指数バックオフ（最大3回）→ 失敗時 `RATE_LIMITED`
+3. **v1 は read-only**（GET/HEAD のみ）。ウィッシュリスト追加・カート操作など POST 系はやらない
+4. ダウンロードは**明示的オプトイン**（環境変数 `BOOTH_MCP_ENABLE_DOWNLOAD=1` かつ保存先ディレクトリ指定時のみツール公開）
+5. 「非公式・pixiv/BOOTH とは無関係」を README とツール説明に明記
+
+---
+
+## 3. MCP ツール設計（v1）
+
+| ツール | 入力 | 出力 | 認証 | フェーズ |
+|---|---|---|---|---|
+| `booth_login` | `timeout_sec?` | ログイン結果 | — | 1 |
+| `booth_auth_status` | — | ログイン有無・ユーザー名 | 要 | 1 |
+| `booth_logout` | — | session/profile 削除 | — | 1 |
+| `booth_get_item` | `item_id` or `url` | 商品詳細（items/{id}.json を整形） | 不要（ログイン時は `wished/order/gift` が付く） | 2 |
+| `booth_search_items` | `query, category?, tags?, sort?, page?(≤5), only_free?, adult?` | 商品サマリ一覧 | 不要 | 2 |
+| `booth_suggest_tags` | `term` | タグ候補 | 不要 | 2 |
+| `booth_list_library` | `page?`, `all?`(全ページ。上限付き), `query?`(取得後にローカルでフィルタ) | 購入済み商品一覧（item_id, 名前, ショップ, サムネ, DL可能ファイル） | 要 | 2 |
+| `booth_list_gifts` | 同上 | ギフト一覧 | 要 | 2 |
+| `booth_list_orders` | `page?` | 注文一覧（注文ID, 日付, 金額, 状態） | 要 | 2 |
+| `booth_get_order` | `order_id` | 注文詳細（商品, DLリンクID）。**住所・電話・氏名はマスク** | 要 | 2 |
+| `booth_download` | `downloadable_id`, `dest_dir?` | 保存パス・サイズ | 要 + オプトイン | 3 |
+| `booth_check_updates` | `item_ids?` | 前回取得時からDLファイル構成が変わった商品 | 要 | 5 (任意) |
+
+出力方針: MCP には**整形済み JSON（必要フィールドのみ）**を返し、大量件数は件数上限 + `next_page` を返す。署名付き URL・cookie はログにも出力にも出さない。
+
+---
+
+## 3.5 VRChat 購入者向け機能
+
+### 3.5.1 方針
+
+- **判定はツールでやり切らず、「根拠」を返して LLM（MCP クライアント）に判断させる。** 説明文の書き方は出品者ごとにばらばらなので、ツール側はルールベースの抽出と `confidence` / `evidence`（該当箇所の引用）までにする。サーバー内で LLM は呼ばない
+- **推測で「対応」と言わない。** 根拠が無ければ `unknown` を返す
+- 対応アバターは**購入済み商品と、ユーザーが明示的に指定した商品・検索**に対してのみ計算する（ストア全体はクロールしない。§2.4）
+
+### 3.5.2 対応アバターの抽出ロジック（`items/{id}.json` から）
+
+優先度順に照合し、ヒットした箇所を `evidence` に残す。
+
+| # | ソース | 例 | confidence |
+|---|---|---|---|
+| 1 | `variations[].name` | 「しなの用」「桔梗用」— 衣装はアバター別にバリエーションを分けて売られることが多い | high |
+| 2 | `tags[].name` | 「しなの」「しなの対応」 | high |
+| 3 | `description` 内の「対応アバター」「対応モデル」「【対応】」などの見出しに続く行 | 「対応アバター：しなの / 桔梗 / …」 | high |
+| 4 | `name`（商品名） | 「【しなの対応】〇〇」「〇〇（桔梗用）」 | medium |
+| 5 | `description` 全文中の単純な出現 | 「しなのちゃんにも着せられます」 | low（参考扱い） |
+
+- **購入済み商品の場合**: 購入したバリエーション / ダウンロードファイル名（例 `Outfit_Shinano_v1.2.zip`）にもアバター名が入ることが多い → 「そのうち**自分が持っているのはどのアバター版か**」も返す
+- 否定表現（「〇〇には非対応」「〇〇は対象外」）は除外ルールを用意し、ヒットしたら `not_supported` として返す
+
+### 3.5.3 アバター辞書
+
+- `avatars.json`（ユーザーが編集可能）: 正規名 + 別名（ひらがな/カタカナ/英字/略称）。例: `{ "id": "shinano", "names": ["しなの", "Shinano"] }`
+- **初期値はライブラリから自動生成**: 購入済み商品のうちカテゴリ **3Dキャラクター（id 208）** のものを「所持アバター候補」として登録し、ユーザーが確認・別名を追記する
+- 誤検出しやすい短い名前・一般名詞と被る名前は「タグ一致または見出し内のみ有効」フラグで制御
+
+### 3.5.4 依存ツール・環境の検出
+
+説明文・タグから辞書照合で抽出（同じく `evidence` 付き）:
+- シェーダー: lilToon / Poiyomi / UTS など
+- ツール: Modular Avatar / VRCFury / Avatar Optimizer / NDMF / FaceEmo など
+- プラットフォーム: 「Quest対応」「Android対応」「PC専用」→ `quest_support: yes | no | unknown`
+
+### 3.5.5 カテゴリ
+
+| id | 名前 | 出典 |
+|---|---|---|
+| 208 | 3Dキャラクター | items/{id}.json で確認済み |
+| 209 | 3D衣装 | Kyure-A/mcp-booth のコード（要確認） |
+| 210 | 3D小道具 | 同上（要確認） |
+| 215 | 3Dツール・システム | 同上（要確認） |
+| 216 | 3Dモーション・アニメーション | 同上（要確認） |
+| ? | 3D装飾品 | 未確認 |
+
+→ `vrchat_kind: avatar | costume | accessory | tool | motion | other` に正規化して返す。
+
+### 3.5.6 追加ツール
+
+| ツール | 入力 | 出力 | 認証 |
+|---|---|---|---|
+| `booth_get_item`（拡張） | 既存 + `include_vrchat?: true` | 既存の出力 + `vrchat: { kind, compatible_avatars[{avatar, confidence, source, evidence}], not_supported[], dependencies[], quest_support }` | 不要 |
+| `booth_check_compatibility` | `item_id`, `avatar` | `supported \| not_supported \| unknown` + 根拠の引用 | 不要 |
+| `booth_list_library`（拡張） | 既存 + `avatar?`, `kind?`, `dependency?` | 条件に合う購入品 + 自分が持っているアバター版 | 要 |
+| `booth_list_my_avatars` | — | ライブラリ内の 3Dキャラクター + 辞書 | 要 |
+| `booth_search_for_avatar` | `avatar`, `kind?`(既定 costume), `query?`, `page?(≤3)` | BOOTH 検索（`/ja/search/{q}` + `tags[]`）の結果に対応度を付けたもの | 不要 |
+| `booth_sync_library_metadata` | `max_items?` | 購入品の items/{id}.json をキャッシュに取り込む（進捗・残件数） | 要 |
+
+### 3.5.7 キャッシュ（リクエスト数対策・必須）
+
+ライブラリ全件の対応アバターを計算するには購入品ごとに `items/{id}.json` が必要。1 req/s だと **300件で約5分**かかる → キャッシュ前提にする。
+
+- 保存先: `~/.booth-mcp/cache/items/{item_id}.json`
+- 形式: `{ "item_id": 123, "fetched_at": "2026-10-12T03:00:00Z", "etag": null, "item": { ...items/{id}.json の中身... } }`（日時は ISO 8601 UTC）
+- TTL 7日（設定可）。ライブラリ一覧でファイル構成が変わった商品は即時再取得
+- **MCP ツールはキャッシュ優先**。未取得分は1回の呼び出しにつき上限（例 20件）まで取得し、残件数を返す。全件取り込みは CLI の `sync` コマンドで事前に行う運用
+- 抽出結果（対応アバター・依存）はキャッシュから都度計算する（辞書を更新したら即反映されるように、抽出結果自体は保存しない）
+
+### 3.5.8 Unity プロジェクトとの突き合わせ（後回し・別 MCP と組み合わせる）
+
+- booth-mcp 自体には Unity 側のスキャン機能を作り込まない。購入品ごとのダウンロードファイル名・商品名を返すまでにする
+- 「この ALCOM プロジェクトに入っている購入品は？」は、Claude が booth-mcp と既存の isuzu-unity MCP（またはファイル読み取り）を組み合わせて答える運用でまず試す。足りなければ CLI に `unity-check <projectPath>`（`Assets/` のフォルダ名と `Packages/vpm-manifest.json` を読み取るだけ）を追加
+
+### 3.5.9 代替案: Hoard のデータを読む
+
+BOOTH へのアクセス・ログイン・ダウンロードを Hoard に任せ、booth-mcp は Hoard のローカルデータを読んで VRChat 向けの判定だけをする構成もあり得る（スクレイピングを自前で持たずに済む）。ただし **Hoard のローカルデータ形式は未確認**（§7）。Phase 0 で確認し、使えそうなら Phase 2 の一部を置き換える。
+
+---
+
+## 4. ディレクトリ構成（フォーク後の想定）
+
+```
+src/
+  browser/
+    client.ts          # ログイン: 開く URL と成功判定を accounts.booth.pm/settings ベースに変更
+    http-client.ts     # origin 可変化、429 バックオフ追加、DL 用リダイレクト例外
+    read-only-guard.ts # そのまま
+  booth/
+    public.ts          # items/{id}.json, autocomplete, search
+    library.ts         # library / gifts（ページング）
+    orders.ts          # orders 一覧 / 詳細
+    download.ts        # downloadables → 署名URL → ファイル保存（パストラバーサル対策）
+  parsers/
+    library.ts  orders.ts  search.ts   # cheerio。失敗時は BOOTH_CHANGED
+  vrchat/
+    avatars.ts         # アバター辞書の読み込み・ライブラリからの初期生成
+    compatibility.ts   # 対応アバター抽出（§3.5.2）。純関数、I/O なし
+    dependencies.ts    # 依存ツール・Quest 対応の抽出（§3.5.4）
+    kind.ts            # カテゴリ → vrchat_kind 正規化
+  cache/
+    item-cache.ts      # items/{id}.json のキャッシュ（TTL・上限付き取得）
+  privacy.ts           # 住所・電話・メールのマスク（上流の流用）
+  server.ts            # MCP ツール登録（zod スキーマ）
+  cli.ts               # CLI サブコマンド（同じ service 層を呼ぶ）
+  service.ts           # ツール/CLI 共通のユースケース層
+tests/
+  fixtures/            # 実ページを1回保存→個人情報を除去した HTML
+  *.test.ts            # パーサ・HTTP・ガード・stdio 契約
+  live/*.live.test.ts  # BOOTH_MCP_LIVE=1 のときのみ実通信
+```
+
+---
+
+## 5. フェーズ計画
+
+### Phase 0: ベース確立と実ページ調査（最優先）
+- [ ] cstria0106/booth-mcp をフォーク（`C:\dev\booth-mcp` には既に PLAN.md があるので、`git init` → `git remote add upstream https://github.com/cstria0106/booth-mcp.git` → `git pull upstream main`、または別ディレクトリに clone して PLAN.md を移す）、パッケージ名変更、既存テストが通ることを確認
+- [ ] 実ブラウザでログインし、以下の**実 HTML を保存**して構造を確認（§7 の検証項目を潰す）:
+  `accounts.booth.pm/library`, `/library/gifts`, `/orders`, `/orders/{id}`, `/wish_lists`, 検索結果ページ
+- [ ] `downloadables/{id}` のリダイレクト先ホストを確認
+- [ ] 保存 HTML から個人情報を除去して `tests/fixtures/` に配置
+- **完了条件**: 全ページの抽出セレクタが確定し、fixture が揃っている
+
+### Phase 1: 認証の汎用化
+- [ ] ログイン先を `https://accounts.booth.pm/settings`（またはライブラリ）に変更、成功判定を「最終 URL が `accounts.booth.pm` 上」に変更
+- [ ] `adult=t` cookie を storageState に注入
+- [ ] `booth_auth_status`: `/settings` への GET で有効性確認
+- [ ] `booth_logout`: session.json と profile dir を削除
+- [ ] CLI: `login / status / logout`
+- **テスト**: リダイレクト=未ログイン判定、cookie 書き戻し、session ファイル権限
+
+### Phase 2: 読み取りツール
+- [ ] `booth_get_item`, `booth_suggest_tags`（JSON 系、最も壊れにくいので先に）
+- [ ] `booth_search_items`（HTML パース、ページ上限 5）
+- [ ] `booth_list_library` / `booth_list_gifts`（ページング、`all=true` は最大 N ページで打ち切り）
+- [ ] `booth_list_orders` / `booth_get_order`（privacy マスク適用）
+- [ ] 429/503 指数バックオフ
+- **テスト（TDD）**: fixture → パーサの単体テストを先に書く。構造変化時に `BOOTH_CHANGED` を返すこと。カバレッジ 80% 以上
+
+### Phase 2.5: VRChat 購入者向け機能（§3.5）
+- [ ] Phase 0 で保存したライブラリ内の実商品（衣装・アバター・小物）の items/{id}.json を集め、個人情報が無いことを確認して fixture 化（**抽出ロジックの評価用データセット**。正解ラベルを手で付ける）
+- [ ] `vrchat/compatibility.ts`: 抽出ロジックを TDD で実装（正解データセットで精度を測り、high の誤検出ゼロを目標）
+- [ ] `vrchat/avatars.ts`: 辞書 + ライブラリの 3Dキャラクターからの初期生成
+- [ ] `vrchat/dependencies.ts`, `kind.ts`
+- [ ] `cache/item-cache.ts` + CLI `sync` コマンド
+- [ ] ツール: `booth_get_item` 拡張, `booth_check_compatibility`, `booth_list_library` 拡張, `booth_list_my_avatars`, `booth_search_for_avatar`, `booth_sync_library_metadata`
+- **完了条件**: 「持ってる衣装でしなの対応のものは？」「この URL の商品は桔梗に対応してる？」に根拠付きで答えられる。未知のケースは `unknown` を返す
+
+### Phase 3: ダウンロード（オプトイン）
+- [ ] `BOOTH_MCP_ENABLE_DOWNLOAD=1` のときのみ `booth_download` を登録
+- [ ] `downloadables/{id}` → 302 の Location を検証（許可ホストのみ）→ ストリーミング保存
+- [ ] ファイル名サニタイズ・保存先外への書き込み禁止（パストラバーサル対策）・既存ファイルは上書きしない
+- [ ] 署名付き URL をログ・エラーメッセージに含めない
+- **テスト**: 不正ファイル名、許可外ホストへのリダイレクト、オプトイン無効時にツールが存在しないこと
+
+### Phase 4: CLI 整備
+- [ ] `booth-xxx library [--all] [--json]`, `gifts`, `orders`, `order <id>`, `item <id>`, `search <q>`, `download <id> --out <dir>`
+- [ ] 人間向け表形式 / `--json` 切替。MCP と同じ service 層を使い、ロジックを二重に持たない
+
+### Phase 5（任意）: 便利機能
+- [ ] `booth_check_updates`: ライブラリの DL ファイル構成をローカルにキャッシュし差分検出（omnooth の `outdated` 相当）
+- [ ] Unity プロジェクトとの突き合わせ（§3.5.8）: まず isuzu-unity MCP との組み合わせで試し、足りなければ CLI `unity-check` を追加
+- [ ] 購入品の更新通知と対応アバターを組み合わせる（「しなの対応の購入品で更新があったもの」）
+
+### 各フェーズ共通
+- code-reviewer / security-reviewer エージェントでレビュー（cookie・ファイル書き込み・外部通信を扱うため security レビュー必須）
+- live テストは手動実行のみ（CI では走らせない＝ BOOTH に負荷をかけない）
+
+---
+
+## 6. リスクと対策
+
+| リスク | 影響 | 対策 |
+|---|---|---|
+| BOOTH の HTML 変更 | 一覧系が壊れる | JSON エンドポイント優先、パーサを1ファイルに隔離、`BOOTH_CHANGED` で明示エラー、fixture 更新手順を README に記載 |
+| 規約・アカウント制限 | アカウント停止の可能性 | 自分のデータのみ、1 req/s 直列、クロール機能なし、自動ログインなし、read-only |
+| Cloudflare の bot 判定強化 | 403 | Playwright request context を使う。悪化したら「実ブラウザ context 経由で fetch」に切替できる設計にしておく |
+| セッション漏洩 | アカウント乗っ取り | session/profile を 0600/0700、リポジトリ外（ユーザーディレクトリ）に保存、`.gitignore`、ログに cookie を出さない。永続 profile dir には pixiv の cookie も残るため logout で profile dir ごと削除。Windows は ACL で保護されるかを確認 |
+| 個人情報（住所等）が LLM に渡る | プライバシー | 注文詳細はデフォルトでマスク |
+| 上流の変更 | マージ困難 | 認証/HTTP 層は上流と差分を小さく保つ |
+
+---
+
+## 7. 検証が必要な項目（未確認・推測で実装しないこと）
+
+1. **ライブラリ/ギフト/注文ページの現行 HTML 構造** — BoothDownloader のセレクタ（`nav-item last-page`, `l-library-item-thumbnail`, 注文詳細の `sheet sheet--p400 ...`）が今も有効か
+2. **ウィッシュリストの一覧取得方法** — `accounts.booth.pm/wish_lists.json?item_ids[]=...` は**指定商品がお気に入り済みかの確認用**であって一覧 API ではない。一覧は `accounts.booth.pm/wish_lists` の HTML か別 API か未確認
+3. **検索結果の JSON 版の有無** — 現状 HTML パース前提
+4. **`downloadables/{id}` のリダイレクト先ホスト**
+5. **"BOOTH Library Manager" の正体** — omnooth が `booth-library-manager://item-import?dlurl=...&item_id=...&order_id=...&variation_id=...` という URL スキームを登録しており、BOOTH 側にこのスキームへ受け渡す仕組みがあると推測されるが、**公式アプリかどうかは2回検索しても確認できず**。公式の受け渡し口なら DL 機能はこれに乗る方が安全な可能性あり
+6. **BOOTH 個別規約の冒頭〜第3条**（取得時に途切れて未読）
+7. **pixiv 登録商標ガイドライン上、ツール名・パッケージ名に「BOOTH」を含めてよいか**（非公式である旨の表記要件含む）
+8. **ログイン時の `items/{id}.json` の `order` / `gift` フィールドの中身** — 所有判定に使えるか
+9. セッション cookie の有効期限・ローテーション頻度
+10. **カテゴリ ID**: 208（3Dキャラクター）以外は Kyure-A/mcp-booth のコード由来で未確認。3D装飾品の ID は不明
+11. **対応アバター抽出の精度**: 実際の購入品データで正解率を測るまで、high/medium/low の閾値は仮
+12. **Hoard のローカルデータ形式**（保存場所・スキーマ・暗号化の有無）— §3.5.9 の代替案を採るかの判断材料
+13. **ライブラリページに購入バリエーション名やダウンロードファイル名が出ているか** —「どのアバター版を持っているか」の判定に必要
+
+---
+
+## 8. 参考にした既存実装
+
+- cstria0106/booth-mcp — 出品者 read MCP（フォーク元候補） https://github.com/cstria0106/booth-mcp
+- quolu/booth-mcp — 出品者 write MCP、Cloudflare/TLS の知見 https://github.com/quolu/booth-mcp
+- Kyure-A/mcp-booth — 検索のみ MCP https://github.com/Kyure-A/mcp-booth
+- thisoverride/BoothPM-SDK (npm `booth-pm-sdk`) — 公開データ SDK + pixiv ログイン https://github.com/thisoverride/BoothPM-SDK
+- Myrkie/BoothDownloader — 購入品 DL CLI（cookie 名・ページ構造の出典） https://github.com/Myrkie/BoothDownloader
+- tukiminya/omnooth — ライブラリ管理 CLI（実験段階） https://github.com/tukiminya/omnooth
+- Hoard — VRChat アセット管理（BOOTH ログイン・更新検知・Unity 連携・CLI） https://github.com/Soloflighter1010/Hoard-Asset-Manager
+- KonoAsset — VRChat アセット管理（101★） https://github.com/siloneco/KonoAsset
+- VRC-Avatar-Explorer — 対応アバター管理・unitypackage インポート https://github.com/puk06/VRC-Avatar-Explorer
+- BOOTH Package Linker — 有料のライブラリ管理アプリ https://booth.pm/ja/items/8639617
+- VRCFinder — 説明文解析による対応アバター検索（Web） https://uhiyama-lab.com/en/product/vrcfinder/
+- pixiv 利用規約 https://policies.pixiv.net/
