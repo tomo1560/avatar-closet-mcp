@@ -1,7 +1,14 @@
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_DOWNLOAD_HOSTS, getDownloadConfig, isAllowedDownloadHost } from "../src/booth/download.js";
+import {
+  DEFAULT_DOWNLOAD_HOSTS,
+  DEFAULT_HEADERS_TIMEOUT_MS,
+  DEFAULT_IDLE_TIMEOUT_MS,
+  DEFAULT_MAX_BYTES,
+  getDownloadConfig,
+  isAllowedDownloadHost,
+} from "../src/booth/download.js";
 
 const ABS_DIR = join(tmpdir(), "booth-library-mcp-config-test");
 
@@ -11,9 +18,13 @@ describe("getDownloadConfig gating", () => {
       enabled: false,
       destDir: null,
       allowedHosts: DEFAULT_DOWNLOAD_HOSTS,
-      maxBytes: null,
+      maxBytes: DEFAULT_MAX_BYTES,
+      headersTimeoutMs: DEFAULT_HEADERS_TIMEOUT_MS,
+      idleTimeoutMs: DEFAULT_IDLE_TIMEOUT_MS,
       issues: [],
     });
+    expect(DEFAULT_MAX_BYTES).toBe(4 * 1024 ** 3);
+    expect([DEFAULT_HEADERS_TIMEOUT_MS, DEFAULT_IDLE_TIMEOUT_MS]).toEqual([30_000, 60_000]);
   });
 
   it.each([
@@ -30,7 +41,7 @@ describe("getDownloadConfig gating", () => {
 
   it("is enabled only with flag 1 and an absolute directory", () => {
     const config = getDownloadConfig({ BOOTH_MCP_ENABLE_DOWNLOAD: "1", BOOTH_MCP_DOWNLOAD_DIR: `${ABS_DIR}/` });
-    expect(config).toMatchObject({ enabled: true, destDir: resolve(ABS_DIR), maxBytes: null, issues: [] });
+    expect(config).toMatchObject({ enabled: true, destDir: resolve(ABS_DIR), maxBytes: DEFAULT_MAX_BYTES, issues: [] });
     expect(config.allowedHosts).toEqual(DEFAULT_DOWNLOAD_HOSTS);
   });
 
@@ -70,7 +81,27 @@ describe("getDownloadConfig gating", () => {
     expect(getDownloadConfig(env)).toMatchObject({ enabled: true, maxBytes: 1_048_576 });
   });
 
-  it.each(["0", "-1", "abc", "1.5", "1e9", "99999999999999999999"])("fails closed on max bytes %s", (value) => {
+  it("treats BOOTH_MCP_DOWNLOAD_MAX_BYTES=0 as unlimited", () => {
+    const env = { BOOTH_MCP_ENABLE_DOWNLOAD: "1", BOOTH_MCP_DOWNLOAD_DIR: ABS_DIR, BOOTH_MCP_DOWNLOAD_MAX_BYTES: " 0 " };
+    expect(getDownloadConfig(env)).toMatchObject({ enabled: true, maxBytes: null, issues: [] });
+  });
+
+  it("applies BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC to both the header wait and the idle gap", () => {
+    const env = { BOOTH_MCP_ENABLE_DOWNLOAD: "1", BOOTH_MCP_DOWNLOAD_DIR: ABS_DIR, BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC: "120" };
+    expect(getDownloadConfig(env)).toMatchObject({ enabled: true, headersTimeoutMs: 120_000, idleTimeoutMs: 120_000 });
+  });
+
+  it.each(["0", "-1", "abc", "1.5", "86401"])("fails closed on timeout %s", (value) => {
+    const config = getDownloadConfig({
+      BOOTH_MCP_ENABLE_DOWNLOAD: "1",
+      BOOTH_MCP_DOWNLOAD_DIR: ABS_DIR,
+      BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC: value,
+    });
+    expect(config.enabled).toBe(false);
+    expect(config.issues).toEqual([expect.stringContaining("BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC")]);
+  });
+
+  it.each(["-1", "abc", "1.5", "1e9", "99999999999999999999"])("fails closed on max bytes %s", (value) => {
     const config = getDownloadConfig({
       BOOTH_MCP_ENABLE_DOWNLOAD: "1",
       BOOTH_MCP_DOWNLOAD_DIR: ABS_DIR,

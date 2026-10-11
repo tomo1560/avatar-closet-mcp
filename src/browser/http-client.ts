@@ -1,7 +1,14 @@
 import { load } from "cheerio";
-import { BoothError, asBoothError } from "../errors.js";
+import { BoothError, asBoothError, errnoCodeOf } from "../errors.js";
 import { getSessionFile } from "../profile.js";
-import { loadSessionState, persistBoothSession, sessionFileExists } from "../session-state.js";
+import {
+  loadSessionState,
+  persistBoothSession,
+  readSessionFingerprint,
+  sameFingerprint,
+  sessionFileExists,
+  type SessionFingerprint,
+} from "../session-state.js";
 import type { BoothReader, BoothRedirectReader, ReadJsonOptions, RedirectLocation } from "./reader.js";
 import { backoffDelayMs, isRetryableStatus, MAX_RETRIES } from "./retry.js";
 import { createPlaywrightTransport, type BoothTransport, type TransportFactory, type TransportResponse } from "./transport.js";
@@ -9,6 +16,8 @@ import { assertAllowedOrigin, BOOTH_ORIGIN, isDownloadableUrl, isSignInUrl, requ
 
 /** Minimum spacing between any two requests (pixiv ToS §14: no excessive / bursty access). */
 export const MIN_REQUEST_INTERVAL_MS = 1_000;
+/** Largest HTML / JSON body handed to a parser. Real BOOTH pages are far smaller. */
+export const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 const MAX_REDIRECTS = 5;
 const HTML_ACCEPT = "text/html,application/xhtml+xml";
 const LOGIN_HINT = "`booth_login` ツールを呼ぶか `npx booth-library-mcp login` を実行してください。";
@@ -23,6 +32,8 @@ export interface BoothHttpClientOptions {
   /** Injectable for tests so rate-limit waits and backoff do not really sleep. */
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
+  /** Non-fatal problems (e.g. cookies could not be saved). Defaults to one line on stderr. */
+  onWarning?: (message: string) => void;
 }
 
 interface ActiveTransport {
@@ -45,6 +56,11 @@ type Task<T> = (url: string, active: ActiveTransport) => Promise<T>;
  */
 export class BoothHttpClient implements BoothReader, BoothRedirectReader {
   private active: ActiveTransport | undefined;
+  /** Version of session.json the in-memory cookie jar corresponds to (loaded, or last written by us). */
+  private sessionVersion: SessionFingerprint | undefined;
+  /** session.json changed on disk (another process logged in / out): reload before the next request. */
+  private reloadRequested = false;
+  private writeBackWarned = false;
   private queue: Promise<unknown> = Promise.resolve();
   private lastRequestAt: number | undefined;
   private readonly origin: string;
@@ -53,6 +69,7 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
   private readonly transportFactory: TransportFactory;
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly now: () => number;
+  private readonly onWarning: (message: string) => void;
 
   constructor(options: BoothHttpClientOptions = {}) {
     this.origin = options.origin ?? BOOTH_ORIGIN;
@@ -62,6 +79,7 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
     this.transportFactory = options.transportFactory ?? createPlaywrightTransport;
     this.sleep = options.sleep ?? defaultSleep;
     this.now = options.now ?? ((): number => Date.now());
+    this.onWarning = options.onWarning ?? defaultWarning;
   }
 
   read<T>(path: string, parser: (html: string, finalUrl: string) => T): Promise<{ data: T; url: string }> {
@@ -118,8 +136,8 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
   }
 
   private async acquire(needsSession: boolean): Promise<ActiveTransport> {
-    // Logged out elsewhere (e.g. CLI `logout` while the MCP server runs): drop in-memory cookies.
-    if (this.active?.hasSession && !(await sessionFileExists(this.sessionFile))) await this.dispose();
+    // Logged out or in elsewhere (e.g. CLI `logout` / `login` while the MCP server runs): drop in-memory cookies.
+    if (this.active?.hasSession && (this.reloadRequested || !(await sessionFileExists(this.sessionFile)))) await this.dispose();
     if (this.active && (this.active.hasSession || !needsSession)) return this.active;
     const loaded = await loadSessionState(this.sessionFile);
     if (needsSession && !loaded.hasSession) {
@@ -127,12 +145,15 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
     }
     await this.dispose();
     this.active = { transport: await this.transportFactory(loaded.state), hasSession: loaded.hasSession };
+    this.sessionVersion = loaded.fingerprint;
     return this.active;
   }
 
   private async dispose(): Promise<void> {
     const active = this.active;
     this.active = undefined;
+    this.sessionVersion = undefined;
+    this.reloadRequested = false;
     await active?.transport.close();
   }
 
@@ -146,7 +167,7 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
           continue;
         }
         assertSuccess(response.status, currentUrl);
-        const body = await response.text();
+        const body = await readCappedBody(response, currentUrl);
         await this.writeBack(active);
         return { body, url: currentUrl };
       } finally {
@@ -200,10 +221,34 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
     if (remaining > 0) await this.sleep(remaining);
   }
 
-  /** Cookies can rotate on every response; persist them, but never create session.json anonymously. */
+  /**
+   * Cookies can rotate on every response, so they are persisted, but only into the session.json they came
+   * from: never create it anonymously, never resurrect it after a logout, and never overwrite a file
+   * another process wrote meanwhile (that one is reloaded instead). A failure here never fails the request.
+   */
   private async writeBack(active: ActiveTransport): Promise<void> {
-    if (!active.hasSession || !(await sessionFileExists(this.sessionFile))) return;
-    await persistBoothSession(active.transport, this.sessionFile);
+    if (!active.hasSession || active !== this.active) return;
+    try {
+      const onDisk = await readSessionFingerprint(this.sessionFile);
+      if (onDisk === undefined) return;
+      if (!sameFingerprint(onDisk, this.sessionVersion)) {
+        this.reloadRequested = true;
+        return;
+      }
+      await persistBoothSession(active.transport, this.sessionFile);
+      this.sessionVersion = await readSessionFingerprint(this.sessionFile);
+      this.writeBackWarned = false;
+    } catch (error) {
+      this.warnWriteBackFailure(error);
+    }
+  }
+
+  /** Once per failure streak; names only the errno code (paths contain the OS user name). */
+  private warnWriteBackFailure(error: unknown): void {
+    if (this.writeBackWarned) return;
+    this.writeBackWarned = true;
+    const code = errnoCodeOf(error) ?? "UNKNOWN";
+    this.onWarning(`booth-library-mcp: 更新された BOOTH のログイン状態を保存できませんでした（${code}）。取得結果には影響しません。`);
   }
 
   private async csrfHeaders(active: ActiveTransport, csrfFrom: string, apiUrl: string): Promise<Record<string, string>> {
@@ -213,6 +258,10 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
     if (!token) throw new BoothError("BOOTH_CHANGED", "BOOTH の CSRF トークンが見つかりません。", page.url);
     return { "X-CSRF-Token": token, Referer: page.url, Origin: new URL(page.url).origin };
   }
+}
+
+function defaultWarning(message: string): void {
+  process.stderr.write(`${message}\n`);
 }
 
 function defaultSleep(ms: number): Promise<void> {
@@ -247,6 +296,22 @@ function assertSuccess(status: number, url: string): void {
   if (status === 404) throw new BoothError("NOT_FOUND", "指定された BOOTH のデータが見つかりません。", url);
   if (status === 401) throw authRequired(url);
   if (status >= 400) throw new BoothError("NETWORK_ERROR", `BOOTH が HTTP ${status} を返しました。`, url);
+}
+
+/**
+ * The body, unless it exceeds MAX_RESPONSE_BYTES: a declared Content-Length is checked before reading,
+ * the actual size after (Playwright buffers the body itself, so this bounds what reaches the parsers).
+ */
+async function readCappedBody(response: TransportResponse, url: string): Promise<string> {
+  const declared = Number(response.headers["content-length"] ?? "");
+  if (Number.isFinite(declared) && declared > MAX_RESPONSE_BYTES) throw tooLargeResponse(url);
+  const body = await response.text();
+  if (Buffer.byteLength(body, "utf8") > MAX_RESPONSE_BYTES) throw tooLargeResponse(url);
+  return body;
+}
+
+function tooLargeResponse(url: string): BoothError {
+  return new BoothError("BOOTH_CHANGED", `BOOTH の応答が大きすぎます（上限 ${MAX_RESPONSE_BYTES / 1024 / 1024} MiB）。`, url);
 }
 
 function parseJsonBody(page: FetchedPage): unknown {

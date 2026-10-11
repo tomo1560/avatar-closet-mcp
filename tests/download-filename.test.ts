@@ -26,6 +26,8 @@ describe("sanitizeFileName", () => {
     ["Aux.unitypackage", "_Aux.unitypackage"],
     ["COM1.zip", "_COM1.zip"],
     ["lpt9", "_lpt9"],
+    ["CONIN$", "_CONIN$"],
+    ["conout$.txt", "_conout$.txt"],
     ["CONSOLE.txt", "CONSOLE.txt"],
     ["COM10.zip", "COM10.zip"],
     ["a\u0000b\u001fc\u007f\u0085.zip", "abc.zip"],

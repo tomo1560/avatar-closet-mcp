@@ -68,10 +68,14 @@ try {
     "booth_get_order",
     "booth_list_my_avatars",
     "booth_sync_library_metadata",
+    "booth_check_updates",
   ];
   const missingTools = expectedTools.filter((name) => !toolNames.has(name));
   if (missingTools.length > 0) {
     throw new Error(`packaged server did not expose the expected BOOTH tools: ${missingTools.join(", ")}`);
+  }
+  if (tools.tools.length !== expectedTools.length) {
+    throw new Error(`packaged server exposed ${tools.tools.length} tools, expected ${expectedTools.length}`);
   }
   // booth_download is opt-in (BOOTH_MCP_ENABLE_DOWNLOAD=1 + BOOTH_MCP_DOWNLOAD_DIR); the default environment must not expose it.
   if (toolNames.has("booth_download")) {

@@ -93,6 +93,8 @@ describe("logout", () => {
     tempPaths.push(appDir);
     await writeFile(join(appDir, "session.json"), "{}", "utf8");
     await mkdir(join(appDir, "browser-profile", "Default"), { recursive: true });
+    // Written by login; logout only deletes a profile that carries it.
+    await writeFile(join(appDir, "browser-profile", "booth-library-mcp-profile.json"), "{}", "utf8");
     const reader = new FakeReader(new BoothError("AUTH_REQUIRED", "x"));
 
     const result = await new BoothService(reader, { env: { BOOTH_MCP_HOME: appDir } }).logout();

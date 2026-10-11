@@ -42,7 +42,7 @@ describe("stdio MCP contract", () => {
     await Promise.all(tempPaths.splice(0).map(async (path) => rm(path, { recursive: true, force: true })));
   });
 
-  it("publishes every buyer tool with schemas and annotations (booth_download is opt-in and absent)", async () => {
+  it("publishes every buyer tool (15) with schemas and annotations (booth_download is opt-in and absent)", async () => {
     const { client } = await connect();
     expect(client.getServerVersion()).toMatchObject({ name: "booth-library-mcp", version: packageVersion });
     const response = await client.listTools();
@@ -61,9 +61,11 @@ describe("stdio MCP contract", () => {
       "booth_get_order",
       "booth_list_my_avatars",
       "booth_sync_library_metadata",
+      "booth_check_updates",
     ]);
     const expectedAnnotations: Record<string, object> = {
       booth_login: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+      booth_check_updates: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
       booth_logout: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     };
     for (const tool of response.tools) {
@@ -87,6 +89,7 @@ describe("stdio MCP contract", () => {
       booth_get_order: ["order_id"],
       booth_list_my_avatars: [],
       booth_sync_library_metadata: ["max_items"],
+      booth_check_updates: ["item_ids", "avatar"],
     });
     for (const tool of response.tools.filter((entry) => !["booth_login", "booth_auth_status", "booth_logout"].includes(entry.name))) {
       expect(tool.description).toContain("非公式");
@@ -100,7 +103,9 @@ describe("stdio MCP contract", () => {
       BOOTH_MCP_ENABLE_DOWNLOAD: "1",
       BOOTH_MCP_DOWNLOAD_DIR: join(home, "downloads"),
     });
-    const tool = (await client.listTools()).tools.find((entry) => entry.name === "booth_download");
+    const { tools } = await client.listTools();
+    expect(tools).toHaveLength(16);
+    const tool = tools.find((entry) => entry.name === "booth_download");
     expect(tool?.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true });
     expect(Object.keys(tool?.inputSchema.properties ?? {})).toEqual(["downloadable_id", "variation_id", "dest_subdir"]);
     expect(tool?.outputSchema?.type).toBe("object");

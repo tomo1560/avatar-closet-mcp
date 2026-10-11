@@ -6,11 +6,12 @@
  * item block class from Myrkie/BoothDownloader BoothPageParser.cs (September 2026). The parsers therefore key on
  * links (order ids, item ids, downloadable ids) and on label texts, and only use classes as preferred hints.
  *
- * Privacy: shipping/contact fields (name, address, phone, e-mail) are never selected. Free-text fields that are
- * returned (status, payment method) are additionally passed through redactSensitiveText.
+ * Privacy: shipping/contact fields (name, address, phone, e-mail) are never selected. The two label fields that are
+ * returned (status, payment method) are kept only when they are a known value of at most 60 characters (anything
+ * else, e.g. a name, an address or injected instructions, becomes null), then passed through redactSensitiveText.
  */
 import type { Cheerio, CheerioAPI } from "cheerio";
-import { redactSensitiveText } from "../privacy.js";
+import { redactSensitiveText, restrictToVocabulary } from "../privacy.js";
 import {
   ACCOUNTS_HOST,
   assertAccountsPage,
@@ -85,6 +86,23 @@ const DETAIL_ITEM_SELECTOR = '[class*="sheet--p400"]';
 const DETAIL_NAME_SELECTOR = '[class*="u-tpg-title4"] a[href]';
 // TODO(PLAN §7-1): verify against real page. Not backed by any source: no project extracts variation names.
 const DETAIL_VARIATION_SELECTOR = '[class*="variation"]';
+/** Status and payment method are short labels; longer values are never returned. */
+const MAX_LABEL_LENGTH = 60;
+// TODO(PLAN §7-1): verify against real page. Known values only (Japanese and English UI); extend this list when a
+// real BOOTH label comes back as null. Matching is exact after NFKC, whitespace and case normalization.
+const ORDER_STATUSES = [
+  "支払待ち", "支払い待ち", "お支払い待ち", "入金待ち", "支払済み", "支払い済み", "お支払い済み", "支払済", "入金済み",
+  "発送待ち", "発送準備中", "発送済み", "発送完了", "配送中", "キャンセル", "キャンセル済み", "返金済み",
+  "ダウンロード可能", "完了", "取引完了", "支払期限切れ", "期限切れ",
+  "Awaiting payment", "Waiting for payment", "Paid", "Payment completed", "Awaiting shipment", "Shipped",
+  "Cancelled", "Canceled", "Refunded", "Downloadable", "Completed", "Expired",
+] as const;
+const PAYMENT_METHODS = [
+  "クレジットカード", "クレジットカード決済", "クレジットカード払い", "PayPal", "PayPal決済", "楽天ペイ", "楽天ペイ決済",
+  "コンビニ払い", "コンビニ決済", "銀行振込", "銀行振り込み", "銀行振込決済", "Amazon Pay", "d払い", "au PAY", "PayPay",
+  "pixivコイン", "BOOTHポイント", "楽天ポイント", "Apple Pay", "Google Pay",
+  "Credit card", "Convenience store", "Bank transfer",
+] as const;
 const TOTAL_LABELS = ["合計", "合計金額", "お支払い金額", "お支払金額", "支払金額", "total"];
 // Label texts: OptoCloud BoothAccountOrderScraper.cs reads "order number" / "created at" (English UI).
 const DETAIL_LABELS = {
@@ -124,8 +142,8 @@ export function parseOrderDetail(html: string, finalUrl: string): OrderDetail {
   return {
     order_id: orderId,
     ordered_at: ordered === null ? null : parseJstDateTime(ordered),
-    status: masked(label(DETAIL_LABELS.status)),
-    payment_method: masked(label(DETAIL_LABELS.paymentMethod)),
+    status: knownLabel(label(DETAIL_LABELS.status), ORDER_STATUSES),
+    payment_method: knownLabel(label(DETAIL_LABELS.paymentMethod), PAYMENT_METHODS),
     total_price: total === null ? null : (parseYenAmounts(total)[0] ?? null),
     items: cards.map((card) => parseDetailItem($, card, finalUrl)),
   };
@@ -146,7 +164,7 @@ function parseOrderCard($: CheerioAPI, card: Card, finalUrl: string): OrderSumma
     order_id: card.id,
     ordered_at: parseJstDateTime(text),
     total_price: amounts.length > 0 ? Math.max(...amounts) : null,
-    status: masked(textOrNull(card.element.find(STATUS_SELECTOR).first().text())),
+    status: knownLabel(textOrNull(card.element.find(STATUS_SELECTOR).first().text()), ORDER_STATUSES),
     item_names: orderItemNames($, card.element, finalUrl),
   };
 }
@@ -219,8 +237,10 @@ function textWithoutDownloads(element: Cheerio<AnyNode>): string {
   return clone.text();
 }
 
-function masked(value: string | null): string | null {
-  return value === null ? null : redactSensitiveText(value).text;
+/** A known label (see MAX_LABEL_LENGTH / ORDER_STATUSES / PAYMENT_METHODS) or null; redaction stays as a second layer. */
+function knownLabel(value: string | null, vocabulary: readonly string[]): string | null {
+  const known = restrictToVocabulary(value, vocabulary, MAX_LABEL_LENGTH);
+  return known === null ? null : redactSensitiveText(known).text;
 }
 
 function unique(values: readonly string[]): string[] {

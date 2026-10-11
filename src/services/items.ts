@@ -1,5 +1,15 @@
 import { parseItemId } from "../booth/item-id.js";
-import { buildSearchUrl, getItem, itemJsonUrl, suggestTags, type SearchUrlParams } from "../booth/public.js";
+import type { RawBoothItem } from "../booth/item-json.js";
+import {
+  buildSearchUrl,
+  getItem,
+  itemJsonUrl,
+  suggestTags,
+  summarizeItem,
+  type ItemSummary,
+  type SearchUrlParams,
+} from "../booth/public.js";
+import { asBoothError, type BoothErrorCode } from "../errors.js";
 import { parseSearchPage } from "../parsers/search.js";
 import type { BoothResult, CompatibilityReport, ItemDetail, SearchResult, TagSuggestions } from "../types.js";
 import { classifyKind } from "../vrchat/kind.js";
@@ -11,6 +21,8 @@ import { buildVrchatInfo, HEURISTIC_NOTE } from "./vrchat-info.js";
 /** PLAN §2.4: a search reads at most a few pages. */
 export const MAX_SEARCH_PAGE = 5;
 const MAX_AVATAR_QUERY_LENGTH = 100;
+/** BOOTH is temporarily unavailable: a cached copy is better than no answer. NOT_FOUND etc. are never hidden. */
+const STALE_FALLBACK_CODES: ReadonlySet<BoothErrorCode> = new Set<BoothErrorCode>(["RATE_LIMITED", "NETWORK_ERROR"]);
 
 export interface GetItemInput {
   item: string | number;
@@ -22,14 +34,36 @@ export interface CompatibilityInput {
   avatar: string;
 }
 
-/** `items/{id}.json` → compact summary (+ VRChat info). The fetched item is stored in the cache. */
+/**
+ * `items/{id}.json` → compact summary (+ VRChat info). An explicit lookup always asks BOOTH and stores the
+ * result in the cache; only when BOOTH rate-limits or cannot be reached is a cached copy served (`stale`).
+ */
 export async function getItemDetail(ctx: ServiceContext, input: GetItemInput): Promise<BoothResult<ItemDetail>> {
   const itemId = parseItemId(input.item);
   const dictionary = input.includeVrchat ? await loadDictionary(ctx) : undefined;
-  const { raw, summary } = await getItem(ctx.reader, itemId);
-  await storeItem(ctx, itemId, raw);
-  const data: ItemDetail = dictionary ? { ...summary, vrchat: buildVrchatInfo(raw, dictionary) } : summary;
+  const { raw, summary, staleFetchedAt } = await fetchFreshOrStale(ctx, itemId);
+  const data: ItemDetail = {
+    ...summary,
+    ...(dictionary ? { vrchat: buildVrchatInfo(raw, dictionary) } : {}),
+    ...(staleFetchedAt !== undefined ? { stale: true as const, fetched_at: staleFetchedAt } : {}),
+  };
   return wrap(data, itemJsonUrl(itemId));
+}
+
+async function fetchFreshOrStale(
+  ctx: ServiceContext,
+  itemId: string,
+): Promise<{ raw: RawBoothItem; summary: ItemSummary; staleFetchedAt?: string }> {
+  try {
+    const { raw, summary } = await getItem(ctx.reader, itemId);
+    await storeItem(ctx, itemId, raw);
+    return { raw, summary };
+  } catch (error) {
+    if (!STALE_FALLBACK_CODES.has(asBoothError(error).code)) throw error;
+    const record = await ctx.cache.getStale(itemId);
+    if (!record) throw error;
+    return { raw: record.item, summary: summarizeItem(record.item), staleFetchedAt: record.fetched_at };
+  }
 }
 
 /** One page of BOOTH search results (HTML; at most page 5). */

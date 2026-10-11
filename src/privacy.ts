@@ -47,3 +47,23 @@ export function redactionsIn(texts: readonly (string | null | undefined)[]): str
 export function maskDirectIdentifier(value: string | undefined): string | undefined {
   return value?.trim() ? "[非表示]" : undefined;
 }
+
+/** Longer raw texts are rejected before normalizing them. */
+const MAX_LABEL_INPUT_LENGTH = 1_000;
+
+/**
+ * Short page labels that may carry seller- or buyer-written text (order status, payment method) are
+ * returned only when they are a known value: the normalized text (NFKC, whitespace collapsed, case-
+ * insensitive) must equal a vocabulary entry and be at most `maxLength` characters. Anything else (free
+ * text, contact details, injected instructions) becomes null. The vocabulary's own spelling is returned.
+ */
+export function restrictToVocabulary(value: string | null, vocabulary: readonly string[], maxLength: number): string | null {
+  if (value === null || value.length > MAX_LABEL_INPUT_LENGTH) return null;
+  const normalized = normalizeLabel(value);
+  if (normalized === "" || normalized.length > maxLength) return null;
+  return vocabulary.find((entry) => normalizeLabel(entry) === normalized) ?? null;
+}
+
+function normalizeLabel(value: string): string {
+  return value.normalize("NFKC").replace(/\s+/gu, " ").trim().toLowerCase();
+}

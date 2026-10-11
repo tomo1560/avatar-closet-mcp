@@ -6,9 +6,10 @@ import { BoothHttpClient } from "./browser/http-client.js";
 import { clearLocalLogin, getLocalLoginPaths } from "./browser/logout.js";
 import type { BoothReader, BoothRedirectReader } from "./browser/reader.js";
 import { ACCOUNT_SETTINGS_URL, ACCOUNTS_ORIGIN } from "./browser/url-policy.js";
-import { ItemCache } from "./cache/item-cache.js";
+import { ItemCache, resolveCacheTtl } from "./cache/item-cache.js";
 import { UnavailableItems } from "./cache/unavailable-items.js";
 import { BoothError } from "./errors.js";
+import { getCacheSnapshotFile, getSnapshotFile } from "./library/update-snapshot.js";
 import { parseAccountSettings } from "./parsers/account.js";
 import { getAvatarDictionaryFile, getCacheDir, getSessionFile } from "./profile.js";
 import { initAvatarDictionary, listMyAvatars, searchForAvatar, type AvatarSearchInput } from "./services/avatars.js";
@@ -19,6 +20,8 @@ import { listLibrary, type LibraryQuery } from "./services/library.js";
 import { getOrder, listOrders } from "./services/orders.js";
 import { wrap } from "./services/result.js";
 import { syncAllMetadata, syncLibraryMetadata, type SyncAllOptions } from "./services/sync.js";
+import { checkUnityProject, type UnityCheckResult } from "./services/unity-check.js";
+import { checkUpdates, type UpdateCheckInput, type UpdateCheckResult } from "./services/updates.js";
 import type {
   AuthStatus,
   AvatarInitResult,
@@ -37,12 +40,13 @@ import type {
   TagSuggestions,
 } from "./types.js";
 
-export { assertNumericId, normalizeLimit, normalizePage, wrap } from "./services/result.js";
 export type { AvatarSearchInput } from "./services/avatars.js";
 export type { DownloadPurchaseInput, DownloadResult } from "./services/download.js";
 export type { CompatibilityInput, GetItemInput } from "./services/items.js";
 export type { LibraryQuery } from "./services/library.js";
 export type { SyncAllOptions, SyncProgress } from "./services/sync.js";
+export type { UnityCheckResult } from "./services/unity-check.js";
+export type { UpdateCheckInput, UpdateCheckResult } from "./services/updates.js";
 
 export const MIN_LOGIN_TIMEOUT_SEC = 30;
 export const MAX_LOGIN_TIMEOUT_SEC = 1_800;
@@ -58,6 +62,8 @@ export interface BoothServiceOptions {
   redirectReader?: BoothRedirectReader;
   /** fetch used for the signed download URL (no cookies). Injectable for tests. */
   downloadFetch?: typeof fetch;
+  /** Receives non-fatal warnings (invalid BOOTH_MCP_CACHE_TTL_DAYS, snapshot write failures). Defaults to stderr. */
+  warn?: (message: string) => void;
 }
 
 export interface DownloadOptions {
@@ -81,12 +87,18 @@ export class BoothService {
     this.redirectReader = options.redirectReader ?? (isRedirectReader(this.browser) ? this.browser : undefined);
     this.downloadFetch = options.downloadFetch;
     const cacheDir = getCacheDir(this.env);
+    const warn = options.warn ?? writeWarning;
+    const ttl = resolveCacheTtl(this.env);
+    if (ttl.warning) warn(ttl.warning);
     this.ctx = {
       reader: this.browser,
-      cache: options.cache ?? new ItemCache({ dir: join(cacheDir, "items") }),
-      unavailable: new UnavailableItems({ file: join(cacheDir, "unavailable-items.json") }),
+      cache: options.cache ?? new ItemCache({ dir: join(cacheDir, "items"), ttlMs: ttl.ttlMs }),
+      unavailable: new UnavailableItems({ file: join(cacheDir, "unavailable-items.json"), ttlMs: ttl.ttlMs }),
       avatarsFile: getAvatarDictionaryFile(this.env),
       ownedItems: new Memo(OWNED_ITEMS_TTL_MS),
+      cacheSnapshotFile: getCacheSnapshotFile(this.env),
+      updateSnapshotFile: getSnapshotFile(this.env),
+      warn,
     };
   }
 
@@ -184,6 +196,16 @@ export class BoothService {
     return syncAllMetadata(this.ctx, options);
   }
 
+  /** `booth_check_updates` / CLI `updates`: download-file changes since the previous check (writes only the local baseline). */
+  checkUpdates(input: UpdateCheckInput = {}): Promise<BoothResult<UpdateCheckResult>> {
+    return checkUpdates(this.ctx, input);
+  }
+
+  /** CLI `unity-check`: owned items found in a Unity project (folder names and package manifests only). */
+  unityCheck(projectPath: string): Promise<BoothResult<UnityCheckResult>> {
+    return checkUnityProject(this.ctx, projectPath);
+  }
+
   /** CLI `avatars init`: add owned avatar bodies missing from the dictionary to avatars.json. */
   initAvatarDictionary(): Promise<BoothResult<AvatarInitResult>> {
     return initAvatarDictionary(this.ctx);
@@ -200,6 +222,10 @@ export class BoothService {
     const deps = { redirectReader: this.redirectReader, fetchImpl: this.downloadFetch, config: this.downloadConfig(options) };
     return downloadPurchaseFile(deps, input);
   }
+}
+
+function writeWarning(message: string): void {
+  process.stderr.write(`booth-library-mcp: ${message}\n`);
 }
 
 function isRedirectReader(reader: BoothReader): reader is BoothReader & BoothRedirectReader {

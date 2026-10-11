@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { BoothError } from "../src/errors.js";
 import { BoothService } from "../src/service.js";
+import { Memo } from "../src/services/context.js";
 import { libraryHtml, type FakeLibraryItem } from "./helpers/buyer-html.js";
 import { itemJsonUrlOf, itemRoutes, publicItem, RoutedFakeReader, type FakeRoute } from "./helpers/fake-reader.js";
 
@@ -66,6 +67,48 @@ describe("syncLibraryMetadata", () => {
     const { service } = await setup(reader);
     await expect(service.syncLibraryMetadata(101)).rejects.toMatchObject({ code: "INVALID_INPUT" });
     expect(reader.calls).toEqual([]);
+  });
+});
+
+describe("Memo", () => {
+  it("shares one in-flight load between concurrent callers", async () => {
+    const memo = new Memo<number>(60_000);
+    let loads = 0;
+    const load = async (): Promise<number> => {
+      loads += 1;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return loads;
+    };
+    expect(await Promise.all([memo.get(load), memo.get(load), memo.get(load)])).toEqual([1, 1, 1]);
+    expect(await memo.get(load)).toBe(1);
+    expect(loads).toBe(1);
+  });
+
+  it("forgets a rejected load so the next call retries", async () => {
+    const memo = new Memo<string>(60_000);
+    const failing = (): Promise<string> => Promise.reject(new Error("boom"));
+    await expect(Promise.all([memo.get(failing), memo.get(failing)])).rejects.toThrow("boom");
+    expect(await memo.get(() => Promise.resolve("ok"))).toBe("ok");
+  });
+
+  it("does not keep a load that finished after clear()", async () => {
+    const memo = new Memo<string>(60_000);
+    let release: (value: string) => void = () => undefined;
+    const gate = new Promise<string>((resolve) => (release = resolve));
+    const pending = memo.get(() => gate);
+    memo.clear();
+    release("stale");
+    expect(await pending).toBe("stale");
+    expect(await memo.get(() => Promise.resolve("fresh"))).toBe("fresh");
+  });
+
+  it("walks the library once for concurrent owned-item calls (list_my_avatars + sync)", async () => {
+    const reader = new RoutedFakeReader(ownedRoutes([]));
+    const { service } = await setup(reader);
+    await Promise.all([service.listMyAvatars(), service.syncLibraryMetadata(), service.syncLibraryMetadata()]);
+    expect(reader.count(LIBRARY)).toBe(2);
+    expect(reader.calls.filter((url) => url === LIBRARY)).toHaveLength(1);
+    expect(reader.calls.filter((url) => url === GIFTS)).toHaveLength(1);
   });
 });
 

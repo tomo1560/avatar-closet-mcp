@@ -5,9 +5,16 @@ const WIDE = new RegExp(
     "\\uF900-\\uFAFF\\uFE30-\\uFE4F\\uFF00-\\uFF60\\uFFE0-\\uFFE6]|[\\u{20000}-\\u{3FFFD}]",
   "u",
 );
-/** C0 / C1 control characters except tab and newline: seller-controlled names must not drive the terminal. */
-// eslint-disable-next-line no-control-regex -- matching control characters is the purpose of this pattern
-const CONTROL = new RegExp("[\\u0000-\\u0008\\u000B-\\u001F\\u007F-\\u009F]", "gu");
+/**
+ * C0 / C1 control characters except tab and newline, plus bidirectional controls (embeddings, overrides,
+ * isolates, LRM / RLM / ALM): seller-controlled names must not drive the terminal or reorder what it shows
+ * (e.g. "Outfit<RLO>piz.exe" displayed as "Outfitexe.zip").
+ */
+const CONTROL = new RegExp(
+  // eslint-disable-next-line no-control-regex -- matching control characters is the purpose of this pattern
+  "[\\u0000-\\u0008\\u000B-\\u001F\\u007F-\\u009F\\u061C\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]",
+  "gu",
+);
 const ELLIPSIS = "…";
 const COLUMN_GAP = "  ";
 

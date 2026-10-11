@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { UnavailableItems } from "../src/cache/unavailable-items.js";
+import { MAX_UNAVAILABLE_FILE_BYTES, UnavailableItems } from "../src/cache/unavailable-items.js";
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
 const tempPaths: string[] = [];
@@ -46,5 +46,17 @@ describe("UnavailableItems", () => {
     await writeFile(file, "{ broken", "utf8");
     expect(await store.freshIds()).toEqual(new Set());
     await expect(store.mark(["../x"])).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  });
+
+  it("ignores a file larger than the read cap (best effort: treated as empty)", async () => {
+    const file = await tempFile();
+    const now = new Date("2026-10-12T00:00:00Z");
+    const store = new UnavailableItems({ file, now: () => now });
+    await store.mark(["9"]);
+    const items = Object.fromEntries(Array.from({ length: 70_000 }, (_, index) => [String(index + 1), "2026-10-12T00:00:00Z"]));
+    const huge = JSON.stringify({ version: 1, items });
+    expect(Buffer.byteLength(huge)).toBeGreaterThan(MAX_UNAVAILABLE_FILE_BYTES);
+    await writeFile(file, huge, "utf8");
+    expect(await store.freshIds()).toEqual(new Set());
   });
 });

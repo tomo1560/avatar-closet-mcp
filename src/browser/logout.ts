@@ -1,10 +1,10 @@
-import { getAppDir, getProfileDir, getSessionFile } from "../profile.js";
+import { getAppDir, getCacheDir, getProfileDir, getSessionFile } from "../profile.js";
 import { deleteSessionFile } from "../session-state.js";
 import type { LogoutResult } from "../types.js";
 import { removeProfileDir, type ProfileDirPaths } from "./profile-dir.js";
 
 export function getLocalLoginPaths(env: NodeJS.ProcessEnv = process.env): ProfileDirPaths {
-  return { appDir: getAppDir(env), sessionFile: getSessionFile(env), profileDir: getProfileDir(env) };
+  return { appDir: getAppDir(env), sessionFile: getSessionFile(env), profileDir: getProfileDir(env), cacheDir: getCacheDir(env) };
 }
 
 /**

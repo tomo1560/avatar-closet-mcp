@@ -1,4 +1,4 @@
-import { request } from "playwright-core";
+import { request, type APIRequestContext } from "playwright-core";
 import { BoothError, firstLineOf } from "../errors.js";
 import type { StorageState } from "../session-state.js";
 
@@ -27,10 +27,7 @@ export type TransportFactory = (state: StorageState) => Promise<BoothTransport>;
 
 /** Browserless transport backed by a Playwright APIRequestContext (TLS fingerprint accepted by BOOTH). */
 export const createPlaywrightTransport: TransportFactory = async (state) => {
-  const context = await request.newContext({
-    storageState: state,
-    extraHTTPHeaders: { "Accept-Language": ACCEPT_LANGUAGE },
-  });
+  const context = await newRequestContext(state);
   return {
     async get(url, headers) {
       try {
@@ -54,3 +51,11 @@ export const createPlaywrightTransport: TransportFactory = async (state) => {
     close: () => context.dispose(),
   };
 };
+
+async function newRequestContext(state: StorageState): Promise<APIRequestContext> {
+  try {
+    return await request.newContext({ storageState: state, extraHTTPHeaders: { "Accept-Language": ACCEPT_LANGUAGE } });
+  } catch (error) {
+    throw new BoothError("NETWORK_ERROR", `BOOTH への接続を準備できませんでした: ${firstLineOf(error)}`);
+  }
+}

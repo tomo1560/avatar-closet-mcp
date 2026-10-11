@@ -12,6 +12,7 @@ import type { AvatarDictionary, AvatarEntry, AvatarSuggestion, CompatibilityChec
 import { dictionaryError, fetchMetadata, loadDictionary, loadUserEntries, type MetadataBatch, type ServiceContext } from "./context.js";
 import { normalizeAvatarQuery } from "./items.js";
 import { collectOwnedItems, LIST_MAX_FETCH, metadataStatus } from "./library.js";
+import { fetchOwnedMetadata } from "./owned-snapshot.js";
 import { invalidInput, wrap } from "./result.js";
 import { HEURISTIC_NOTE } from "./vrchat-info.js";
 
@@ -121,13 +122,14 @@ export async function searchForAvatar(ctx: ServiceContext, input: AvatarSearchIn
 }
 
 async function ownedMetadata(ctx: ServiceContext): Promise<{ items: readonly LibraryItem[]; batch: MetadataBatch }> {
-  const { items } = await collectOwnedItems(ctx);
-  const batch = await fetchMetadata(
+  const owned = await collectOwnedItems(ctx);
+  const batch = await fetchOwnedMetadata(
     ctx,
-    items.map((item) => item.item_id),
+    owned,
+    owned.items.map((item) => item.item_id),
     LIST_MAX_FETCH,
   );
-  return { items, batch };
+  return { items: owned.items, batch };
 }
 
 function ownedRawItems(items: readonly LibraryItem[], batch: MetadataBatch): RawBoothItem[] {

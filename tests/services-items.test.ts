@@ -2,6 +2,8 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { parseRawBoothItem } from "../src/booth/item-json.js";
+import { ItemCache } from "../src/cache/item-cache.js";
 import { BoothError } from "../src/errors.js";
 import { BoothService } from "../src/service.js";
 import { dictionaryError } from "../src/services/context.js";
@@ -180,5 +182,73 @@ describe("searchForAvatar", () => {
   it("rejects pages beyond 3", async () => {
     const { service } = await setup(new RoutedFakeReader());
     await expect(service.searchForAvatar({ avatar: "しなの", page: 4 })).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  });
+});
+
+const DAY_MS = 24 * 60 * 60 * 1_000;
+
+/** Writes a cache record for a public fixture as if it had been fetched `ageMs` ago. */
+async function seedCache(home: string, id: number, ageMs: number): Promise<string> {
+  const fetchedAt = new Date(Date.now() - ageMs);
+  const cache = new ItemCache({ dir: join(home, "cache", "items"), now: () => fetchedAt });
+  return (await cache.set(id, parseRawBoothItem(publicItem(id)))).fetched_at;
+}
+
+describe("cache TTL setting (BOOTH_MCP_CACHE_TTL_DAYS)", () => {
+  it("re-fetches cached items older than the configured number of days", async () => {
+    const reader = new RoutedFakeReader(itemRoutes([4866933]));
+    const { home } = await setup(reader);
+    await seedCache(home, 4866933, 2 * DAY_MS);
+    await new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }).checkCompatibility({ item: 4866933, avatar: "しなの" });
+    expect(reader.count(itemJsonUrlOf(4866933))).toBe(0);
+    const shortTtl = new BoothService(reader, { env: { BOOTH_MCP_HOME: home, BOOTH_MCP_CACHE_TTL_DAYS: "1" } });
+    await shortTtl.checkCompatibility({ item: 4866933, avatar: "しなの" });
+    expect(reader.count(itemJsonUrlOf(4866933))).toBe(1);
+  });
+
+  it("warns once and keeps the 7-day default when the value is invalid", async () => {
+    const reader = new RoutedFakeReader(itemRoutes([4866933]));
+    const { home } = await setup(reader);
+    await seedCache(home, 4866933, 2 * DAY_MS);
+    const warnings: string[] = [];
+    const service = new BoothService(reader, {
+      env: { BOOTH_MCP_HOME: home, BOOTH_MCP_CACHE_TTL_DAYS: "0" },
+      warn: (message) => warnings.push(message),
+    });
+    await service.checkCompatibility({ item: 4866933, avatar: "しなの" });
+    expect(reader.count(itemJsonUrlOf(4866933))).toBe(0);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain("BOOTH_MCP_CACHE_TTL_DAYS");
+  });
+});
+
+describe("getItem stale fallback", () => {
+  it.each(["RATE_LIMITED", "NETWORK_ERROR"] as const)("serves the cached copy marked stale on %s", async (code) => {
+    const reader = new RoutedFakeReader({ [itemJsonUrlOf(4866933)]: new BoothError(code, "unavailable") });
+    const { service, home } = await setup(reader);
+    const fetchedAt = await seedCache(home, 4866933, 10 * DAY_MS);
+    const result = await service.getItem({ item: 4866933, includeVrchat: true });
+    expect(result.data).toMatchObject({ item_id: "4866933", stale: true, fetched_at: fetchedAt, vrchat: { kind: "costume" } });
+    expect(reader.count(itemJsonUrlOf(4866933))).toBe(1);
+  });
+
+  it("does not mark a successful fetch as stale", async () => {
+    const reader = new RoutedFakeReader(itemRoutes([4866933]));
+    const { service, home } = await setup(reader);
+    await seedCache(home, 4866933, 10 * DAY_MS);
+    const { data } = await service.getItem({ item: 4866933 });
+    expect(data.stale).toBeUndefined();
+    expect(reader.count(itemJsonUrlOf(4866933))).toBe(1);
+  });
+
+  it("rethrows when nothing is cached", async () => {
+    const { service } = await setup(new RoutedFakeReader({ [itemJsonUrlOf(4866933)]: new BoothError("RATE_LIMITED", "slow down") }));
+    await expect(service.getItem({ item: 4866933 })).rejects.toMatchObject({ code: "RATE_LIMITED" });
+  });
+
+  it("does not hide NOT_FOUND behind a cached copy", async () => {
+    const { service, home } = await setup(new RoutedFakeReader({ [itemJsonUrlOf(4866933)]: new BoothError("NOT_FOUND", "gone") }));
+    await seedCache(home, 4866933, DAY_MS);
+    await expect(service.getItem({ item: 4866933 })).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 });

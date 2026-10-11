@@ -1,5 +1,5 @@
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 
 const APP_DIR_NAME = "booth-library-mcp";
 
@@ -20,9 +20,13 @@ export function getProfileDir(env: NodeJS.ProcessEnv = process.env): string {
   return join(getAppDir(env), "browser-profile");
 }
 
+/**
+ * session.json lives in the app directory (not next to a custom BOOTH_MCP_PROFILE_DIR), so deleting the
+ * login profile can never take the session file's directory with it.
+ */
 export function getSessionFile(env: NodeJS.ProcessEnv = process.env): string {
   if (env.BOOTH_MCP_SESSION_FILE) return env.BOOTH_MCP_SESSION_FILE;
-  return join(dirname(getProfileDir(env)), "session.json");
+  return join(getAppDir(env), "session.json");
 }
 
 export function getCacheDir(env: NodeJS.ProcessEnv = process.env): string {

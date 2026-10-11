@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, readdir, rename, unlink, writeFile, type FileHandle } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
 import { toItemId } from "../booth/item-id.js";
@@ -7,16 +7,51 @@ import { describeIssues, rawBoothItemSchema, type RawBoothItem } from "../booth/
 import { BoothError, asBoothError, type BoothErrorCode } from "../errors.js";
 import { getCacheDir } from "../profile.js";
 
-/** PLAN §3.5.7: items are re-fetched after 7 days. */
-export const DEFAULT_ITEM_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1_000;
+const DAY_MS = 24 * 60 * 60 * 1_000;
+/** PLAN §3.5.7: items are re-fetched after 7 days (configurable with BOOTH_MCP_CACHE_TTL_DAYS). */
+export const DEFAULT_CACHE_TTL_DAYS = 7;
+export const DEFAULT_ITEM_CACHE_TTL_MS = DEFAULT_CACHE_TTL_DAYS * DAY_MS;
+export const CACHE_TTL_ENV = "BOOTH_MCP_CACHE_TTL_DAYS";
+/** About one hour to one year. */
+export const MIN_CACHE_TTL_DAYS = 0.04;
+export const MAX_CACHE_TTL_DAYS = 365;
 /** PLAN §3.5.7: one MCP call fetches at most ~20 uncached items. */
 export const DEFAULT_MAX_FETCH = 20;
+/** Real records are a few KiB to a few hundred KiB; anything larger is not read into memory. */
+export const MAX_CACHE_RECORD_BYTES = 2 * 1_024 * 1_024;
 
 const FILE_MODE = 0o600;
 const DIR_MODE = 0o700;
 const RECORD_FILE_PATTERN = /^([1-9]\d{0,11})\.json$/;
 /** Errors that make further requests pointless (or harmful) in this run. */
 const STOP_CODES: ReadonlySet<BoothErrorCode> = new Set<BoothErrorCode>(["RATE_LIMITED", "AUTH_REQUIRED"]);
+
+const ttlDaysSchema = z.coerce.number().min(MIN_CACHE_TTL_DAYS).max(MAX_CACHE_TTL_DAYS);
+
+export interface CacheTtlSetting {
+  readonly ttlMs: number;
+  readonly days: number;
+  /** Set when the environment value was invalid and the default is used instead. */
+  readonly warning?: string;
+}
+
+/**
+ * Cache TTL from `BOOTH_MCP_CACHE_TTL_DAYS` (PLAN §3.5.7 "TTL 7日（設定可）"). Unset or empty means
+ * 7 days. An invalid value does not stop the server: the default is used and a warning is returned.
+ */
+export function resolveCacheTtl(env: NodeJS.ProcessEnv = process.env): CacheTtlSetting {
+  const raw = env[CACHE_TTL_ENV]?.trim();
+  const fallback = { ttlMs: DEFAULT_ITEM_CACHE_TTL_MS, days: DEFAULT_CACHE_TTL_DAYS };
+  if (raw === undefined || raw === "") return fallback;
+  const parsed = ttlDaysSchema.safeParse(raw);
+  if (parsed.success) return { ttlMs: Math.round(parsed.data * DAY_MS), days: parsed.data };
+  return {
+    ...fallback,
+    warning:
+      `${CACHE_TTL_ENV} は ${MIN_CACHE_TTL_DAYS}〜${MAX_CACHE_TTL_DAYS} の日数で指定してください。` +
+      `値が不正なため既定の ${DEFAULT_CACHE_TTL_DAYS} 日を使います。`,
+  };
+}
 
 const recordSchema = z.object({
   item_id: z.number().int().positive(),
@@ -244,13 +279,10 @@ export class ItemCache {
   }
 
   private async lookup(itemId: string): Promise<Lookup> {
-    let text: string;
-    try {
-      text = await readFile(this.recordPath(itemId), "utf8");
-    } catch (error) {
-      if (isMissingFileError(error)) return { status: "missing" };
-      return this.reportCorrupt(itemId, `unreadable (${errorCode(error)})`);
-    }
+    const read = await readCappedText(this.recordPath(itemId), MAX_CACHE_RECORD_BYTES);
+    if (read.status === "missing") return { status: "missing" };
+    if (read.status === "unusable") return this.reportCorrupt(itemId, read.reason);
+    const { text } = read;
     let json: unknown;
     try {
       json = JSON.parse(text);
@@ -286,6 +318,24 @@ export class ItemCache {
   /** `itemId` must already be validated by `toItemId` (digits only), which rules out path traversal. */
   private recordPath(itemId: string): string {
     return join(this.dir, `${itemId}.json`);
+  }
+}
+
+type CappedRead = { status: "missing" } | { status: "unusable"; reason: string } | { status: "ok"; text: string };
+
+/** Reads a UTF-8 file of at most `maxBytes` (size checked on the open handle before reading). Never throws. */
+async function readCappedText(path: string, maxBytes: number): Promise<CappedRead> {
+  let handle: FileHandle | undefined;
+  try {
+    handle = await open(path, "r");
+    const info = await handle.stat();
+    if (!info.isFile()) return { status: "unusable", reason: "unreadable (not a file)" };
+    if (info.size > maxBytes) return { status: "unusable", reason: "too large" };
+    return { status: "ok", text: await handle.readFile("utf8") };
+  } catch (error) {
+    return isMissingFileError(error) ? { status: "missing" } : { status: "unusable", reason: `unreadable (${errorCode(error)})` };
+  } finally {
+    await handle?.close().catch(() => undefined);
   }
 }
 

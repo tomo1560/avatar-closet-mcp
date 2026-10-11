@@ -57,6 +57,10 @@ export interface VrchatInfo {
 /** `booth_get_item` output (`ItemSummary` from `booth/public.ts` plus optional VRChat info). */
 export interface ItemDetail extends ItemSummary {
   vrchat?: VrchatInfo;
+  /** Only when BOOTH could not be reached (RATE_LIMITED / NETWORK_ERROR) and a cached copy was served instead. */
+  stale?: true;
+  /** When the served cached copy was fetched (present together with `stale`). */
+  fetched_at?: string;
 }
 
 export interface SearchResult {

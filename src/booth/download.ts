@@ -9,6 +9,9 @@ import { fileNameFromUrlPath, parseContentDispositionName, sanitizeFileName } fr
 
 export {
   DEFAULT_DOWNLOAD_HOSTS,
+  DEFAULT_HEADERS_TIMEOUT_MS,
+  DEFAULT_IDLE_TIMEOUT_MS,
+  DEFAULT_MAX_BYTES,
   getDownloadConfig,
   isAllowedDownloadHost,
   type DownloadConfig,
@@ -65,6 +68,15 @@ interface SignedResponse {
   readonly urls: readonly URL[];
 }
 
+/** The parts of an enabled DownloadConfig the download needs. */
+interface DownloadSettings {
+  readonly root: string;
+  readonly allowedHosts: readonly string[];
+  readonly maxBytes: number | null;
+  readonly headersTimeoutMs: number;
+  readonly idleTimeoutMs: number;
+}
+
 interface DownloadIds {
   readonly downloadableId: string;
   readonly variationId: string | undefined;
@@ -91,19 +103,20 @@ export async function downloadPurchase(deps: DownloadDeps, input: DownloadInput)
   const firstUrl = await locateSignedUrl(deps.redirectReader, ids, config.allowedHosts);
   const controller = new AbortController();
   try {
-    const signed = await fetchSigned(deps.fetchImpl ?? fetch, firstUrl, config.allowedHosts, controller.signal);
-    return await saveResponse(signed, directory, ids.downloadableId, config.maxBytes);
+    const signed = await fetchSigned(deps.fetchImpl ?? fetch, firstUrl, config, controller);
+    return await saveResponse(signed, directory, ids.downloadableId, config);
   } finally {
     // Releases the connection when we bail out before consuming the body.
     controller.abort();
   }
 }
 
-function requireEnabled(config: DownloadConfig): { root: string; allowedHosts: readonly string[]; maxBytes: number | null } {
+function requireEnabled(config: DownloadConfig): DownloadSettings {
   if (!config.enabled || config.destDir === null) {
     throw new BoothError("INVALID_INPUT", "ダウンロードは無効です。BOOTH_MCP_ENABLE_DOWNLOAD=1 と BOOTH_MCP_DOWNLOAD_DIR（絶対パス）を設定してください。");
   }
-  return { root: config.destDir, allowedHosts: config.allowedHosts, maxBytes: config.maxBytes };
+  const { allowedHosts, maxBytes, headersTimeoutMs, idleTimeoutMs } = config;
+  return { root: config.destDir, allowedHosts, maxBytes, headersTimeoutMs, idleTimeoutMs };
 }
 
 function validateIds(input: DownloadInput): DownloadIds {
@@ -173,13 +186,13 @@ function authRequired(): BoothError {
 async function fetchSigned(
   fetchImpl: typeof fetch,
   first: URL,
-  allowedHosts: readonly string[],
-  signal: AbortSignal,
+  settings: DownloadSettings,
+  controller: AbortController,
 ): Promise<SignedResponse> {
   let urls: readonly URL[] = [first];
   for (let hop = 0; ; hop += 1) {
     const current = urls[urls.length - 1] ?? first;
-    const response = await requestSigned(fetchImpl, current, signal);
+    const response = await requestSigned(fetchImpl, current, controller, settings.headersTimeoutMs);
     if (!REDIRECT_STATUSES.has(response.status)) {
       assertSignedSuccess(response);
       return { response, urls };
@@ -189,23 +202,39 @@ async function fetchSigned(
     if (hop >= MAX_SIGNED_REDIRECTS || !location) {
       throw new BoothError("BOOTH_CHANGED", "ダウンロード先のリダイレクトが想定と異なるため中止しました。");
     }
-    urls = [...urls, vetSignedUrl(parseLocation(location, current), allowedHosts)];
+    urls = [...urls, vetSignedUrl(parseLocation(location, current), settings.allowedHosts)];
   }
 }
 
-async function requestSigned(fetchImpl: typeof fetch, url: URL, signal: AbortSignal): Promise<Response> {
+/**
+ * One GET without cookies. Gives up (and aborts the shared controller) when the response headers do not
+ * arrive within `headersTimeoutMs`, even if the fetch implementation ignores the abort signal. The body
+ * is not covered by this timer; the idle timeout in writeExclusive watches it instead.
+ */
+async function requestSigned(fetchImpl: typeof fetch, url: URL, controller: AbortController, headersTimeoutMs: number): Promise<Response> {
+  let timer: NodeJS.Timeout | undefined;
+  const timedOut = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      // Reject first: aborting makes the pending fetch reject too, and the race must report the timeout.
+      reject(noResponse(headersTimeoutMs));
+      controller.abort();
+    }, headersTimeoutMs);
+  });
+  const init: RequestInit = { method: "GET", redirect: "manual", credentials: "omit", headers: SIGNED_REQUEST_HEADERS, signal: controller.signal };
   try {
-    return await fetchImpl(url.toString(), {
-      method: "GET",
-      redirect: "manual",
-      credentials: "omit",
-      headers: SIGNED_REQUEST_HEADERS,
-      signal,
-    });
-  } catch {
+    return await Promise.race([fetchImpl(url.toString(), init), timedOut]);
+  } catch (error) {
+    if (error instanceof BoothError) throw error;
     // fetch errors may embed the request URL: never forward their message or cause.
     throw new BoothError("NETWORK_ERROR", "ダウンロード先に接続できませんでした。再実行してください。");
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+function noResponse(timeoutMs: number): BoothError {
+  const seconds = Math.max(1, Math.round(timeoutMs / 1_000));
+  return new BoothError("NETWORK_ERROR", `ダウンロード先が ${seconds} 秒以内に応答しませんでした。再実行してください。`);
 }
 
 function assertSignedSuccess(response: Response): void {
@@ -230,9 +259,10 @@ async function saveResponse(
   signed: SignedResponse,
   directory: string,
   downloadableId: string,
-  maxBytes: number | null,
+  settings: DownloadSettings,
 ): Promise<DownloadResult> {
   const { response } = signed;
+  const { maxBytes, idleTimeoutMs } = settings;
   const contentType = mediaType(response.headers.get("content-type"));
   const fileName = pickFileName(response, signed.urls, downloadableId);
   if (contentType === "text/html" && !HTML_FILE.test(fileName)) {
@@ -245,7 +275,7 @@ async function saveResponse(
     throw new BoothError("INVALID_INPUT", "保存先のファイル名が不正です。");
   }
   await assertTargetAbsent(target, fileName);
-  const bytes = await writeExclusive(response.body, target, fileName, { maxBytes, expectedBytes });
+  const bytes = await writeExclusive(response.body, target, fileName, { maxBytes, expectedBytes, idleTimeoutMs });
   return Object.freeze({ path: target, file_name: fileName, bytes, content_type: contentType });
 }
 

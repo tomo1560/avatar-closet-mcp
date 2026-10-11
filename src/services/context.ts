@@ -18,6 +18,12 @@ export interface ServiceContext {
   readonly avatarsFile: string;
   /** Recent library + gifts walk, reused by sync / avatar calls for a few minutes. */
   readonly ownedItems: Memo<OwnedItems>;
+  /** Library file composition at the last complete walk; drives metadata re-fetches (PLAN §3.5.7). */
+  readonly cacheSnapshotFile: string;
+  /** Baseline of `booth_check_updates` (advanced only by that check). */
+  readonly updateSnapshotFile: string;
+  /** Non-fatal problems for the operator (stderr by default, never part of a tool result). */
+  readonly warn: (message: string) => void;
 }
 
 export interface OwnedItems {
@@ -28,24 +34,44 @@ export interface OwnedItems {
 /** Owned items rarely change between consecutive calls; re-reading up to 40 pages each time is wasteful. */
 export const OWNED_ITEMS_TTL_MS = 5 * 60 * 1_000;
 
-/** Single-value, time-limited memo. Failed loads are not remembered. */
+/**
+ * Single-value, time-limited memo. Concurrent callers share one in-flight load; failed loads are not
+ * remembered, and a load that finishes after `clear()` (e.g. a walk started before a login) is not kept.
+ */
 export class Memo<T> {
   private entry: { readonly value: T; readonly at: number } | undefined;
+  private inFlight: Promise<T> | undefined;
 
   constructor(
     private readonly ttlMs: number,
     private readonly now: () => number = Date.now,
   ) {}
 
-  async get(load: () => Promise<T>): Promise<T> {
-    if (this.entry && this.now() - this.entry.at < this.ttlMs) return this.entry.value;
-    const value = await load();
-    this.entry = { value, at: this.now() };
-    return value;
+  get(load: () => Promise<T>): Promise<T> {
+    if (this.entry && this.now() - this.entry.at < this.ttlMs) return Promise.resolve(this.entry.value);
+    if (this.inFlight) return this.inFlight;
+    const pending: Promise<T> = Promise.resolve()
+      .then(load)
+      .then(
+      (value) => {
+        if (this.inFlight === pending) {
+          this.entry = { value, at: this.now() };
+          this.inFlight = undefined;
+        }
+        return value;
+      },
+      (error: unknown) => {
+        if (this.inFlight === pending) this.inFlight = undefined;
+        throw error;
+      },
+    );
+    this.inFlight = pending;
+    return pending;
   }
 
   clear(): void {
     this.entry = undefined;
+    this.inFlight = undefined;
   }
 }
 
@@ -112,12 +138,18 @@ export async function getCachedItem(ctx: ServiceContext, itemId: string): Promis
 /**
  * Cache-first bulk metadata (PLAN §3.5.7): at most `maxFetch` requests. Items known to be deleted are
  * skipped, and newly found 404s are remembered so they do not consume the budget of later calls.
+ * `forceIds` are re-fetched even when their cache record is fresh (download files changed).
  */
-export async function fetchMetadata(ctx: ServiceContext, ids: readonly string[], maxFetch: number): Promise<MetadataBatch> {
+export async function fetchMetadata(
+  ctx: ServiceContext,
+  ids: readonly string[],
+  maxFetch: number,
+  forceIds: readonly string[] = [],
+): Promise<MetadataBatch> {
   const skipped = await ctx.unavailable.freshIds();
   const unique = [...new Set(ids.filter(isItemId))];
   const wanted = unique.filter((id) => !skipped.has(id));
-  const result = await ctx.cache.fetchMany(wanted, createItemFetcher(ctx.reader), { maxFetch });
+  const result = await ctx.cache.fetchMany(wanted, createItemFetcher(ctx.reader), { maxFetch, forceIds: forceIds.filter(isItemId) });
   const notFound = result.errors.filter((error) => error.code === "NOT_FOUND").map((error) => error.item_id);
   await ctx.unavailable.mark(notFound);
   return {

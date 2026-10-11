@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { BoothHttpClient } from "../src/browser/http-client.js";
+import { BoothHttpClient, MAX_RESPONSE_BYTES } from "../src/browser/http-client.js";
 import type { BoothError } from "../src/errors.js";
 import type { StorageCookie, StorageState } from "../src/session-state.js";
 import { createFakeClock, FakeTransportHarness, type FakeHandler } from "./helpers/fake-transport.js";
@@ -122,6 +122,27 @@ describe("status handling and parsing", () => {
     await expect(client.readJson("/ja/items/1.json", (json) => json)).rejects.toMatchObject({ code: "BOOTH_CHANGED" });
   });
 
+  it("refuses a response whose declared size exceeds the cap without parsing it", async () => {
+    let parsed = false;
+    const { client } = await setup(() => ({ status: 200, headers: { "content-length": String(MAX_RESPONSE_BYTES + 1) }, body: "x" }));
+    const read = client.read("/ja/items/1", (html) => {
+      parsed = true;
+      return html;
+    });
+    await expect(read).rejects.toMatchObject({ code: "BOOTH_CHANGED" });
+    expect(parsed).toBe(false);
+  });
+
+  it("refuses an oversized body that did not declare its size", async () => {
+    const { client } = await setup(() => ok("a".repeat(MAX_RESPONSE_BYTES + 1)));
+    await expect(client.read("/ja/items/1", (html) => html.length)).rejects.toMatchObject({ code: "BOOTH_CHANGED" });
+  });
+
+  it("accepts a body of exactly the cap", async () => {
+    const { client } = await setup(() => ok("a".repeat(MAX_RESPONSE_BYTES)));
+    await expect(client.read("/ja/items/1", (html) => html.length)).resolves.toMatchObject({ data: MAX_RESPONSE_BYTES });
+  });
+
   it("extracts a CSRF token from HTML before calling a JSON endpoint", async () => {
     const { client, harness } = await setup((request) =>
       request.url.endsWith("/detail") ? ok("<meta name='csrf-token' content='token-value'><main></main>") : ok('{"ok":true}'),
@@ -133,7 +154,7 @@ describe("status handling and parsing", () => {
 
   it("strips multi-line transport errors", async () => {
     const { client } = await setup(() => {
-      throw new Error("connect failed\nCall log:\n  cookie: _plaza_session=fictional-secret");
+      throw new Error("apiRequestContext.get: connect failed\nCall log:\n  cookie: _plaza_session=fictional-secret");
     });
     const error = (await client.read("/ja", (html) => html).catch((e: unknown) => e)) as BoothError;
     expect(error.code).toBe("NETWORK_ERROR");
@@ -172,6 +193,36 @@ describe("cookie write-back", () => {
     await rm(sessionFile);
     await client.read("/ja", (html) => html);
     await expect(readFile(sessionFile, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("does not clobber a session.json changed by another process, and reloads it for the next request", async () => {
+    const { client, harness, sessionFile } = await setup(() => ok());
+    await client.read("/ja", (html) => html);
+    // Another process (e.g. `login` from the CLI) saves a new session meanwhile. Different length on purpose:
+    // the change must be detected even when the file system's mtime granularity hides it.
+    await writeSession(sessionFile, [boothCookie("_plaza_session_test", "from-another-process-login")]);
+    const external = await readFile(sessionFile, "utf8");
+    harness.jar = { cookies: [boothCookie("_plaza_session_test", "stale-in-memory")], origins: [] };
+
+    await client.read("/ja", (html) => html);
+    expect(await readFile(sessionFile, "utf8")).toBe(external);
+
+    await client.read("/ja", (html) => html);
+    expect(harness.createdWith).toHaveLength(2);
+    expect(harness.createdWith[1]?.cookies.find((cookie) => cookie.name === "_plaza_session_test")?.value).toBe(
+      "from-another-process-login",
+    );
+  });
+
+  it("keeps writing back after its own write (its own changes are not mistaken for another process)", async () => {
+    const { client, harness, sessionFile } = await setup(() => ok());
+    harness.jar = { cookies: [boothCookie("_plaza_session_test", "rotated-1")], origins: [] };
+    await client.read("/ja", (html) => html);
+    harness.jar = { cookies: [boothCookie("_plaza_session_test", "rotated-2-longer")], origins: [] };
+    await client.read("/ja", (html) => html);
+    const saved = JSON.parse(await readFile(sessionFile, "utf8")) as StorageState;
+    expect(saved.cookies.find((cookie) => cookie.name === "_plaza_session_test")?.value).toBe("rotated-2-longer");
+    expect(harness.createdWith).toHaveLength(1);
   });
 
   it("disposes the transport on close and recreates it for the next request", async () => {

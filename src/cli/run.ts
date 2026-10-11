@@ -2,6 +2,7 @@ import type { BoothService } from "../service.js";
 import type { AuthStatus, BoothResult, LogoutResult } from "../types.js";
 import type { CliCommand } from "./commands.js";
 import { HELP_TEXT } from "./commands.js";
+import { EXIT_CODE_HELP, EXIT_NOT_LOGGED_IN, EXIT_OK } from "./exit-codes.js";
 import { stripControl } from "./format.js";
 import { formatDownload, resolveOutDir } from "./print-download.js";
 import { formatCompat, formatItem, formatSearch, formatTags } from "./print-items.js";
@@ -14,6 +15,8 @@ import {
   formatSync,
   formatSyncProgress,
 } from "./print-library.js";
+import { formatUnityCheck } from "./print-unity.js";
+import { formatUpdates } from "./print-updates.js";
 
 export interface CliIo {
   stdout: (text: string) => void;
@@ -28,11 +31,14 @@ export interface CliDeps {
 
 type DataCommand = Exclude<CliCommand, { kind: "help" | "serve" | "login" | "status" | "logout" }>;
 
-/** Runs one CLI command through the shared service layer and returns the process exit code. */
+/**
+ * Runs one CLI command through the shared service layer and returns the process exit code
+ * (0, or 1 for `status` when signed out). Failures are thrown; `runMain` maps them to exit codes.
+ */
 export async function runCli(command: CliCommand, deps: CliDeps): Promise<number> {
   if (command.kind === "help") {
-    deps.io.stdout(HELP_TEXT);
-    return 0;
+    deps.io.stdout(`${HELP_TEXT}${EXIT_CODE_HELP}`);
+    return EXIT_OK;
   }
   if (command.kind === "serve") {
     await deps.serve();
@@ -93,6 +99,10 @@ async function runDataCommand(command: DataCommand, service: BoothService, io: C
       const input = { downloadable_id: command.downloadableId, variation_id: command.variationId };
       return render(await service.downloadPurchase(input, options), formatDownload);
     }
+    case "updates":
+      return render(await service.checkUpdates({ itemIds: command.itemIds, avatar: command.avatar }), formatUpdates);
+    case "unity-check":
+      return render(await service.unityCheck(command.projectPath), formatUnityCheck);
   }
 }
 
@@ -104,7 +114,7 @@ function printStatus(result: BoothResult<AuthStatus>, json: boolean, io: CliIo):
   } else {
     io.stdout("未ログインです。`booth-library-mcp login` を実行してください。\n");
   }
-  return result.data.authenticated ? 0 : 1;
+  return result.data.authenticated ? EXIT_OK : EXIT_NOT_LOGGED_IN;
 }
 
 function printLogout(result: BoothResult<LogoutResult>, io: CliIo): void {

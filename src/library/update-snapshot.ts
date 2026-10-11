@@ -13,7 +13,14 @@ import type { LibraryItem } from "../parsers/library.js";
 import { getCacheDir } from "../profile.js";
 import { readSnapshotText, writeFileAtomic } from "./snapshot-file.js";
 
+/** Baseline of `booth_check_updates`: advanced only by that check ("compared with the last check"). */
 export const SNAPSHOT_FILE_NAME = "library-snapshot.json";
+/**
+ * File composition at the last complete library + gifts walk, used only to re-fetch the item metadata
+ * of changed items (PLAN §3.5.7). Separate from the update-check baseline so that `sync` or avatar
+ * listings never hide updates from `booth_check_updates`.
+ */
+export const CACHE_SNAPSHOT_FILE_NAME = "item-cache-snapshot.json";
 export const SNAPSHOT_VERSION = 1;
 
 export interface SnapshotFile {
@@ -95,6 +102,10 @@ const snapshotSchema = z.object({
 
 export function getSnapshotFile(env: NodeJS.ProcessEnv = process.env): string {
   return join(getCacheDir(env), SNAPSHOT_FILE_NAME);
+}
+
+export function getCacheSnapshotFile(env: NodeJS.ProcessEnv = process.env): string {
+  return join(getCacheDir(env), CACHE_SNAPSHOT_FILE_NAME);
 }
 
 /**

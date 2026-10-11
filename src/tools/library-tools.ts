@@ -5,6 +5,7 @@ import { MAX_SYNC_ITEMS } from "../services/sync.js";
 import { VRCHAT_KINDS } from "../services/vrchat-info.js";
 import { avatarSchema } from "./item-tools.js";
 import { register, UNOFFICIAL_NOTE } from "./register.js";
+import { registerUpdateTools } from "./update-tools.js";
 
 const LOGIN_NOTE = "ログインが必要です（AUTH_REQUIRED のときは booth_login）。";
 const FILTER_NOTE =
@@ -76,4 +77,6 @@ export function registerLibraryTools(server: McpServer, service: BoothService): 
     },
     ({ max_items }) => service.syncLibraryMetadata(max_items),
   );
+  // Registered here (right after the library tools) so createServer() needs no change for Phase 5.
+  registerUpdateTools(server, service);
 }

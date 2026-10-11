@@ -8,6 +8,8 @@ import { parseRawBoothItem, type RawBoothItem } from "../src/booth/item-json.js"
 import {
   DEFAULT_ITEM_CACHE_TTL_MS,
   ItemCache,
+  MAX_CACHE_RECORD_BYTES,
+  resolveCacheTtl,
   type CorruptCacheEntry,
   type ItemFetcher,
 } from "../src/cache/item-cache.js";
@@ -67,6 +69,30 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await rm(root, { recursive: true, force: true });
+});
+
+describe("resolveCacheTtl (BOOTH_MCP_CACHE_TTL_DAYS)", () => {
+  it("defaults to 7 days without a warning when unset or empty", () => {
+    expect(resolveCacheTtl({})).toEqual({ ttlMs: DEFAULT_ITEM_CACHE_TTL_MS, days: 7 });
+    expect(resolveCacheTtl({ BOOTH_MCP_CACHE_TTL_DAYS: "  " })).toEqual({ ttlMs: DEFAULT_ITEM_CACHE_TTL_MS, days: 7 });
+  });
+
+  it.each([
+    ["1", 1],
+    [" 30 ", 30],
+    ["0.5", 0.5],
+    ["0.04", 0.04],
+    ["365", 365],
+  ])("accepts %s days", (value, days) => {
+    expect(resolveCacheTtl({ BOOTH_MCP_CACHE_TTL_DAYS: value })).toEqual({ ttlMs: Math.round(days * DAY_MS), days });
+  });
+
+  it.each(["0", "0.01", "366", "-1", "abc", "Infinity", "7days"])("falls back to 7 days with a warning for %s", (value) => {
+    const result = resolveCacheTtl({ BOOTH_MCP_CACHE_TTL_DAYS: value });
+    expect(result).toMatchObject({ ttlMs: DEFAULT_ITEM_CACHE_TTL_MS, days: 7 });
+    expect(result.warning).toContain("BOOTH_MCP_CACHE_TTL_DAYS");
+    expect(result.warning).toContain("7 日");
+  });
 });
 
 describe("ItemCache records", () => {
@@ -160,6 +186,19 @@ describe("ItemCache records", () => {
     const cache = createCache();
     expect(await cache.get(5)).toBeNull();
     expect(corrupt[0]?.reason).toMatch(/^unreadable/);
+  });
+
+  it("treats a record file over 2 MiB as corrupt without parsing it", async () => {
+    await mkdir(dir, { recursive: true });
+    const record = { item_id: 5, fetched_at: START, etag: null, item: makeItem(5) };
+    const padded = `${JSON.stringify(record)}${" ".repeat(MAX_CACHE_RECORD_BYTES)}`;
+    await writeFile(join(dir, "5.json"), padded);
+    const cache = createCache();
+    expect(await cache.get(5)).toBeNull();
+    expect(corrupt[0]).toEqual({ item_id: "5", reason: "too large" });
+
+    await writeFile(join(dir, "5.json"), JSON.stringify(record));
+    expect(await cache.get(5)).not.toBeNull();
   });
 
   it("works without an onCorrupt callback", async () => {
@@ -292,7 +331,7 @@ describe("ItemCache.fetchMany", () => {
 
   it("continues past NOT_FOUND and other per-item errors", async () => {
     const cache = createCache();
-    const { fetcher, calls } = fakeFetcher({ "2": "NOT_FOUND", "3": "BOOTH_CHANGED", "4": new Error("socket hang up") });
+    const { fetcher, calls } = fakeFetcher({ "2": "NOT_FOUND", "3": "BOOTH_CHANGED", "4": Object.assign(new Error("socket hang up"), { code: "ECONNRESET" }) });
     const result = await cache.fetchMany([1, 2, 3, 4, 5], fetcher);
     expect(calls).toEqual(["1", "2", "3", "4", "5"]);
     expect(result.fetched).toBe(2);

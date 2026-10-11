@@ -12,6 +12,7 @@ export function formatItem({ data }: BoothResult<ItemDetail>): string {
     `カテゴリ: ${data.category.parent_name ? `${data.category.parent_name} > ` : ""}${data.category.name}（${data.category.id}）`,
     `公開日: ${orDash(data.published_at)}`,
     `タグ: ${data.tags.length > 0 ? data.tags.join(", ") : "-"}`,
+    ...(data.stale ? [`注意: BOOTH に接続できなかったため、キャッシュ（${orDash(data.fetched_at)} 取得）を表示しています。`] : []),
   ];
   const variations =
     data.variations.length <= 1

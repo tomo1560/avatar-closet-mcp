@@ -146,8 +146,8 @@ describe("CLI formatting helpers", () => {
     );
   });
 
-  it("prints our own error messages in full but only the first line of foreign errors", () => {
+  it("prints our own error messages in full but never the text of foreign errors", () => {
     expect(describeCliError(new BoothError("INVALID_INPUT", "bad\n使い方: x"))).toBe("bad\n使い方: x [INVALID_INPUT]");
-    expect(describeCliError(new Error("boom\nCall log: cookie=secret"))).toBe("boom");
+    expect(describeCliError(new Error("boom\nCall log: cookie=secret"))).not.toContain("secret");
   });
 });

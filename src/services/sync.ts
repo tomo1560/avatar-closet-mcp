@@ -2,8 +2,9 @@ import { ACCOUNTS_ORIGIN } from "../browser/url-policy.js";
 import type { FetchManyError } from "../cache/item-cache.js";
 import type { BoothErrorCode } from "../errors.js";
 import type { BoothResult, SyncResult } from "../types.js";
-import { fetchMetadata, type MetadataBatch, type ServiceContext } from "./context.js";
+import type { MetadataBatch, ServiceContext } from "./context.js";
 import { collectOwnedItems } from "./library.js";
+import { fetchOwnedMetadata } from "./owned-snapshot.js";
 import { invalidInput, wrap } from "./result.js";
 
 export const DEFAULT_SYNC_ITEMS = 20;
@@ -33,7 +34,7 @@ export async function syncLibraryMetadata(ctx: ServiceContext, maxItems = DEFAUL
   assertRange(maxItems, MAX_SYNC_ITEMS, "max_items");
   const owned = await collectOwnedItems(ctx);
   const ids = owned.items.map((item) => item.item_id);
-  const batch = await fetchMetadata(ctx, ids, maxItems);
+  const batch = await fetchOwnedMetadata(ctx, owned, ids, maxItems);
   return wrap(toSyncResult(ids.length, [batch], owned.truncated), LIBRARY_URL);
 }
 
@@ -50,7 +51,7 @@ export async function syncAllMetadata(ctx: ServiceContext, options: SyncAllOptio
   let pending: readonly string[] = ids;
   let attempts = 0;
   while (attempts < maxItems) {
-    const batch = await fetchMetadata(ctx, pending, Math.min(SYNC_BATCH_SIZE, maxItems - attempts));
+    const batch = await fetchOwnedMetadata(ctx, owned, pending, Math.min(SYNC_BATCH_SIZE, maxItems - attempts));
     batches.push(batch);
     attempts += batch.attempts;
     const madeProgress = batch.remaining.length < pending.length;

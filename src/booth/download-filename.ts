@@ -16,7 +16,7 @@ const MAX_EXTENSION_BYTES = 24;
 // eslint-disable-next-line no-control-regex -- matching control characters is the point here
 const UNSAFE_CHARS = /[\u0000-\u001f\u007f-\u009f‎‏‪-‮⁦-⁩<>:"/\\|?*]/gu;
 const TRAILING_DOTS_SPACES = /[. ]+$/u;
-const WINDOWS_RESERVED = /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])$/iu;
+const WINDOWS_RESERVED = /^(?:con|prn|aux|nul|conin\$|conout\$|com[1-9¹²³]|lpt[1-9¹²³])$/iu;
 const EXTENSION = /\.[^.\s]{1,23}$/u;
 const PERCENT_ESCAPE = /%[0-9a-f]{2}/iu;
 const STAR_PARAM = /(?:^|;)\s*filename\*\s*=\s*"?([\w!#$&+.^`{}~-]*)'[^']*'([^;\s"]*)"?/iu;

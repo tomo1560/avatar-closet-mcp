@@ -27,6 +27,18 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Never claim that an item supports an avatar without evidence. `unknown` means no evidence was found, not "unsupported".
 - Library filters need cached item metadata. If `metadata_pending` is above zero, say that some items were not checked yet and offer `booth_sync_library_metadata` (repeat until `remaining` is 0) or the CLI command `booth-library-mcp sync` for large libraries.
 
+## Purchase updates
+
+- `booth_check_updates` compares the download files of every purchased item with the previous check and records the current state as the next baseline. Call it once per user request; a second call right away reports nothing new.
+- On `first_run: true` nothing was compared yet: tell the user a baseline was recorded and that the next check will show changes.
+- `added_files` usually means the seller uploaded a new version. Mention the new file names.
+- For "updated items that support <avatar>" pass `avatar`; only supported items are returned, with `evidence`. If `metadata_pending` is above zero, some changed items were not checked yet.
+- If `complete` is false the library was too large to read completely; report the warning instead of claiming there are no updates.
+
+## Unity projects
+
+- There is no MCP tool for scanning Unity projects. For "which of my purchases are in this Unity project?", suggest the CLI command `booth-library-mcp unity-check <projectPath>`, or combine `booth_list_library` (file names) with a Unity or file-system MCP server that can list the project's `Assets/` folders and `Packages/*.json`.
+
 ## Tool routing
 
 - Connect or sign in to BOOTH: `booth_login`
@@ -41,4 +53,5 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Find items for a specific avatar: `booth_search_for_avatar`
 - Avatars the user owns and the avatar dictionary: `booth_list_my_avatars`
 - Pre-fetch item metadata for the whole library: `booth_sync_library_metadata`
+- Purchased items updated since the last check (optionally only those supporting an avatar): `booth_check_updates`
 - Save one purchased file (opt-in; take `downloadable_id` from `booth_get_order` or `booth_list_library`): `booth_download`

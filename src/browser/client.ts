@@ -1,5 +1,5 @@
 import { chromium, type BrowserContext, type Page } from "playwright-core";
-import { BoothError, firstLineOf } from "../errors.js";
+import { BoothError } from "../errors.js";
 import { getProfileDir, getSessionFile } from "../profile.js";
 import { persistBoothSession } from "../session-state.js";
 import { prepareProfileDir } from "./profile-dir.js";
@@ -115,8 +115,12 @@ async function reopenSettingsIfReturned(pages: Page[], tracker: ReopenTracker): 
   await target?.goto(LOGIN_START_URL, { waitUntil: "domcontentloaded" }).catch(() => undefined);
 }
 
+/**
+ * Tries each candidate browser in turn. The launch errors themselves are not reported: they name
+ * executable and profile paths (which contain the OS user name).
+ */
 async function launchLoginBrowser(profileDir: string, env: NodeJS.ProcessEnv): Promise<BrowserContext> {
-  const failures: string[] = [];
+  const tried: string[] = [];
   for (const candidate of getLoginBrowserCandidates(env)) {
     try {
       return await chromium.launchPersistentContext(profileDir, {
@@ -124,11 +128,12 @@ async function launchLoginBrowser(profileDir: string, env: NodeJS.ProcessEnv): P
         locale: "ja-JP",
         ...("executablePath" in candidate ? { executablePath: candidate.executablePath } : { channel: candidate.channel }),
       });
-    } catch (error) {
-      failures.push(`${candidate.label}: ${firstLineOf(error)}`);
+    } catch {
+      tried.push(candidate.label);
     }
   }
-  throw new Error(
-    `ログイン用の Chrome / Edge を起動できませんでした。どちらかをインストールするか、BOOTH_MCP_BROWSER_PATH に Chromium 系ブラウザの実行ファイルを指定してください。\n${failures.join("\n")}`,
+  throw new BoothError(
+    "INTERNAL_ERROR",
+    `ログイン用の Chrome / Edge を起動できませんでした（試行: ${tried.join(", ")}）。どちらかをインストールするか、BOOTH_MCP_BROWSER_PATH に Chromium 系ブラウザの実行ファイルを指定してください。`,
   );
 }

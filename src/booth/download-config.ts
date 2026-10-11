@@ -12,6 +12,13 @@ import { z } from "zod";
  * TODO(PLAN §7-4): verify against a real download (observed host(s), whether it ever leaves *.booth.pm).
  */
 export const DEFAULT_DOWNLOAD_HOSTS: readonly string[] = Object.freeze(["*.booth.pm"]);
+/** Per-file cap unless BOOTH_MCP_DOWNLOAD_MAX_BYTES says otherwise (0 = unlimited). */
+export const DEFAULT_MAX_BYTES = 4 * 1024 ** 3;
+/** Wait for the signed host's response headers. */
+export const DEFAULT_HEADERS_TIMEOUT_MS = 30_000;
+/** Longest gap between two body chunks before the download is abandoned. */
+export const DEFAULT_IDLE_TIMEOUT_MS = 60_000;
+const MAX_TIMEOUT_SEC = 86_400;
 
 export interface DownloadConfig {
   /** True only with BOOTH_MCP_ENABLE_DOWNLOAD=1, an absolute BOOTH_MCP_DOWNLOAD_DIR and no invalid setting. */
@@ -19,8 +26,12 @@ export interface DownloadConfig {
   /** Resolved absolute root that every download must stay inside, or null when unset / not absolute. */
   readonly destDir: string | null;
   readonly allowedHosts: readonly string[];
-  /** Per-file byte cap, or null for no cap. */
+  /** Per-file byte cap, or null for no cap (BOOTH_MCP_DOWNLOAD_MAX_BYTES=0). */
   readonly maxBytes: number | null;
+  /** How long to wait for the signed host's response headers. */
+  readonly headersTimeoutMs: number;
+  /** Longest gap between two body chunks (no overall limit: files can be large). */
+  readonly idleTimeoutMs: number;
   /** Why an opted-in configuration is disabled (fail closed). Contains no secrets. */
   readonly issues: readonly string[];
 }
@@ -31,6 +42,7 @@ const LABEL = "[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?";
 /** At least two DNS labels, lower-case, no trailing dot, no port / path / userinfo. */
 const HOST_NAME = new RegExp(`^(?=.{1,253}$)${LABEL}(?:\\.${LABEL})+$`, "u");
 const MAX_BYTES_DIGITS = /^\d{1,15}$/u;
+const TIMEOUT_DIGITS = /^\d{1,5}$/u;
 
 const hostEntrySchema = z
   .string()
@@ -43,7 +55,14 @@ const maxBytesSchema = z
   .trim()
   .regex(MAX_BYTES_DIGITS)
   .transform(Number)
-  .refine((value) => Number.isSafeInteger(value) && value > 0);
+  .refine((value) => Number.isSafeInteger(value) && value >= 0);
+
+const timeoutSecSchema = z
+  .string()
+  .trim()
+  .regex(TIMEOUT_DIGITS)
+  .transform(Number)
+  .refine((value) => value >= 1 && value <= MAX_TIMEOUT_SEC);
 
 const destDirSchema = z
   .string()
@@ -63,12 +82,15 @@ export function getDownloadConfig(env: DownloadEnv = process.env): DownloadConfi
   const destDir = parseDestDir(env.BOOTH_MCP_DOWNLOAD_DIR, optedIn);
   const hosts = parseHosts(env.BOOTH_MCP_DOWNLOAD_HOSTS);
   const maxBytes = parseMaxBytes(env.BOOTH_MCP_DOWNLOAD_MAX_BYTES);
-  const issues = [destDir.issue, hosts.issue, maxBytes.issue].filter((issue): issue is string => issue !== null);
+  const timeout = parseTimeout(env.BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC);
+  const issues = [destDir.issue, hosts.issue, maxBytes.issue, timeout.issue].filter((issue): issue is string => issue !== null);
   return Object.freeze({
     enabled: optedIn && destDir.value !== null && issues.length === 0,
     destDir: destDir.value,
     allowedHosts: hosts.value,
     maxBytes: maxBytes.value,
+    headersTimeoutMs: timeout.value?.headersTimeoutMs ?? DEFAULT_HEADERS_TIMEOUT_MS,
+    idleTimeoutMs: timeout.value?.idleTimeoutMs ?? DEFAULT_IDLE_TIMEOUT_MS,
     issues: Object.freeze(issues),
   });
 }
@@ -100,10 +122,18 @@ function parseHosts(raw: string | undefined): Parsed<readonly string[]> {
 }
 
 function parseMaxBytes(raw: string | undefined): Parsed<number | null> {
-  if (raw === undefined || raw.trim() === "") return { value: null, issue: null };
+  if (raw === undefined || raw.trim() === "") return { value: DEFAULT_MAX_BYTES, issue: null };
   const parsed = maxBytesSchema.safeParse(raw);
-  if (parsed.success) return { value: parsed.data, issue: null };
-  return { value: null, issue: "BOOTH_MCP_DOWNLOAD_MAX_BYTES は正の整数（バイト数）で指定してください。" };
+  if (parsed.success) return { value: parsed.data === 0 ? null : parsed.data, issue: null };
+  return { value: null, issue: "BOOTH_MCP_DOWNLOAD_MAX_BYTES は 0 以上の整数（バイト数、0 は上限なし）で指定してください。" };
+}
+
+/** One value for both waits: response headers and the gap between body chunks. */
+function parseTimeout(raw: string | undefined): Parsed<{ headersTimeoutMs: number; idleTimeoutMs: number } | null> {
+  if (raw === undefined || raw.trim() === "") return { value: null, issue: null };
+  const parsed = timeoutSecSchema.safeParse(raw);
+  if (parsed.success) return { value: { headersTimeoutMs: parsed.data * 1_000, idleTimeoutMs: parsed.data * 1_000 }, issue: null };
+  return { value: null, issue: `BOOTH_MCP_DOWNLOAD_TIMEOUT_SEC は 1〜${MAX_TIMEOUT_SEC} の整数（秒）で指定してください。` };
 }
 
 /**

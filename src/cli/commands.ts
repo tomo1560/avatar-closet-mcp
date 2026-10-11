@@ -20,7 +20,9 @@ export type CliCommand =
   | { kind: "compat"; json: boolean; item: string; avatar: string }
   | { kind: "avatars" | "avatars-init"; json: boolean }
   | { kind: "sync"; json: boolean; max?: number }
-  | { kind: "download"; json: boolean; downloadableId: string; variationId?: string; out?: string };
+  | { kind: "download"; json: boolean; downloadableId: string; variationId?: string; out?: string }
+  | { kind: "updates"; json: boolean; itemIds?: string[]; avatar?: string }
+  | { kind: "unity-check"; json: boolean; projectPath: string };
 
 const LIBRARY_FLAGS = { all: "boolean", page: "integer", query: "string", avatar: "string", kind: "string", dependency: "string", json: "boolean" } as const;
 
@@ -50,6 +52,8 @@ const SPECS = {
     maxPositionals: 1,
     usage: "download <ダウンロードID> [--variation N] [--out <dir>] [--json]",
   },
+  updates: { flags: { item: "list", avatar: "string", json: "boolean" }, minPositionals: 0, maxPositionals: 0, usage: "updates [--item <商品ID>]... [--avatar A] [--json]" },
+  "unity-check": { flags: { json: "boolean" }, minPositionals: 1, maxPositionals: 1, usage: "unity-check <Unityプロジェクトのフォルダ> [--json]" },
 } as const satisfies Record<string, ArgSpec>;
 
 const NUMERIC_ID = /^\d{1,20}$/u;
@@ -80,6 +84,12 @@ export const HELP_TEXT = `booth-library-mcp - BOOTH 購入者向けの非公式�
   booth-library-mcp ${SPECS.download.usage}
                                              購入したファイルを保存（オプトイン: BOOTH_MCP_ENABLE_DOWNLOAD=1 が必要。
                                              保存先は --out か BOOTH_MCP_DOWNLOAD_DIR。既存ファイルは上書きしません）
+  booth-library-mcp ${SPECS.updates.usage}
+                                             前回の確認から更新された購入品（ダウンロードファイルの追加・削除・改名）。
+                                             初回は基準を記録するだけです。--avatar で対応アバターの商品に絞り込み
+  booth-library-mcp ${SPECS["unity-check"].usage}
+                                             Unity プロジェクトに入っている購入品を推定（Assets/ のフォルダ名と
+                                             Packages/*.json だけを読みます）
   booth-library-mcp help                     このヘルプを表示
 
 --kind: ${VRCHAT_KINDS.join(" / ")}
@@ -129,7 +139,18 @@ function toCommand(name: SpecName, parsed: ParsedArgs): CliCommand {
       return withOptional({ kind: "sync", json }, "max", integerFlag(parsed, "max"));
     case "download":
       return downloadCommand(parsed, json);
+    case "updates":
+      return updatesCommand(parsed, json);
+    case "unity-check":
+      return { kind: "unity-check", json, projectPath: first };
   }
+}
+
+function updatesCommand(parsed: ParsedArgs, json: boolean): CliCommand {
+  const itemIds = listFlag(parsed, "item");
+  if (itemIds.some((id) => !NUMERIC_ID.test(id.trim()))) throw usageError("--item には商品 ID（数字）を指定してください。", SPECS.updates);
+  const ids = itemIds.length > 0 ? itemIds.map((id) => id.trim()) : undefined;
+  return withOptional(withOptional({ kind: "updates", json }, "avatar", stringFlag(parsed, "avatar")), "itemIds", ids);
 }
 
 function downloadCommand(parsed: ParsedArgs, json: boolean): CliCommand {

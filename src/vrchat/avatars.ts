@@ -1,8 +1,7 @@
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
-
 import { z } from "zod";
 
+import { FileTooLargeError, isMissingFileError, readTextFileCapped, writeFileAtomic } from "../atomic-file.js";
+import { errnoCodeOf } from "../errors.js";
 import { getAvatarDictionaryFile } from "../profile.js";
 import { extractAvatarDisplayName, isAvatarBody } from "./kind.js";
 import { resolveAvatarId } from "./matcher.js";
@@ -16,6 +15,8 @@ const MAX_ID_LENGTH = 64;
 const MAX_NAME_LENGTH = 100;
 const MAX_NAMES = 50;
 const MAX_ENTRIES = 2000;
+/** avatars.json is hand-edited and small; anything larger is refused before it is read. */
+export const MAX_AVATAR_FILE_BYTES = 1024 * 1024;
 
 const avatarEntrySchema = z.object({
   id: z.string().trim().min(1).max(MAX_ID_LENGTH),
@@ -84,18 +85,20 @@ function stripBom(text: string): string {
   return text.startsWith(BYTE_ORDER_MARK) ? text.slice(1) : text;
 }
 
-function isMissingFile(error: unknown): boolean {
-  return error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT";
+/** Only the errno code: fs messages contain the path, and with it the OS user name. */
+function ioDetail(error: unknown): string {
+  if (error instanceof FileTooLargeError) return `larger than ${error.maxBytes} bytes`;
+  return errnoCodeOf(error) ?? "unknown error";
 }
 
 /** Read only the user's own entries (empty when the file does not exist). */
 export async function readUserAvatarEntries(file = getAvatarDictionaryFile()): Promise<AvatarEntry[]> {
   let raw: string;
   try {
-    raw = await readFile(file, "utf8");
+    raw = (await readTextFileCapped(file, MAX_AVATAR_FILE_BYTES)).text;
   } catch (error: unknown) {
-    if (isMissingFile(error)) return [];
-    throw new AvatarDictionaryError(`Cannot read avatar dictionary: ${(error as Error).message}`, file);
+    if (isMissingFileError(error)) return [];
+    throw new AvatarDictionaryError(`Cannot read avatar dictionary (${ioDetail(error)})`, file);
   }
   let json: unknown;
   try {
@@ -111,18 +114,17 @@ export async function loadAvatarDictionary(file = getAvatarDictionaryFile()): Pr
   return mergeAvatarDictionaries(SEED_AVATARS, await readUserAvatarEntries(file));
 }
 
-/** Atomically write entries to avatars.json (tmp file + rename, parent directory created). */
+/**
+ * Atomically write entries to avatars.json: a uniquely named temporary file (created exclusively, 0600)
+ * renamed over the target; the parent directory is created 0700.
+ */
 export async function saveAvatarDictionary(entries: AvatarDictionary, file = getAvatarDictionaryFile()): Promise<void> {
   const validated = parseAvatarEntries([...entries], file);
   const body = `${JSON.stringify({ version: 1, avatars: validated }, null, 2)}\n`;
-  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
-  await mkdir(dirname(file), { recursive: true });
   try {
-    await writeFile(tmp, body, { encoding: "utf8", mode: 0o600 });
-    await rename(tmp, file);
+    await writeFileAtomic(file, body);
   } catch (error: unknown) {
-    await rm(tmp, { force: true });
-    throw new AvatarDictionaryError(`Cannot write avatar dictionary: ${(error as Error).message}`, file);
+    throw new AvatarDictionaryError(`Cannot write avatar dictionary (${ioDetail(error)})`, file);
   }
 }
 

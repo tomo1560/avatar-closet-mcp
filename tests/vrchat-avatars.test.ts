@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
   AvatarDictionaryError,
+  MAX_AVATAR_FILE_BYTES,
   SEED_AVATARS,
   loadAvatarDictionary,
   mergeAvatarDictionaries,
@@ -101,6 +102,37 @@ describe("avatar dictionary files", () => {
     expect(await readUserAvatarEntries(file)).toEqual(entries);
     expect(JSON.parse(await readFile(file, "utf8"))).toMatchObject({ version: 1 });
     expect((await readdir(join(dir, "nested", "deeper"))).filter((f) => f.endsWith(".tmp"))).toEqual([]);
+  });
+
+  it("survives concurrent saves (unique temporary files) and leaves no temporary file", async () => {
+    const file = join(dir, "avatars.json");
+    const saves = Array.from({ length: 6 }, (_, index) => saveAvatarDictionary([{ id: `a${index}`, names: [`A${index}`] }], file));
+    await expect(Promise.all(saves)).resolves.toHaveLength(6);
+    expect((await readUserAvatarEntries(file))[0]?.id).toMatch(/^a\d$/u);
+    expect((await readdir(dir)).filter((f) => f.endsWith(".tmp"))).toEqual([]);
+  });
+
+  it.skipIf(process.platform === "win32")("saves the dictionary as 0600 inside a new 0700 directory", async () => {
+    const parent = join(dir, "private");
+    const file = join(parent, "avatars.json");
+    await saveAvatarDictionary([{ id: "x", names: ["X"] }], file);
+    expect((await stat(file)).mode & 0o777).toBe(0o600);
+    expect((await stat(parent)).mode & 0o777).toBe(0o700);
+  });
+
+  it("refuses a dictionary larger than the read cap without reading it", async () => {
+    const file = join(dir, "avatars.json");
+    await writeFile(file, `[${" ".repeat(MAX_AVATAR_FILE_BYTES)}]`, "utf8");
+    const error = await readUserAvatarEntries(file).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AvatarDictionaryError);
+    expect((error as Error).message).not.toContain(dir);
+  });
+
+  it("names only the errno code when the file cannot be read", async () => {
+    const error = await readUserAvatarEntries(dir).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AvatarDictionaryError);
+    expect((error as Error).message).toMatch(/E[A-Z]+/u);
+    expect((error as Error).message).not.toContain(dir);
   });
 
   it("refuses to save invalid entries", async () => {

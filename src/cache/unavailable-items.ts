@@ -1,12 +1,10 @@
-import { randomBytes } from "node:crypto";
-import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import { z } from "zod";
+import { readTextFileCapped, writeFileAtomic } from "../atomic-file.js";
 import { toItemId } from "../booth/item-id.js";
 import { DEFAULT_ITEM_CACHE_TTL_MS } from "./item-cache.js";
 
-const FILE_MODE = 0o600;
-const DIR_MODE = 0o700;
+/** A larger file is ignored (treated as empty) rather than read into memory. */
+export const MAX_UNAVAILABLE_FILE_BYTES = 2 * 1024 * 1024;
 
 const fileSchema = z.object({
   version: z.literal(1),
@@ -23,7 +21,7 @@ export interface UnavailableItemsOptions {
 /**
  * Negative cache for items whose `items/{id}.json` returned 404 (deleted or private). Bulk paths
  * (library filters, sync) skip them until the TTL expires so that they do not consume the per-call
- * fetch budget on every call. Best effort: an unreadable file counts as empty.
+ * fetch budget on every call. Best effort: an unreadable or oversized file counts as empty.
  */
 export class UnavailableItems {
   private readonly file: string;
@@ -55,7 +53,7 @@ export class UnavailableItems {
     const kept = Object.entries(await this.read()).filter(([, at]) => isWithin(nowMs - Date.parse(at), this.ttlMs));
     const items = Object.fromEntries([...kept, ...ids.map((id) => [toItemId(id), markedAt] as const)]);
     try {
-      await this.writeAtomic(`${JSON.stringify({ version: 1, items })}\n`);
+      await writeFileAtomic(this.file, `${JSON.stringify({ version: 1, items })}\n`);
       return true;
     } catch {
       return false;
@@ -64,22 +62,11 @@ export class UnavailableItems {
 
   private async read(): Promise<Record<string, string>> {
     try {
-      const parsed = fileSchema.safeParse(JSON.parse(await readFile(this.file, "utf8")));
+      const { text } = await readTextFileCapped(this.file, MAX_UNAVAILABLE_FILE_BYTES);
+      const parsed = fileSchema.safeParse(JSON.parse(text));
       return parsed.success ? parsed.data.items : {};
     } catch {
       return {};
-    }
-  }
-
-  private async writeAtomic(content: string): Promise<void> {
-    await mkdir(dirname(this.file), { recursive: true, mode: DIR_MODE });
-    const tmpPath = `${this.file}.${process.pid}.${randomBytes(6).toString("hex")}.tmp`;
-    try {
-      await writeFile(tmpPath, content, { encoding: "utf8", mode: FILE_MODE, flag: "wx" });
-      await rename(tmpPath, this.file);
-    } catch (error) {
-      await unlink(tmpPath).catch(() => undefined);
-      throw error;
     }
   }
 }

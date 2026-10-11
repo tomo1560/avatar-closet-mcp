@@ -9,7 +9,7 @@
 
 ## できること・できないこと
 
-- できること: ライブラリ・ギフト・注文履歴の一覧、注文詳細、商品詳細（公開 JSON）、商品検索、タグ候補、VRChat の対応アバター・依存ツール・Quest 対応の判定、購入したファイルのダウンロード（オプトイン・既定は無効）
+- できること: ライブラリ・ギフト・注文履歴の一覧、注文詳細、商品詳細（公開 JSON）、商品検索、タグ候補、VRChat の対応アバター・依存ツール・Quest 対応の判定、購入品の[更新チェック](#更新チェック)（前回の確認からのダウンロードファイルの変化）、[Unity プロジェクトとの突き合わせ](#unity-プロジェクトとの突き合わせcli)（CLI）、購入したファイルのダウンロード（オプトイン・既定は無効）
 - できないこと: 購入・カート・ウィッシュリストの変更など BOOTH 上のデータを変える操作（通信は GET のみ）、ストア全体の巡回
 - 注文詳細の氏名・住所・電話番号・メールアドレスは取得・表示しません
 
@@ -77,9 +77,12 @@ npx -y booth-library-mcp login
 | `booth_get_order` | `order_id` | 注文詳細（商品・価格・ダウンロード ID） | 要 |
 | `booth_list_my_avatars` | — | 所持アバター本体と辞書 | 要 |
 | `booth_sync_library_metadata` | `max_items?`（既定 20、最大 100） | 購入品の商品データをキャッシュに取り込む | 要 |
+| `booth_check_updates` | `item_ids?`（最大 100）, `avatar?` | 前回の確認からダウンロードファイル構成が変わった購入品（[更新チェック](#更新チェック)） | 要 |
 | `booth_download` | `downloadable_id`, `variation_id?`, `dest_subdir?` | 購入したファイルを保存。**オプトイン**（有効にしたときだけ表示） | 要 |
 
 結果は `{ data, meta }` 形式の JSON です。続きがある一覧は `meta.nextPage`、商品データが未取得の件数は `metadata_pending` / `remaining` で示します。`all=true` は最大 20 ページで打ち切ります。
+
+ツールは既定で 15 個、[ダウンロード](#ダウンロードオプトイン)を有効にすると `booth_download` が加わって 16 個です。
 
 ## CLI
 
@@ -98,12 +101,40 @@ npx -y booth-library-mcp avatars [--json]
 npx -y booth-library-mcp avatars init
 npx -y booth-library-mcp sync [--max N]
 npx -y booth-library-mcp download <ダウンロードID> [--variation N] [--out <dir>] [--json]   （オプトイン）
+npx -y booth-library-mcp updates [--item <商品ID>]... [--avatar A] [--json]
+npx -y booth-library-mcp unity-check <Unityプロジェクトのフォルダ> [--json]
 npx -y booth-library-mcp login | status | logout | serve | help
 ```
 
 例: `library --all --avatar しなの --kind costume`（しなの対応の衣装）、`compat https://booth.pm/ja/items/123456 桔梗`。
 
 `sync` はライブラリを 1 回読み込んだあと、未取得の商品データを 20 件ずつ取り込みます。`--max N` は 1 回の実行で送る商品データのリクエスト数の上限です（失敗も数えます。既定・最大 2000）。
+
+`updates` は `booth_check_updates` と同じ処理です（`--item` は繰り返し指定できます）。例: `updates --avatar しなの`（しなの対応の購入品で更新があったもの）。`unity-check` は[後述](#unity-プロジェクトとの突き合わせcli)。
+
+## 更新チェック
+
+`booth_check_updates`（CLI は `updates`）は、ライブラリとギフトの全ページを読み、購入品ごとのダウンロードファイル（ダウンロード ID とファイル名）を **前回の確認** のときの記録（基準）と比べます。
+
+- 返すもの: ファイルが追加・削除・改名された商品（`changed`。`added_files` は新しいバージョンのアップロードであることが多い）、新しい購入品（`new_items`）、一覧から消えた商品（`removed_items`）、変化の無い件数（`unchanged_count`）、比べた基準の日時（`previous_snapshot_taken_at`）。
+- **初回** は比較対象が無いので、現在の一覧を基準として記録するだけです（`first_run: true`）。2 回目以降は前回の確認との差分を返し、今回の一覧が次回の基準になります。`sync` や `booth_list_my_avatars` は基準を進めません（キャッシュ用の記録は別ファイルです）。
+- `item_ids` を指定するとその商品だけを確認し、基準もその商品の分だけ更新します（他の商品の変化は次回も報告されます）。
+- `avatar` を指定すると、変化した商品・新しい購入品のうち、そのアバターに対応する（根拠付きで `supported` の）ものだけを返します（例: 「しなの対応の購入品で更新があったもの」）。商品データはキャッシュ優先で 1 回あたり最大 20 件取得し（ファイルが変わった商品は再取得）、未取得の件数は `metadata_pending` です。対応と判定できなかった商品の変化は基準を進めないので、`avatar` なしの確認で後から確認できます。
+- ライブラリかギフトが 20 ページを超えて全件を読めないときは、読めなかった商品が消えたように見えてしまうため、比較も基準の記録もせず `complete: false` と警告を返します。
+- 基準は `cache/library-snapshot.json` に保存します（BOOTH には GET しかせず、書き込むのはこのローカルファイルだけです）。削除すると次回は初回扱いになります。書き込めなかったときは結果の `warnings` に理由が入ります（`snapshot_saved: false`）。
+- ライブラリの一覧は同じプロセス内で最大 5 分間再利用します。
+
+## Unity プロジェクトとの突き合わせ（CLI）
+
+```bash
+npx -y booth-library-mcp unity-check "D:/Unity/MyAvatar"
+npx -y booth-library-mcp unity-check ./MyAvatarProject --json
+```
+
+- Unity プロジェクトの `Assets/` のフォルダ名（2 階層まで）と `Packages/vpm-manifest.json` / `Packages/manifest.json` だけを読み、ライブラリとギフトの商品名・ダウンロードファイル名と照合します。アセットの中身は読みません。
+- 結果は一致した購入品の表（商品 ID・商品名・一致の種類 `matched_by`（ファイル名 / フォルダ名 / VPM）・確度 `confidence`・根拠 `evidence`）と、購入品と一致しなかったフォルダの一覧です。フォルダ名からの推定なので、確度が low / medium のものは中身で確認してください。
+- `Packages/manifest.json` のうちローカルパス（`file:…`）は `local`、git の URL は `git` と表示し、パスや URL そのものは出力しません。
+- これは CLI だけの機能です（MCP ツールはありません）。Claude などから使う場合は、`booth_list_library`（購入品のファイル名）と Unity 用の MCP サーバー（プロジェクトのフォルダやパッケージを読めるもの）を組み合わせて「このプロジェクトに入っている購入品は？」と聞くこともできます。
 
 ## VRChat 向け機能と限界
 
@@ -170,7 +201,11 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 
 ## キャッシュ
 
-- 商品データは `cache/items/{商品ID}.json` に保存し、7 日間はキャッシュから使います。削除・非公開の商品（404）も 7 日間は再取得しません（`cache/unavailable-items.json`）。
+- 商品データは `cache/items/{商品ID}.json` に保存し、7 日間はキャッシュから使います。削除・非公開の商品（404）も同じ期間は再取得しません（`cache/unavailable-items.json`）。
+- 期間は環境変数 `BOOTH_MCP_CACHE_TTL_DAYS`（日数。`0.04`〜`365`、小数可。既定 `7`）で変更できます。値が不正なときはサーバーを止めずに既定の 7 日を使い、起動時に標準エラーへ警告を 1 回出します。
+- ライブラリとギフトを全ページ読んだとき（`sync`・`booth_list_my_avatars` など）、前回からダウンロードファイルの構成が変わった商品は、キャッシュが新しくても優先して再取得します（記録は `cache/item-cache-snapshot.json`。ページ数の上限で打ち切った一覧は記録しません）。
+- `booth_get_item` は明示的な問い合わせなので常に BOOTH から取得します。BOOTH に制限された（`RATE_LIMITED`）・接続できない（`NETWORK_ERROR`）ときだけ、キャッシュがあればそれを `stale: true` と取得日時 `fetched_at` 付きで返します。
+- 2 MiB を超えるキャッシュファイルは読み込まず、壊れたものとして扱って再取得します。
 - キャッシュには公開データのみを保存し、ログイン中のお気に入り・購入状態などは保存しません。
 
 ## レート制限と利用規約への配慮
@@ -193,7 +228,7 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 | --- | --- | --- |
 | `session.json` | BOOTH のセッション cookie（共有・コミットしないでください） | `BOOTH_MCP_SESSION_FILE` |
 | `browser-profile/` | ログイン用ブラウザプロファイル（pixiv の cookie を含む） | `BOOTH_MCP_PROFILE_DIR` |
-| `cache/` | 商品データのキャッシュ | `BOOTH_MCP_CACHE_DIR` |
+| `cache/` | 商品データのキャッシュ（`items/`）、更新チェックの基準（`library-snapshot.json`）、キャッシュ用のファイル構成の記録（`item-cache-snapshot.json`） | `BOOTH_MCP_CACHE_DIR` |
 | `avatars.json` | ユーザーのアバター辞書 | `BOOTH_MCP_AVATARS_FILE` |
 
 ## ログアウト
@@ -204,7 +239,9 @@ npx -y booth-library-mcp logout
 
 `session.json` とログイン用ブラウザプロファイルを削除します（BOOTH には通信しません）。キャッシュと avatars.json は残るので、不要なら保存先のフォルダごと削除してください。
 
-## エラーコード
+## エラーコードと終了コード
+
+<!-- TODO(orchestrator): エラーコード（INTERNAL_ERROR を含む）と CLI の終了コードの表をここにまとめる。 -->
 
 | コード | 意味 |
 | --- | --- |

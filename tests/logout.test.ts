@@ -2,8 +2,9 @@ import { mkdir, mkdtemp, readdir, rm, stat, symlink, writeFile } from "node:fs/p
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { clearLocalLogin } from "../src/browser/logout.js";
+import { clearLocalLogin, getLocalLoginPaths } from "../src/browser/logout.js";
 import { PROFILE_MARKER_FILE, prepareProfileDir } from "../src/browser/profile-dir.js";
+import { getCacheDir, getSessionFile } from "../src/profile.js";
 
 const tempPaths: string[] = [];
 
@@ -12,10 +13,11 @@ afterEach(async () => {
 });
 
 describe("logout (local credential cleanup)", () => {
-  it("deletes session.json and the default browser profile under the app dir", async () => {
+  it("deletes session.json and the default browser profile that login created", async () => {
     const appDir = await createTempDirectory();
-    const paths = { appDir, sessionFile: join(appDir, "session.json"), profileDir: join(appDir, "browser-profile") };
+    const paths = defaultPaths(appDir);
     await writeFile(paths.sessionFile, "{}", "utf8");
+    await prepareProfileDir(paths.profileDir);
     await mkdir(join(paths.profileDir, "Default"), { recursive: true });
     await writeFile(join(paths.profileDir, "Default", "Cookies"), "fictional", "utf8");
 
@@ -27,13 +29,51 @@ describe("logout (local credential cleanup)", () => {
     expect(await exists(appDir)).toBe(true);
   });
 
+  it("deletes a default profile with only the marker (login aborted before the browser started)", async () => {
+    const appDir = await createTempDirectory();
+    const paths = defaultPaths(appDir);
+    await prepareProfileDir(paths.profileDir);
+    expect((await clearLocalLogin(paths)).profileDirRemoved).toBe(true);
+  });
+
+  it("refuses the default path without the marker and asks the user to delete it manually", async () => {
+    const appDir = await createTempDirectory();
+    const paths = defaultPaths(appDir);
+    await mkdir(join(paths.profileDir, "Default"), { recursive: true });
+    await writeFile(join(paths.profileDir, "Local State"), "{}", "utf8");
+
+    const result = await clearLocalLogin(paths);
+
+    expect(result.profileDirRemoved).toBe(false);
+    expect(result.warnings).toEqual([expect.stringContaining("手動で削除")]);
+    expect(result.warnings[0]).not.toContain(appDir);
+    expect(await exists(join(paths.profileDir, "Local State"))).toBe(true);
+  });
+
+  it.each([
+    ["the cache directory", (profileDir: string, appDir: string) => ({ ...defaultPaths(appDir), profileDir, cacheDir: join(profileDir, "cache") })],
+    ["the session file", (profileDir: string, appDir: string) => ({ ...defaultPaths(appDir), profileDir, sessionFile: join(profileDir, "nested", "session.json") })],
+    ["the app directory", (profileDir: string) => ({ ...defaultPaths(join(profileDir, "app")), profileDir })],
+  ])("refuses a marked profile that contains %s", async (_label, makePaths) => {
+    const appDir = await createTempDirectory();
+    const profileDir = await createTempDirectory();
+    await writeFile(join(profileDir, PROFILE_MARKER_FILE), "{}", "utf8");
+    await writeFile(join(profileDir, "Local State"), "{}", "utf8");
+
+    const result = await clearLocalLogin(makePaths(profileDir, appDir));
+
+    expect(result.profileDirRemoved).toBe(false);
+    expect(result.warnings).toHaveLength(1);
+    expect(await exists(join(profileDir, "Local State"))).toBe(true);
+  });
+
   it("deletes a custom Chromium profile dir that booth-library-mcp created", async () => {
     const appDir = await createTempDirectory();
     const profileDir = join(await createTempDirectory(), "custom-profile");
     await prepareProfileDir(profileDir);
     await writeFile(join(profileDir, "Local State"), "{}", "utf8");
 
-    const result = await clearLocalLogin({ appDir, sessionFile: join(appDir, "session.json"), profileDir });
+    const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir });
 
     expect(result.profileDirRemoved).toBe(true);
     expect(await exists(profileDir)).toBe(false);
@@ -45,7 +85,7 @@ describe("logout (local credential cleanup)", () => {
     await writeFile(join(realProfile, "Local State"), "{}", "utf8");
     await mkdir(join(realProfile, "Default"));
 
-    const result = await clearLocalLogin({ appDir, sessionFile: join(appDir, "session.json"), profileDir: realProfile });
+    const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir: realProfile });
 
     expect(result.profileDirRemoved).toBe(false);
     expect(result.warnings).toHaveLength(1);
@@ -68,7 +108,7 @@ describe("logout (local credential cleanup)", () => {
     const notAProfile = await createTempDirectory();
     await writeFile(join(notAProfile, "important.txt"), "keep me", "utf8");
 
-    const result = await clearLocalLogin({ appDir, sessionFile, profileDir: notAProfile });
+    const result = await clearLocalLogin({ ...defaultPaths(appDir), sessionFile, profileDir: notAProfile });
 
     expect(result.sessionFileRemoved).toBe(true);
     expect(result.profileDirRemoved).toBe(false);
@@ -81,7 +121,7 @@ describe("logout (local credential cleanup)", () => {
     await writeFile(join(appDir, "Local State"), "{}", "utf8");
     await writeFile(join(appDir, "avatars.json"), "[]", "utf8");
 
-    const result = await clearLocalLogin({ appDir, sessionFile: join(appDir, "session.json"), profileDir: appDir });
+    const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir: appDir });
 
     expect(result.profileDirRemoved).toBe(false);
     expect(await exists(join(appDir, "avatars.json"))).toBe(true);
@@ -94,7 +134,7 @@ describe("logout (local credential cleanup)", () => {
     const profileDir = join(appDir, "browser-profile");
     await symlink(target, profileDir, process.platform === "win32" ? "junction" : "dir");
 
-    const result = await clearLocalLogin({ appDir, sessionFile: join(appDir, "session.json"), profileDir });
+    const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir });
 
     expect(result.profileDirRemoved).toBe(false);
     expect(await exists(join(target, "Local State"))).toBe(true);
@@ -102,14 +142,37 @@ describe("logout (local credential cleanup)", () => {
 
   it("succeeds when nothing exists", async () => {
     const appDir = join(await createTempDirectory(), "never-created");
-    const result = await clearLocalLogin({
-      appDir,
-      sessionFile: join(appDir, "session.json"),
-      profileDir: join(appDir, "browser-profile"),
-    });
+    const result = await clearLocalLogin(defaultPaths(appDir));
     expect(result).toEqual({ sessionFileRemoved: false, profileDirRemoved: false, warnings: [] });
   });
 });
+
+describe("local login paths", () => {
+  it("keeps session.json in the app directory even with a custom profile directory", () => {
+    const env = { BOOTH_MCP_HOME: join("x", "app"), BOOTH_MCP_PROFILE_DIR: join("y", "profile") };
+    expect(getSessionFile(env)).toBe(join("x", "app", "session.json"));
+    expect(getSessionFile({ ...env, BOOTH_MCP_SESSION_FILE: join("z", "s.json") })).toBe(join("z", "s.json"));
+  });
+
+  it("includes the cache directory", () => {
+    const env = { BOOTH_MCP_HOME: join("x", "app") };
+    expect(getLocalLoginPaths(env)).toEqual({
+      appDir: join("x", "app"),
+      sessionFile: join("x", "app", "session.json"),
+      profileDir: join("x", "app", "browser-profile"),
+      cacheDir: getCacheDir(env),
+    });
+  });
+});
+
+function defaultPaths(appDir: string): { appDir: string; sessionFile: string; profileDir: string; cacheDir: string } {
+  return {
+    appDir,
+    sessionFile: join(appDir, "session.json"),
+    profileDir: join(appDir, "browser-profile"),
+    cacheDir: join(appDir, "cache"),
+  };
+}
 
 async function createTempDirectory(): Promise<string> {
   const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-logout-"));

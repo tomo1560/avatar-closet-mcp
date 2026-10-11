@@ -4,16 +4,21 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { Readable, Transform, type TransformCallback } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
-import { BoothError } from "../errors.js";
+import { BoothError, localIoError } from "../errors.js";
+import { sanitizeFileName } from "./download-filename.js";
 
 export interface WriteOptions {
   /** Abort once more than this many bytes arrive (null: no cap). */
   readonly maxBytes: number | null;
   /** Declared length of an un-encoded body; a mismatch means a truncated download. */
   readonly expectedBytes: number | null;
+  /** Abort when no chunk arrives for this long (null: wait forever). */
+  readonly idleTimeoutMs: number | null;
 }
 
 const OUTSIDE_ROOT = "保存先は BOOTH_MCP_DOWNLOAD_DIR の内側を指定してください。";
+const BAD_SEGMENT =
+  "dest_subdir のフォルダ名に使えないもの（「..」、: < > など Windows で使えない文字、CON / NUL などの予約名、末尾のドットや空白、制御文字）が含まれています。";
 
 /** True when `candidate` is `root` itself or inside it (both absolute, already normalized). */
 export function isInside(root: string, candidate: string): boolean {
@@ -28,12 +33,14 @@ export function isInside(root: string, candidate: string): boolean {
  */
 export async function resolveDestinationDir(root: string, requested: string | undefined): Promise<string> {
   if (requested?.includes("\0")) throw outsideRoot();
+  if (requested !== undefined && !isAbsolute(requested)) assertSafeSegments(requested);
   const realRoot = await fsStep(async () => {
     await mkdir(root, { recursive: true });
     return realpath(root);
   });
   const rel = relativeInside([root, realRoot], requested ?? "");
   if (rel === null) throw outsideRoot();
+  assertSafeSegments(rel);
   const candidate = join(realRoot, rel);
   const ancestor = await fsStep(async () => realpath(await deepestExisting(candidate, realRoot)));
   if (!isInside(realRoot, ancestor)) throw outsideRoot();
@@ -56,6 +63,20 @@ function relativeInside(bases: readonly string[], requested: string): string | n
 
 function outsideRoot(): BoothError {
   return new BoothError("INVALID_INPUT", OUTSIDE_ROOT);
+}
+
+/**
+ * Every folder name must survive the file-name sanitizer unchanged: no `..`, no `:` (NTFS alternate data
+ * streams), no reserved device names, no trailing dot / space, no control or bidi characters. Checked
+ * before anything is created, so a refused path leaves no directories behind.
+ */
+function assertSafeSegments(path: string): void {
+  for (const segment of path.split(/[\\/]/u)) {
+    if (segment === "" || segment === ".") continue;
+    if (segment === ".." || segment.includes(":") || sanitizeFileName(segment, "") !== segment) {
+      throw new BoothError("INVALID_INPUT", BAD_SEGMENT);
+    }
+  }
 }
 
 async function deepestExisting(path: string, stopAt: string): Promise<string> {
@@ -97,7 +118,7 @@ export async function writeExclusive(
   const part = `${target}.part`;
   const handle = await openPart(part, fileName);
   try {
-    const written = await streamInto(body, handle, options.maxBytes);
+    const written = await streamInto(body, handle, options);
     await handle.close();
     if (options.expectedBytes !== null && written !== options.expectedBytes) {
       throw new BoothError("NETWORK_ERROR", `ダウンロードが途中で切れました（${written} / ${options.expectedBytes} バイト）。再実行してください。`);
@@ -122,23 +143,39 @@ async function openPart(part: string, fileName: string): Promise<FileHandle> {
   }
 }
 
-async function streamInto(body: ReadableStream<Uint8Array> | null, handle: FileHandle, maxBytes: number | null): Promise<number> {
+async function streamInto(body: ReadableStream<Uint8Array> | null, handle: FileHandle, options: WriteOptions): Promise<number> {
+  const { maxBytes, idleTimeoutMs } = options;
   let written = 0;
+  const stall = new AbortController();
+  let timer: NodeJS.Timeout | undefined;
+  const rearm = (): void => {
+    clearTimeout(timer);
+    if (idleTimeoutMs !== null) timer = setTimeout(() => stall.abort(), idleTimeoutMs);
+  };
   const counter = new Transform({
     transform(chunk: Uint8Array, _encoding: BufferEncoding, callback: TransformCallback): void {
+      rearm();
       written += chunk.byteLength;
       if (maxBytes !== null && written > maxBytes) callback(tooLarge(maxBytes));
       else callback(null, chunk);
     },
   });
   const source = body ? Readable.fromWeb(body as NodeReadableStream<Uint8Array>) : Readable.from([]);
+  rearm();
   try {
     // The write stream closes the handle when it finishes or is destroyed (pipeline waits for 'close').
-    await pipeline(source, counter, handle.createWriteStream());
+    await pipeline(source, counter, handle.createWriteStream(), { signal: stall.signal });
   } catch (error) {
-    throw streamError(error);
+    throw stall.signal.aborted ? stalled(idleTimeoutMs ?? 0) : streamError(error);
+  } finally {
+    clearTimeout(timer);
   }
   return written;
+}
+
+function stalled(idleTimeoutMs: number): BoothError {
+  const seconds = Math.max(1, Math.round(idleTimeoutMs / 1_000));
+  return new BoothError("NETWORK_ERROR", `ダウンロードが途切れました（${seconds} 秒以上データが届きませんでした）。再実行してください。`);
 }
 
 /** link() fails with EEXIST instead of replacing (rename() would overwrite on every platform). */
@@ -182,8 +219,7 @@ async function fsStep<T>(step: () => Promise<T>): Promise<T> {
 
 function fileSystemError(error: unknown): BoothError {
   if (error instanceof BoothError) return error;
-  const code = errorCode(error) ?? "UNKNOWN";
-  return new BoothError("INVALID_INPUT", `保存先へのファイル操作に失敗しました（${code}）。権限と空き容量を確認してください。`);
+  return localIoError(errorCode(error) ?? "UNKNOWN");
 }
 
 /** Network failures while reading the body can carry the signed URL: never reuse their message. */
