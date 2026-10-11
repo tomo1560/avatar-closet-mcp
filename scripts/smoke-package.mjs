@@ -73,6 +73,10 @@ try {
   if (missingTools.length > 0) {
     throw new Error(`packaged server did not expose the expected BOOTH tools: ${missingTools.join(", ")}`);
   }
+  // booth_download is opt-in (BOOTH_MCP_ENABLE_DOWNLOAD=1 + BOOTH_MCP_DOWNLOAD_DIR); the default environment must not expose it.
+  if (toolNames.has("booth_download")) {
+    throw new Error("packaged server exposed the opt-in booth_download tool without being enabled");
+  }
 
   process.stdout.write(`Packaged MCP ${server.version} initialized with ${tools.tools.length} tools.\n`);
 } finally {

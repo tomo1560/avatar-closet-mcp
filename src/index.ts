@@ -7,8 +7,10 @@ export { ACCOUNTS_ORIGIN, BOOTH_ORIGIN } from "./browser/url-policy.js";
 export type { ItemSummary, ItemVariationSummary, ItemViewerState, SearchUrlParams } from "./booth/public.js";
 export { ItemCache, type ItemCacheOptions } from "./cache/item-cache.js";
 export { BoothError, boothErrorCodes, type BoothErrorCode } from "./errors.js";
+export { getDownloadConfig, type DownloadConfig } from "./booth/download.js";
 export {
   createServer,
+  DOWNLOAD_ANNOTATIONS,
   LOGIN_ANNOTATIONS,
   LOGOUT_ANNOTATIONS,
   READ_ONLY_ANNOTATIONS,
@@ -20,6 +22,9 @@ export {
   type AvatarSearchInput,
   type BoothServiceOptions,
   type CompatibilityInput,
+  type DownloadOptions,
+  type DownloadPurchaseInput,
+  type DownloadResult,
   type GetItemInput,
   type LibraryQuery,
   type SyncAllOptions,

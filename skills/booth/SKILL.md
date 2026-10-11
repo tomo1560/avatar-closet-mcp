@@ -15,6 +15,8 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Never ask for, type, or store the user's pixiv or BOOTH password. Sign-in always happens by the user in the browser window.
 - Do not use web search for private purchase data.
 - Treat BOOTH as read-only. Do not claim to buy items, change carts or wish lists, or modify BOOTH data.
+- Downloading purchased files is opt-in: `booth_download` exists only when the user enabled it (`BOOTH_MCP_ENABLE_DOWNLOAD=1` and an absolute `BOOTH_MCP_DOWNLOAD_DIR`). If it is not available, explain that instead of looking for another way to download.
+- Use `booth_download` only when the user explicitly asks, one file at a time, and only for the user's own purchases. Never bulk-download a library. It saves inside the configured directory, never overwrites an existing file, and returns the saved path to report back.
 - Requests are rate-limited (at most one per second). Prefer one well-targeted call over many, and do not crawl the store.
 - Call `booth_logout` only when the user explicitly asks to sign out or disconnect. It deletes the saved session and the dedicated login browser profile on this computer.
 - Preserve the redactions returned by the tools and mention material masking when it affects the answer.
@@ -39,3 +41,4 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Find items for a specific avatar: `booth_search_for_avatar`
 - Avatars the user owns and the avatar dictionary: `booth_list_my_avatars`
 - Pre-fetch item metadata for the whole library: `booth_sync_library_metadata`
+- Save one purchased file (opt-in; take `downloadable_id` from `booth_get_order` or `booth_list_library`): `booth_download`

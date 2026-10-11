@@ -3,6 +3,7 @@ import type { AuthStatus, BoothResult, LogoutResult } from "../types.js";
 import type { CliCommand } from "./commands.js";
 import { HELP_TEXT } from "./commands.js";
 import { stripControl } from "./format.js";
+import { formatDownload, resolveOutDir } from "./print-download.js";
 import { formatCompat, formatItem, formatSearch, formatTags } from "./print-items.js";
 import {
   formatAvatarInit,
@@ -85,6 +86,12 @@ async function runDataCommand(command: DataCommand, service: BoothService, io: C
       io.stderr("ライブラリとギフトを読み込んでいます（1 秒に 1 リクエスト）…\n");
       const onProgress = (progress: Parameters<typeof formatSyncProgress>[0]): void => io.stderr(formatSyncProgress(progress));
       return render(await service.syncAllMetadata({ maxItems: command.max, onProgress }), formatSync);
+    }
+    case "download": {
+      const options = { downloadDir: resolveOutDir(command.out) };
+      if (service.downloadConfig(options).enabled) io.stderr(`ダウンロード ${command.downloadableId} を取得しています…\n`);
+      const input = { downloadable_id: command.downloadableId, variation_id: command.variationId };
+      return render(await service.downloadPurchase(input, options), formatDownload);
     }
   }
 }

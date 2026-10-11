@@ -19,7 +19,8 @@ export type CliCommand =
   | { kind: "tags"; json: boolean; term: string }
   | { kind: "compat"; json: boolean; item: string; avatar: string }
   | { kind: "avatars" | "avatars-init"; json: boolean }
-  | { kind: "sync"; json: boolean; max?: number };
+  | { kind: "sync"; json: boolean; max?: number }
+  | { kind: "download"; json: boolean; downloadableId: string; variationId?: string; out?: string };
 
 const LIBRARY_FLAGS = { all: "boolean", page: "integer", query: "string", avatar: "string", kind: "string", dependency: "string", json: "boolean" } as const;
 
@@ -43,7 +44,15 @@ const SPECS = {
   compat: { flags: { json: "boolean" }, minPositionals: 2, maxPositionals: 2, usage: "compat <商品ID|URL> <アバター> [--json]" },
   avatars: { flags: { json: "boolean" }, minPositionals: 0, maxPositionals: 1, usage: "avatars [init] [--json]" },
   sync: { flags: { max: "integer", json: "boolean" }, minPositionals: 0, maxPositionals: 0, usage: "sync [--max N] [--json]" },
+  download: {
+    flags: { variation: "string", out: "string", json: "boolean" },
+    minPositionals: 1,
+    maxPositionals: 1,
+    usage: "download <ダウンロードID> [--variation N] [--out <dir>] [--json]",
+  },
 } as const satisfies Record<string, ArgSpec>;
+
+const NUMERIC_ID = /^\d{1,20}$/u;
 
 type SpecName = keyof typeof SPECS;
 
@@ -68,6 +77,9 @@ export const HELP_TEXT = `booth-library-mcp - BOOTH 購入者向けの非公式�
   booth-library-mcp avatars [--json]         所持アバターとアバター辞書
   booth-library-mcp avatars init             所持アバターのうち辞書に無いものを avatars.json に追加
   booth-library-mcp ${SPECS.sync.usage}         購入品の商品データをキャッシュに取り込む（1 件あたり約 1 秒）
+  booth-library-mcp ${SPECS.download.usage}
+                                             購入したファイルを保存（オプトイン: BOOTH_MCP_ENABLE_DOWNLOAD=1 が必要。
+                                             保存先は --out か BOOTH_MCP_DOWNLOAD_DIR。既存ファイルは上書きしません）
   booth-library-mcp help                     このヘルプを表示
 
 --kind: ${VRCHAT_KINDS.join(" / ")}
@@ -115,7 +127,21 @@ function toCommand(name: SpecName, parsed: ParsedArgs): CliCommand {
       return avatarsCommand(parsed, json);
     case "sync":
       return withOptional({ kind: "sync", json }, "max", integerFlag(parsed, "max"));
+    case "download":
+      return downloadCommand(parsed, json);
   }
+}
+
+function downloadCommand(parsed: ParsedArgs, json: boolean): CliCommand {
+  const [downloadableId = ""] = parsed.positionals;
+  const variationId = stringFlag(parsed, "variation");
+  const out = stringFlag(parsed, "out");
+  if (!NUMERIC_ID.test(downloadableId)) throw usageError("ダウンロード ID は数字で指定してください。", SPECS.download);
+  if (variationId !== undefined && !NUMERIC_ID.test(variationId)) {
+    throw usageError("--variation は数字で指定してください。", SPECS.download);
+  }
+  if (out !== undefined && out.trim() === "") throw usageError("--out には保存先ディレクトリを指定してください。", SPECS.download);
+  return withOptional(withOptional({ kind: "download", json, downloadableId }, "variationId", variationId), "out", out);
 }
 
 function libraryQuery(parsed: ParsedArgs, spec: ArgSpec): LibraryQuery {

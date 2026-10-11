@@ -49,6 +49,7 @@ const toolNames = [
   "booth_get_order",
   "booth_list_my_avatars",
   "booth_sync_library_metadata",
+  "booth_download",
 ];
 for (const tool of toolNames) {
   assert(skill.includes(`\`${tool}\``), `skill must route the ${tool} tool`);
@@ -56,6 +57,7 @@ for (const tool of toolNames) {
 assert(!skill.includes("booth_get_sales"), "skill must not reference removed seller tools");
 assert(/evidence/u.test(skill) && /unknown/u.test(skill), "skill must require evidence for VRChat compatibility claims");
 assert(/not affiliated with pixiv or BOOTH/u.test(skill), "skill must state that it is unofficial and unaffiliated");
+assert(/opt-in/u.test(skill) && /never overwrites/u.test(skill), "skill must describe booth_download as opt-in and non-overwriting");
 assert(agentMetadata.includes("allow_implicit_invocation: true"), "skill must allow implicit invocation");
 assert(agentMetadata.includes('value: "booth"'), "skill must depend on the booth MCP server");
 assertEnglish(skill, "skill instructions");

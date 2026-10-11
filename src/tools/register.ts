@@ -25,7 +25,19 @@ export const LOGOUT_ANNOTATIONS = {
   openWorldHint: false,
 } as const;
 
-export type ToolAnnotations = typeof READ_ONLY_ANNOTATIONS | typeof LOGIN_ANNOTATIONS | typeof LOGOUT_ANNOTATIONS;
+/** Opt-in download: GET-only towards BOOTH, but writes a new local file (never overwrites one). */
+export const DOWNLOAD_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: true,
+} as const;
+
+export type ToolAnnotations =
+  | typeof READ_ONLY_ANNOTATIONS
+  | typeof LOGIN_ANNOTATIONS
+  | typeof LOGOUT_ANNOTATIONS
+  | typeof DOWNLOAD_ANNOTATIONS;
 
 /** Appended to every data tool description (PLAN §2.4 design consequences 2 and 5). */
 export const UNOFFICIAL_NOTE =

@@ -2,11 +2,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { BoothService } from "./service.js";
 import { registerAuthTools } from "./tools/auth-tools.js";
+import { downloadStartupWarning, registerDownloadTools } from "./tools/download-tools.js";
 import { registerItemTools } from "./tools/item-tools.js";
 import { registerLibraryTools } from "./tools/library-tools.js";
 import { PACKAGE_VERSION } from "./version.js";
 
-export { LOGIN_ANNOTATIONS, LOGOUT_ANNOTATIONS, READ_ONLY_ANNOTATIONS } from "./tools/register.js";
+export { DOWNLOAD_ANNOTATIONS, LOGIN_ANNOTATIONS, LOGOUT_ANNOTATIONS, READ_ONLY_ANNOTATIONS } from "./tools/register.js";
 
 export const SERVER_INSTRUCTIONS =
   "非公式 / Unofficial tool, not affiliated with pixiv or BOOTH. " +
@@ -20,11 +21,15 @@ export function createServer(service = new BoothService()): { server: McpServer;
   registerAuthTools(server, service);
   registerItemTools(server, service);
   registerLibraryTools(server, service);
+  // Opt-in (PLAN §2.4): the download tool does not exist unless the user enabled and configured it.
+  if (service.downloadConfig().enabled) registerDownloadTools(server, service);
   return { server, service };
 }
 
 export async function startStdioServer(): Promise<void> {
   const { server, service } = createServer();
+  const warning = downloadStartupWarning(process.env, service.downloadConfig());
+  if (warning) process.stderr.write(warning);
   const transport = new StdioServerTransport();
   const shutdown = async (): Promise<void> => {
     await service.close();

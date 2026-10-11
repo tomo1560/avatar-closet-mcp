@@ -1,9 +1,10 @@
 import { join } from "node:path";
+import { getDownloadConfig, type DownloadConfig } from "./booth/download.js";
 import type { SearchUrlParams } from "./booth/public.js";
 import { DEFAULT_LOGIN_TIMEOUT_MS, runInteractiveLogin } from "./browser/client.js";
 import { BoothHttpClient } from "./browser/http-client.js";
 import { clearLocalLogin, getLocalLoginPaths } from "./browser/logout.js";
-import type { BoothReader } from "./browser/reader.js";
+import type { BoothReader, BoothRedirectReader } from "./browser/reader.js";
 import { ACCOUNT_SETTINGS_URL, ACCOUNTS_ORIGIN } from "./browser/url-policy.js";
 import { ItemCache } from "./cache/item-cache.js";
 import { UnavailableItems } from "./cache/unavailable-items.js";
@@ -12,6 +13,7 @@ import { parseAccountSettings } from "./parsers/account.js";
 import { getAvatarDictionaryFile, getCacheDir, getSessionFile } from "./profile.js";
 import { initAvatarDictionary, listMyAvatars, searchForAvatar, type AvatarSearchInput } from "./services/avatars.js";
 import { Memo, OWNED_ITEMS_TTL_MS, type ServiceContext } from "./services/context.js";
+import { downloadPurchaseFile, type DownloadPurchaseInput, type DownloadResult } from "./services/download.js";
 import { checkItemCompatibility, getItemDetail, searchItems, suggestTagNames, type CompatibilityInput, type GetItemInput } from "./services/items.js";
 import { listLibrary, type LibraryQuery } from "./services/library.js";
 import { getOrder, listOrders } from "./services/orders.js";
@@ -37,6 +39,7 @@ import type {
 
 export { assertNumericId, normalizeLimit, normalizePage, wrap } from "./services/result.js";
 export type { AvatarSearchInput } from "./services/avatars.js";
+export type { DownloadPurchaseInput, DownloadResult } from "./services/download.js";
 export type { CompatibilityInput, GetItemInput } from "./services/items.js";
 export type { LibraryQuery } from "./services/library.js";
 export type { SyncAllOptions, SyncProgress } from "./services/sync.js";
@@ -51,6 +54,15 @@ export interface BoothServiceOptions {
   env?: NodeJS.ProcessEnv;
   /** Item metadata cache. Defaults to `{cache dir}/items`. */
   cache?: ItemCache;
+  /** Reads `booth.pm/downloadables/{id}` redirects. Defaults to `browser` when it can (BoothHttpClient). */
+  redirectReader?: BoothRedirectReader;
+  /** fetch used for the signed download URL (no cookies). Injectable for tests. */
+  downloadFetch?: typeof fetch;
+}
+
+export interface DownloadOptions {
+  /** CLI `--out`: absolute directory used instead of BOOTH_MCP_DOWNLOAD_DIR. */
+  downloadDir?: string | undefined;
 }
 
 /** Single place of business logic shared by the MCP server and the CLI. */
@@ -59,11 +71,15 @@ export class BoothService {
   private readonly runLogin: (timeoutMs: number) => Promise<void>;
   private readonly env: NodeJS.ProcessEnv;
   private readonly ctx: ServiceContext;
+  private readonly redirectReader: BoothRedirectReader | undefined;
+  private readonly downloadFetch: typeof fetch | undefined;
 
   constructor(browser?: BoothReader, options: BoothServiceOptions = {}) {
     this.env = options.env ?? process.env;
     this.browser = browser ?? new BoothHttpClient({ sessionFile: getSessionFile(this.env) });
     this.runLogin = options.login ?? ((timeoutMs: number): Promise<void> => runInteractiveLogin(timeoutMs, this.env));
+    this.redirectReader = options.redirectReader ?? (isRedirectReader(this.browser) ? this.browser : undefined);
+    this.downloadFetch = options.downloadFetch;
     const cacheDir = getCacheDir(this.env);
     this.ctx = {
       reader: this.browser,
@@ -172,6 +188,22 @@ export class BoothService {
   initAvatarDictionary(): Promise<BoothResult<AvatarInitResult>> {
     return initAvatarDictionary(this.ctx);
   }
+
+  /** Opt-in download settings from this service's environment (`downloadDir` replaces BOOTH_MCP_DOWNLOAD_DIR). */
+  downloadConfig(options: DownloadOptions = {}): DownloadConfig {
+    const env = options.downloadDir === undefined ? this.env : { ...this.env, BOOTH_MCP_DOWNLOAD_DIR: options.downloadDir };
+    return getDownloadConfig(env);
+  }
+
+  /** `booth_download` / CLI `download`: save one purchased file inside the download directory (never overwrites). */
+  downloadPurchase(input: DownloadPurchaseInput, options: DownloadOptions = {}): Promise<BoothResult<DownloadResult>> {
+    const deps = { redirectReader: this.redirectReader, fetchImpl: this.downloadFetch, config: this.downloadConfig(options) };
+    return downloadPurchaseFile(deps, input);
+  }
+}
+
+function isRedirectReader(reader: BoothReader): reader is BoothReader & BoothRedirectReader {
+  return typeof (reader as Partial<BoothRedirectReader>).getRedirectLocation === "function";
 }
 
 function isAccountSettingsUrl(value: string): boolean {
