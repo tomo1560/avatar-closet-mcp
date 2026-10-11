@@ -12,7 +12,7 @@ const marketplace = await readJson(".agents/plugins/marketplace.json");
 const skill = await readFile(resolve(root, "skills/booth/SKILL.md"), "utf8");
 const agentMetadata = await readFile(resolve(root, "skills/booth/agents/openai.yaml"), "utf8");
 
-assert(plugin.name === "booth-mcp", "plugin name must be booth-mcp");
+assert(plugin.name === "booth-library-mcp", "plugin name must be booth-library-mcp");
 assert(plugin.version === packageJson.version, "plugin version must match package.json");
 assertEnglish(packageJson.description, "package description");
 assertEnglish(plugin.description, "plugin description");
@@ -25,13 +25,13 @@ assert(plugin.skills === "./skills/", "plugin must expose ./skills/");
 assert(plugin.mcpServers === "./.mcp.json", "plugin must expose ./.mcp.json");
 assert(mcp?.mcpServers?.booth?.command === "npx", "booth MCP must use npx");
 assert(
-  JSON.stringify(mcp.mcpServers.booth.args) === JSON.stringify(["-y", `booth-mcp@${packageJson.version}`]),
+  JSON.stringify(mcp.mcpServers.booth.args) === JSON.stringify(["-y", `booth-library-mcp@${packageJson.version}`]),
   "booth MCP must pin the package version",
 );
-assert(marketplace.name === "booth-mcp", "marketplace name must be booth-mcp");
-const marketplacePlugin = marketplace.plugins?.find((entry) => entry.name === "booth-mcp");
+assert(marketplace.name === "booth-library-mcp", "marketplace name must be booth-library-mcp");
+const marketplacePlugin = marketplace.plugins?.find((entry) => entry.name === "booth-library-mcp");
 assert(marketplacePlugin?.source?.source === "npm", "marketplace must use an npm source");
-assert(marketplacePlugin?.source?.package === "booth-mcp", "marketplace must install booth-mcp");
+assert(marketplacePlugin?.source?.package === "booth-library-mcp", "marketplace must install booth-library-mcp");
 assert(marketplacePlugin?.source?.version === "latest", "marketplace must follow the latest dist-tag");
 assert(/^---\r?\nname: booth\r?\n/u.test(skill), "skill frontmatter name must be booth");
 assert(skill.includes("booth_get_sales"), "skill must include BOOTH tool routing");

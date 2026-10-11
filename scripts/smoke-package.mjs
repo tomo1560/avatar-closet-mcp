@@ -7,7 +7,7 @@ import { join, resolve } from "node:path";
 
 const npm = process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "npm";
 const npmArgs = process.platform === "win32" ? ["/d", "/s", "/c", "npm"] : [];
-const destination = await mkdtemp(join(tmpdir(), "booth-mcp-package-"));
+const destination = await mkdtemp(join(tmpdir(), "booth-library-mcp-package-"));
 let client;
 
 try {
@@ -38,17 +38,17 @@ try {
 
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const transport = new StdioClientTransport({
-    command: resolve(destination, "node_modules", ".bin", process.platform === "win32" ? "booth-mcp.cmd" : "booth-mcp"),
+    command: resolve(destination, "node_modules", ".bin", process.platform === "win32" ? "booth-library-mcp.cmd" : "booth-library-mcp"),
     args: [],
     cwd: process.cwd(),
     stderr: "pipe",
   });
   transport.stderr?.pipe(process.stderr);
-  client = new Client({ name: "booth-mcp-package-smoke", version: "1.0.0" });
+  client = new Client({ name: "booth-library-mcp-package-smoke", version: "1.0.0" });
   await client.connect(transport);
 
   const server = client.getServerVersion();
-  if (server?.name !== "booth-mcp" || server.version !== packageJson.version) {
+  if (server?.name !== "booth-library-mcp" || server.version !== packageJson.version) {
     throw new Error(`packaged server version mismatch: ${JSON.stringify(server)}`);
   }
   const tools = await client.listTools();

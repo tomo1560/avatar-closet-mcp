@@ -92,7 +92,7 @@ async function createMockServer(
 }
 
 async function createTempDirectory(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-mcp-test-"));
+  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-test-"));
   tempPaths.push(directory);
   return directory;
 }

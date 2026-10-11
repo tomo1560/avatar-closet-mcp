@@ -21,9 +21,9 @@ describe("stdio MCP contract", () => {
       cwd: process.cwd(),
       stderr: "pipe",
     });
-    client = new Client({ name: "booth-mcp-contract-test", version: "1.0.0" });
+    client = new Client({ name: "booth-library-mcp-contract-test", version: "1.0.0" });
     await client.connect(transport);
-    expect(client.getServerVersion()).toMatchObject({ name: "booth-mcp", version: packageVersion });
+    expect(client.getServerVersion()).toMatchObject({ name: "booth-library-mcp", version: packageVersion });
     const response = await client.listTools();
     expect(response.tools.map((tool) => tool.name)).toEqual([
       "booth_login",

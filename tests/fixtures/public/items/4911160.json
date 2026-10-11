@@ -1,0 +1,585 @@
+{
+  "description": "--------------------------------------------------------\n本モデルはVrchatでの利用を想定した3D衣装となっております。\nデータのご購入、ご利用については仕様および利用規約をご確認いただき、ご了承された上でお願いいたします。\n\n※注：アバター本体は商品には付属しておりません。",
+  "factory_description": null,
+  "id": 4911160,
+  "is_adult": false,
+  "is_buyee_possible": false,
+  "is_end_of_sale": false,
+  "is_placeholder": false,
+  "is_sold_out": false,
+  "name": "オリジナル3D衣装「メイガスバニー」",
+  "published_at": "2023-07-07T18:27:27.000+09:00",
+  "price": "¥ 2,800",
+  "shipping_info": "ショップの通常発送日数：支払いから1日以内",
+  "small_stock": null,
+  "url": "https://rokota.booth.pm/items/4911160",
+  "wish_list_url": "https://booth.pm/items/4911160/wish_list",
+  "wish_lists_count": 13343,
+  "wished": false,
+  "purchase_limit": null,
+  "past_purchase_count": 0,
+  "buyee_variations": [],
+  "category": {
+    "id": 209,
+    "name": "3D衣装",
+    "parent": {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/browse/3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    "url": "https://booth.pm/ja/browse/3D%E8%A1%A3%E8%A3%85"
+  },
+  "embeds": [],
+  "images": [
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2ba62809-55be-4ed5-99a6-4f919f31b5ff_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2ba62809-55be-4ed5-99a6-4f919f31b5ff_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2d1c1ce6-7e6b-4669-829c-eead2124da2b_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2d1c1ce6-7e6b-4669-829c-eead2124da2b_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/61c924aa-2172-442d-965d-db68cadbe53d_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/61c924aa-2172-442d-965d-db68cadbe53d_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/017ab567-9486-4b97-a67c-7f73bb5c8bc4_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/017ab567-9486-4b97-a67c-7f73bb5c8bc4_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/9af4d326-0be2-41fe-8201-4af439553c24_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/9af4d326-0be2-41fe-8201-4af439553c24_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/46d9e70f-39a1-4b01-99d5-4d9cf282a117_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/46d9e70f-39a1-4b01-99d5-4d9cf282a117_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/6de355dd-2486-4aef-a34b-573ca0e8ee40_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/6de355dd-2486-4aef-a34b-573ca0e8ee40_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/7245bd28-207d-49d0-a2e0-462bd8ab75b5_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/7245bd28-207d-49d0-a2e0-462bd8ab75b5_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/aad96b51-984d-4257-852b-89a213d4eafc_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/aad96b51-984d-4257-852b-89a213d4eafc_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/f6ec2b89-5220-4e7b-81d9-c8ecd9170622_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/f6ec2b89-5220-4e7b-81d9-c8ecd9170622_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2a786781-56e7-4dcd-b3be-4331bcd0d3dc_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2a786781-56e7-4dcd-b3be-4331bcd0d3dc_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/755fabdc-6f71-4562-a8f4-2706010a03c2_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/755fabdc-6f71-4562-a8f4-2706010a03c2_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2d54c62b-3b18-4d5b-82d3-a992ef8a8365_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2d54c62b-3b18-4d5b-82d3-a992ef8a8365_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/bce27ab4-7426-4301-828c-a31848dd2777_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/bce27ab4-7426-4301-828c-a31848dd2777_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/a930868c-f7f6-49e8-ab37-7a978dfb9eb0_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/a930868c-f7f6-49e8-ab37-7a978dfb9eb0_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/6e18ef97-573f-45d1-83b0-78dcb1be04d5_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/6e18ef97-573f-45d1-83b0-78dcb1be04d5_base_resized.jpg"
+    }
+  ],
+  "order": null,
+  "gift": null,
+  "report_url": "https://rokota.booth.pm/items/4911160/report",
+  "share": {
+    "hashtags": [
+      "booth_pm"
+    ],
+    "text": "オリジナル3D衣装「メイガスバニー」 | ROKO SHOP"
+  },
+  "shop": {
+    "uuid": "e3843aaf-9232-4a4c-9d6e-e0a09646f417",
+    "name": "ROKO SHOP",
+    "subdomain": "rokota",
+    "thumbnail_url": "https://booth.pximg.net/c/48x48/users/703657/icon_image/ced71572-2f17-46cc-b1dc-109ca061b592_base_resized.jpg",
+    "url": "https://rokota.booth.pm/",
+    "verified": false
+  },
+  "sound": null,
+  "tags": [
+    {
+      "name": "魔法使い",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E9%AD%94%E6%B3%95%E4%BD%BF%E3%81%84"
+    },
+    {
+      "name": "魔女",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E9%AD%94%E5%A5%B3"
+    },
+    {
+      "name": "セレスティア",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%BB%E3%83%AC%E3%82%B9%E3%83%86%E3%82%A3%E3%82%A2"
+    },
+    {
+      "name": "衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "name": "ライム",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%A9%E3%82%A4%E3%83%A0"
+    },
+    {
+      "name": "桔梗",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A1%94%E6%A2%97"
+    },
+    {
+      "name": "リセ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%AA%E3%82%BB"
+    },
+    {
+      "name": "カリン",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AB%E3%83%AA%E3%83%B3"
+    },
+    {
+      "name": "しなの",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE"
+    },
+    {
+      "name": "萌",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%90%8C"
+    },
+    {
+      "name": "竜胆",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E7%AB%9C%E8%83%86"
+    },
+    {
+      "name": "森羅",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A3%AE%E7%BE%85"
+    },
+    {
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "name": "バニー服",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%90%E3%83%8B%E3%83%BC%E6%9C%8D"
+    },
+    {
+      "name": "VRC想定モデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRC%E6%83%B3%E5%AE%9A%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "name": "薄荷",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%96%84%E8%8D%B7"
+    },
+    {
+      "name": "ルキフェル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%AB%E3%82%AD%E3%83%95%E3%82%A7%E3%83%AB"
+    },
+    {
+      "name": "3dキャラクター用衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3d%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC%E7%94%A8%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "name": "シアノス",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B7%E3%82%A2%E3%83%8E%E3%82%B9"
+    },
+    {
+      "name": "ミュリシア",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%9F%E3%83%A5%E3%83%AA%E3%82%B7%E3%82%A2"
+    },
+    {
+      "name": "舞夜",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%88%9E%E5%A4%9C"
+    },
+    {
+      "name": "びしょぬれのしずくさん",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%B3%E3%81%97%E3%82%87%E3%81%AC%E3%82%8C%E3%81%AE%E3%81%97%E3%81%9A%E3%81%8F%E3%81%95%E3%82%93"
+    },
+    {
+      "name": "ネミア",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%8D%E3%83%9F%E3%82%A2"
+    },
+    {
+      "name": "イェーナ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A4%E3%82%A7%E3%83%BC%E3%83%8A"
+    },
+    {
+      "name": "まるぼでぃ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%BE%E3%82%8B%E3%81%BC%E3%81%A7%E3%81%83"
+    },
+    {
+      "name": "marubody",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=marubody"
+    },
+    {
+      "name": "ラシューシャ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%A9%E3%82%B7%E3%83%A5%E3%83%BC%E3%82%B7%E3%83%A3"
+    },
+    {
+      "name": "マヌカ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%9E%E3%83%8C%E3%82%AB"
+    }
+  ],
+  "tag_banners": [
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/aa0be63e-cec2-400e-953a-db726d92735f/i/6151859/2baf9628-17ac-4999-9e28-dc1d5ebffa10_base_resized.jpg",
+      "name": "魔法使い",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E9%AD%94%E6%B3%95%E4%BD%BF%E3%81%84"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/2c32971b-6bde-44dd-ad58-a31eceb2c863/i/6194760/bd25737f-6674-4469-95ae-4bd6040c735f_base_resized.jpg",
+      "name": "魔女",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E9%AD%94%E5%A5%B3"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/8a7426aa-ba62-4ef0-9e7d-2c8ea96e7c9b/i/4035411/6f839883-1ab0-48fa-bfca-10c73ab7a33d_base_resized.jpg",
+      "name": "セレスティア",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%BB%E3%83%AC%E3%82%B9%E3%83%86%E3%82%A3%E3%82%A2"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/61a3b2d7-b4b1-4f97-9e48-ffe959b26ae9/i/4876459/73a1c9e3-825d-4045-bf14-e07392ad7afa_base_resized.jpg",
+      "name": "ライム",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%A9%E3%82%A4%E3%83%A0"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "桔梗",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A1%94%E6%A2%97"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/3c104a65-910a-4eda-b846-66b64482ff17/i/5439066/5d8bf1fe-e29d-4be7-b3f9-d90acbba3751_base_resized.jpg",
+      "name": "リセ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%AA%E3%82%BB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/61a3b2d7-b4b1-4f97-9e48-ffe959b26ae9/i/3470989/a70bc916-21f3-4b06-ae3a-eb302058a0b5_base_resized.jpg",
+      "name": "カリン",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AB%E3%83%AA%E3%83%B3"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg",
+      "name": "しなの",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/f420c992-4225-4ce0-b751-3a4acdceaab6/i/4667400/1641b18e-eb97-4cbe-85fd-0f04cd53b46a_base_resized.jpg",
+      "name": "萌",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%90%8C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/8a7426aa-ba62-4ef0-9e7d-2c8ea96e7c9b/i/3443188/0d655d88-23b0-4e23-a2ab-0e42244abd03_base_resized.jpg",
+      "name": "竜胆",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E7%AB%9C%E8%83%86"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/87b70515-e32e-4a2e-bf41-317cf2c2177c/i/6714930/c8da1ada-b914-4378-af76-ef371298b479_base_resized.jpg",
+      "name": "森羅",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A3%AE%E7%BE%85"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2ba62809-55be-4ed5-99a6-4f919f31b5ff_base_resized.jpg",
+      "name": "バニー服",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%90%E3%83%8B%E3%83%BC%E6%9C%8D"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "VRC想定モデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRC%E6%83%B3%E5%AE%9A%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/67ef5da1-3efe-4443-a63f-b6a5948d2c54/i/5068109/e473fc3e-9570-418b-aaf7-28d831f9a96d_base_resized.jpg",
+      "name": "薄荷",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%96%84%E8%8D%B7"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/2bbfc6cd-c88d-4f80-8d45-2066fcd51c78/i/6500677/e5eaba91-1c5a-4733-9125-0f47090b6adb_base_resized.jpg",
+      "name": "ルキフェル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%AB%E3%82%AD%E3%83%95%E3%82%A7%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2ba62809-55be-4ed5-99a6-4f919f31b5ff_base_resized.jpg",
+      "name": "3dキャラクター用衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3d%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC%E7%94%A8%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "image_url": null,
+      "name": "シアノス",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B7%E3%82%A2%E3%83%8E%E3%82%B9"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/e3843aaf-9232-4a4c-9d6e-e0a09646f417/i/4911160/2ba62809-55be-4ed5-99a6-4f919f31b5ff_base_resized.jpg",
+      "name": "ミュリシア",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%9F%E3%83%A5%E3%83%AA%E3%82%B7%E3%82%A2"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/f420c992-4225-4ce0-b751-3a4acdceaab6/i/3390957/452e082f-67e8-480d-b697-9378977f41b0_base_resized.jpg",
+      "name": "舞夜",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%88%9E%E5%A4%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/40e6fb67-d32a-48f9-9820-e064ff7b8670/i/3828632/77568536-fcea-4ea0-b94f-c6ea29529174_base_resized.jpg",
+      "name": "びしょぬれのしずくさん",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%B3%E3%81%97%E3%82%87%E3%81%AC%E3%82%8C%E3%81%AE%E3%81%97%E3%81%9A%E3%81%8F%E3%81%95%E3%82%93"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/2bbfc6cd-c88d-4f80-8d45-2066fcd51c78/i/6500677/e5eaba91-1c5a-4733-9125-0f47090b6adb_base_resized.jpg",
+      "name": "ネミア",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%8D%E3%83%9F%E3%82%A2"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/3c104a65-910a-4eda-b846-66b64482ff17/i/5439066/5d8bf1fe-e29d-4be7-b3f9-d90acbba3751_base_resized.jpg",
+      "name": "イェーナ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A4%E3%82%A7%E3%83%BC%E3%83%8A"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/2bbfc6cd-c88d-4f80-8d45-2066fcd51c78/i/6110958/8b4d54d7-58ca-4c53-9a62-f365c4d267e0_base_resized.jpg",
+      "name": "まるぼでぃ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%BE%E3%82%8B%E3%81%BC%E3%81%A7%E3%81%83"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/38e05a3f-b6bf-41b6-95ef-000b4c1614d3/i/5652457/6f20adb2-75e0-4a17-a55a-e26c63f5f2a7_base_resized.jpg",
+      "name": "marubody",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=marubody"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/de9ac79a-d2ba-4cc5-a4c4-002da7a40795/i/4825073/46d77d10-f243-47a9-9784-65266da975a9_base_resized.jpg",
+      "name": "ラシューシャ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%A9%E3%82%B7%E3%83%A5%E3%83%BC%E3%82%B7%E3%83%A3"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/8a7426aa-ba62-4ef0-9e7d-2c8ea96e7c9b/i/5058077/a18424fe-a56e-411a-9c47-27c56909593c_base_resized.jpg",
+      "name": "マヌカ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%9E%E3%83%8C%E3%82%AB"
+    }
+  ],
+  "tag_combination": {
+    "category": "3D衣装",
+    "tag": "魔法使い",
+    "url": "https://booth.pm/ja/browse/3D%E8%A1%A3%E8%A3%85?tags%5B%5D=%E9%AD%94%E6%B3%95%E4%BD%BF%E3%81%84"
+  },
+  "tracks": null,
+  "variations": [
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8248494,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "ネミア・シアノス用（Marubody・Cyanos）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8313595,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "びしょぬれのしずくさん用（Shizukusan）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8313596,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "リルモワ・ミュリシア用（Liloumois・Mulicia）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8343086,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "森羅・薄荷用（Shinra・Hakka）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8343087,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "セレスティア・竜胆用・マヌカ（Selestia・Rindo・Manuka）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8448030,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "ライム・カリン用（Lime・Karin）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8448031,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "ラシューシャ用（Lasyusya）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8448032,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "しなの・桔梗用（Shinano・Kikyo）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 8448033,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "萌・舞夜用（Moe・Maya）",
+      "order_url": null,
+      "price": 2800,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    }
+  ]
+}

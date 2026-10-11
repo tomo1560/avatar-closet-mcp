@@ -1,14 +1,14 @@
 {
-  "name": "booth-mcp",
+  "name": "booth-library-mcp",
   "interface": {
-    "displayName": "BOOTH MCP"
+    "displayName": "BOOTH Library MCP"
   },
   "plugins": [
     {
-      "name": "booth-mcp",
+      "name": "booth-library-mcp",
       "source": {
         "source": "npm",
-        "package": "booth-mcp",
+        "package": "booth-library-mcp",
         "version": "latest",
         "registry": "https://registry.npmjs.org"
       },

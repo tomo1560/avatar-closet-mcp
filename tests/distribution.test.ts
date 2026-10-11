@@ -34,7 +34,7 @@ describe("version metadata", () => {
 });
 
 function createFixture(): string {
-  const fixture = mkdtempSync(join(tmpdir(), "booth-mcp-version-"));
+  const fixture = mkdtempSync(join(tmpdir(), "booth-library-mcp-version-"));
   temporaryDirectories.push(fixture);
   mkdirSync(join(fixture, "scripts"));
   mkdirSync(join(fixture, ".codex-plugin"));

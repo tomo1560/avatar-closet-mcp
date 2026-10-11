@@ -1,0 +1,220 @@
+{
+  "description": "重要 : 影がうまく出ない環境があります！注意事項をよく読んでください！\n\nMA対応\n\nワールドにアバターの影を落とすアバターギミックです。\nライトと異なり、影の場所を暗くして表現するためワールドの情景を壊さずに影を追加できます。\n\n近くにいればほかの人の影もワールドに落とします。\n\nパイメニューから影色やぼかし具合、影の向きを変更可能です。\n\n\n",
+  "factory_description": null,
+  "id": 5737352,
+  "is_adult": false,
+  "is_buyee_possible": false,
+  "is_end_of_sale": false,
+  "is_placeholder": false,
+  "is_sold_out": false,
+  "name": "【落ち影システム】ワールドにあなたの影を【Ochikage】",
+  "published_at": "2024-10-05T19:38:57.000+09:00",
+  "price": "¥ 300",
+  "shipping_info": "ショップの通常発送日数：支払いから7日以内",
+  "small_stock": null,
+  "url": "https://nururori-shop.booth.pm/items/5737352",
+  "wish_list_url": "https://booth.pm/items/5737352/wish_list",
+  "wish_lists_count": 7225,
+  "wished": false,
+  "purchase_limit": null,
+  "past_purchase_count": 0,
+  "buyee_variations": [],
+  "category": {
+    "id": 215,
+    "name": "3Dツール・システム",
+    "parent": {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/browse/3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    "url": "https://booth.pm/ja/browse/3D%E3%83%84%E3%83%BC%E3%83%AB%E3%83%BB%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0"
+  },
+  "embeds": [
+    "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/XqG105OYPuA?si=tjn4ZY4AN7_W05-u\" frameborder=\"0\" allowfullscreen sandbox=\"allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation\" class=\"wide-content\"></iframe>"
+  ],
+  "images": [
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/d45ad98c-9781-47e0-a4e0-4ae5f0fc2b51_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/d45ad98c-9781-47e0-a4e0-4ae5f0fc2b51_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/7cffa852-c383-45a8-af86-d77740781315_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/7cffa852-c383-45a8-af86-d77740781315_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/22d8e94e-48ed-42b8-a636-9ed51ec58446_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/22d8e94e-48ed-42b8-a636-9ed51ec58446_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/1aa9da01-5294-4c1f-be85-609bc069cbed_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/42a7c335-53d2-4250-a8e9-8871f79d3d16/i/5737352/1aa9da01-5294-4c1f-be85-609bc069cbed_base_resized.jpg"
+    }
+  ],
+  "order": null,
+  "gift": null,
+  "report_url": "https://nururori-shop.booth.pm/items/5737352/report",
+  "share": {
+    "hashtags": [
+      "booth_pm"
+    ],
+    "text": "【落ち影システム】ワールドにあなたの影を【Ochikage】 | ぬるろりの雑多屋"
+  },
+  "shop": {
+    "uuid": "42a7c335-53d2-4250-a8e9-8871f79d3d16",
+    "name": "ぬるろりの雑多屋",
+    "subdomain": "nururori-shop",
+    "thumbnail_url": "https://booth.pximg.net/c/48x48/users/4320833/icon_image/f3eedb84-b70c-41bf-a2cc-b8050befc906_base_resized.jpg",
+    "url": "https://nururori-shop.booth.pm/",
+    "verified": false
+  },
+  "sound": null,
+  "tags": [
+    {
+      "name": "影",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E5%BD%B1"
+    },
+    {
+      "name": "撮影",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%92%AE%E5%BD%B1"
+    },
+    {
+      "name": "ギミック",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AE%E3%83%9F%E3%83%83%E3%82%AF"
+    },
+    {
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "name": "シェーダー",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B7%E3%82%A7%E3%83%BC%E3%83%80%E3%83%BC"
+    },
+    {
+      "name": "アバターギミック",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A2%E3%83%90%E3%82%BF%E3%83%BC%E3%82%AE%E3%83%9F%E3%83%83%E3%82%AF"
+    },
+    {
+      "name": "ポストエフェクト",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%9D%E3%82%B9%E3%83%88%E3%82%A8%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88"
+    },
+    {
+      "name": "MA対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=MA%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "name": "modularavatar",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=modularavatar"
+    }
+  ],
+  "tag_banners": [
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/0dec8891-3619-4358-bc4b-f80b41bb68bc/i/5839346/de16ddda-991f-4645-b9c7-fe2215f4630c_base_resized.jpg",
+      "name": "影",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E5%BD%B1"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/d8150708-eabc-4aea-8078-03420bf95612/i/2280136/4b7771c0-c70d-4007-82e7-fb610bae3f8f_base_resized.jpg",
+      "name": "撮影",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%92%AE%E5%BD%B1"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "ギミック",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AE%E3%83%9F%E3%83%83%E3%82%AF"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/097baf76-9858-45ba-86a5-30a1e5273196/i/4493526/9e6712b5-5de8-448e-ba52-d53bc9a249be_base_resized.jpg",
+      "name": "シェーダー",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B7%E3%82%A7%E3%83%BC%E3%83%80%E3%83%BC"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "アバターギミック",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A2%E3%83%90%E3%82%BF%E3%83%BC%E3%82%AE%E3%83%9F%E3%83%83%E3%82%AF"
+    },
+    {
+      "image_url": null,
+      "name": "ポストエフェクト",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%9D%E3%82%B9%E3%83%88%E3%82%A8%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/46b8f3a9-89c4-4830-947f-b23462397261/i/6584744/b93ef28c-ca21-4c35-ac53-1ba798ea3bb1_base_resized.jpg",
+      "name": "MA対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=MA%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/e0b175a7-41d6-44df-96aa-e8ceb60f8148/i/5534236/acce1a14-5903-4905-93c4-7f5b9c01e1bc_base_resized.jpg",
+      "name": "modularavatar",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=modularavatar"
+    }
+  ],
+  "tag_combination": {
+    "category": "3Dツール・システム",
+    "tag": "影",
+    "url": "https://booth.pm/ja/browse/3D%E3%83%84%E3%83%BC%E3%83%AB%E3%83%BB%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0?tags%5B%5D=%E5%BD%B1"
+  },
+  "tracks": null,
+  "variations": [
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 9686541,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "Ochikage",
+      "order_url": null,
+      "price": 300,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    },
+    {
+      "buyee_html": null,
+      "downloadable": {
+        "musics": [],
+        "no_musics": [
+          {
+            "file_name": "利用規約",
+            "file_extension": ".zip",
+            "file_size": "2.64 MB",
+            "name": "利用規約.zip",
+            "url": "https://booth.pm/downloadables/5003834?variation_id=10190321"
+          }
+        ]
+      },
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 10190321,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": "利用規約",
+      "order_url": null,
+      "price": 0,
+      "small_stock": null,
+      "status": "free_download",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    }
+  ]
+}

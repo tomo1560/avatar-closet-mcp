@@ -1,10 +1,10 @@
 {
-  "name": "booth-mcp",
-  "version": "0.2.2",
-  "description": "Read-only MCP server for safely querying the BOOTH seller dashboard",
+  "name": "booth-library-mcp",
+  "version": "0.1.0",
+  "description": "Unofficial read-only MCP server and CLI for your own BOOTH purchases (library, gifts, orders) with VRChat avatar compatibility helpers",
   "type": "module",
   "bin": {
-    "booth-mcp": "dist/cli.js"
+    "booth-library-mcp": "dist/cli.js"
   },
   "main": "dist/cli.js",
   "types": "dist/index.d.ts",
@@ -45,12 +45,9 @@
     "booth",
     "mcp",
     "model-context-protocol",
-    "pixiv"
+    "pixiv",
+    "vrchat"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cstria0106/booth-mcp.git"
-  },
   "publishConfig": {
     "access": "public"
   },

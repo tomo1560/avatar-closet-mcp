@@ -1,4 +1,13 @@
-# booth-mcp
+# booth-library-mcp
+
+> [!IMPORTANT]
+> **非公式ツールです。pixiv / BOOTH とは一切関係ありません。**
+> 自分の BOOTH アカウントの購入データ（ライブラリ・ギフト・注文履歴）を読み取り専用で扱う MCP サーバー + CLI として開発中です（計画: [PLAN.md](PLAN.md)）。
+> 以下の韓国語の説明は上流（出品者向け）のもので、購入者向け機能の実装に合わせて書き換える予定です。
+
+本プロジェクトは [cstria0106/booth-mcp](https://github.com/cstria0106/booth-mcp)（MIT License）のフォークです。原作者に感謝します。ライセンスは同じく MIT です（[LICENSE](LICENSE)）。
+
+---
 
 BOOTH 판매자 관리 정보를 MCP 클라이언트에서 조회하는 비공식·읽기 전용 MCP 서버입니다.
 
@@ -24,15 +33,15 @@ BOOTH 판매자 관리 정보를 MCP 클라이언트에서 조회하는 비공�
 ## Codex 설치
 
 ```bash
-codex plugin marketplace add cstria0106/booth-mcp
-codex plugin add booth-mcp@booth-mcp
+# marketplace add の手順はフォーク版リポジトリの公開後に記載します
+codex plugin add booth-library-mcp@booth-library-mcp
 ```
 
 설치 또는 업데이트 후 새 작업을 시작하세요. 플러그인을 업데이트하려면 다음 명령을 사용합니다.
 
 ```bash
-codex plugin marketplace upgrade booth-mcp
-codex plugin add booth-mcp@booth-mcp
+codex plugin marketplace upgrade booth-library-mcp
+codex plugin add booth-library-mcp@booth-library-mcp
 ```
 
 ## 로그인
@@ -40,25 +49,25 @@ codex plugin add booth-mcp@booth-mcp
 MCP에서 `booth_login`을 호출하거나 터미널에서 로그인할 수 있습니다.
 
 ```bash
-npx -y booth-mcp login
+npx -y booth-library-mcp login
 ```
 
 Chrome과 Edge를 찾지 못하면 브라우저 경로를 지정하세요.
 
 ```bash
 # macOS/Linux
-BOOTH_MCP_BROWSER_PATH=/path/to/chrome npx -y booth-mcp login
+BOOTH_MCP_BROWSER_PATH=/path/to/chrome npx -y booth-library-mcp login
 
 # Windows PowerShell
 $env:BOOTH_MCP_BROWSER_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
-npx -y booth-mcp login
+npx -y booth-library-mcp login
 ```
 
 Windows에서는 기본적으로 다음 경로에 로그인 정보가 저장됩니다.
 
 ```text
-%LOCALAPPDATA%\booth-mcp\browser-profile
-%LOCALAPPDATA%\booth-mcp\session.json
+%LOCALAPPDATA%\booth-library-mcp\browser-profile
+%LOCALAPPDATA%\booth-library-mcp\session.json
 ```
 
 저장 위치는 `BOOTH_MCP_PROFILE_DIR`과 `BOOTH_MCP_SESSION_FILE`로 변경할 수 있습니다.
@@ -70,7 +79,7 @@ Codex에서 플러그인 없이 사용하려면 다음 설정을 추가합니다
 ```toml
 [mcp_servers.booth]
 command = "npx"
-args = ["-y", "booth-mcp"]
+args = ["-y", "booth-library-mcp"]
 ```
 
 Claude Desktop과 Cursor에서는 MCP 설정에 다음 항목을 추가합니다.
@@ -80,7 +89,7 @@ Claude Desktop과 Cursor에서는 MCP 설정에 다음 항목을 추가합니다
   "mcpServers": {
     "booth": {
       "command": "npx",
-      "args": ["-y", "booth-mcp"]
+      "args": ["-y", "booth-library-mcp"]
     }
   }
 }

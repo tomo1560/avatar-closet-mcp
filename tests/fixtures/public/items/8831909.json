@@ -1,0 +1,331 @@
+{
+  "description": "ゆったりとしたケープコート+インナーとスカートのセットです。\nケープコートはシェイプキーである程度袖の幅等を調整できます、別の衣装と組み合わせる際にご使用下さい。\n(確実に合わせられるわけではありませんのでご注意下さい)\n\nシェーダーには【liltoon】を使用しています\nhttps://booth.pm/ja/items/3087170\n\n揺れ物には【physbone】を使用しています\n\n動画とSSはVRC内で撮影したもので【落ち影システム】を使用しています。\nhttps://booth.pm/ja/items/5737352\n\n対応アバター\n【Lapwing】\nhttps://booth.pm/ja/items/4993931\n【しなの】\nhttps://booth.pm/ja/items/6106863\n【Alué】\nhttps://booth.pm/ja/items/6957623\n\n※しなのはBreast_Flatにのみ対応しています\n\n●導入方法\nUnitypackageを展開した後、prefabをHierarchyのアバター直下へと導入\nその後Materialsフォルダからお好みのMaterialに差し替えてお使いください\n(全マテリアル分のPrefabを用意してあるわけではないのでご注意ください)\n\n表地と裏地の色をカスタムできるPrefabも用意しております\n詳しくは同梱されているReadmeをお読みください\n\n内容物\n-Unitypackage\n-UV_Map\n\n総ポリゴン数 △21372\n-Cape Coat △7876\n-Skirt+Inner△13496\n\n注意事項\n・商品画像のアバター本体やメイク、髪型、アクセサリーは付属しません\n・腕をおろした時、脇の下部分が貫通することがあります\n・腕を大きく捻った際、二の腕や肘部分が貫通することがあります\n・激しく動くとスカートがコートを貫通することがあります\n・Aポーズで制作しているため、Tポーズにした際に胸から腕にかけてテクスチャの伸びがあります\n・動きは三点及び可愛いポーズツール(https://booth.pm/ja/items/5479202)でのみ確認しております\n・【もちふぃった～】や【きせった】の使用は制限していませんので、ご自由に使用していただいて大丈夫です。\n・本商品の制作過程およびサムネや商品画像の制作にAIは一切使用されておりません。\n・本商品および本商品を使用して作成された画像・動画・改変データを、AI学習用途に使用することを禁止します\n・返金対応は出来かねます、慎重にご購入下さい\n\nその他もし不具合や気になる点、要望がございましたらBoothのDMにてお気軽にご連絡下さい",
+  "factory_description": null,
+  "id": 8831909,
+  "is_adult": false,
+  "is_buyee_possible": false,
+  "is_end_of_sale": false,
+  "is_placeholder": false,
+  "is_sold_out": false,
+  "name": "【MA対応】Long Cape Coat【3アバター対応】",
+  "published_at": "2026-09-13T16:29:13.000+09:00",
+  "price": "¥ 1,400",
+  "shipping_info": "ショップの通常発送日数：支払いから7日以内",
+  "small_stock": null,
+  "url": "https://apoapo7.booth.pm/items/8831909",
+  "wish_list_url": "https://booth.pm/items/8831909/wish_list",
+  "wish_lists_count": 7202,
+  "wished": false,
+  "purchase_limit": null,
+  "past_purchase_count": 0,
+  "buyee_variations": [],
+  "category": {
+    "id": 209,
+    "name": "3D衣装",
+    "parent": {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/browse/3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    "url": "https://booth.pm/ja/browse/3D%E8%A1%A3%E8%A3%85"
+  },
+  "embeds": [
+    "<iframe width=\"366\" height=\"651\" src=\"https://www.youtube.com/embed/OZoSJjW9zvg\" frameborder=\"0\" allowfullscreen sandbox=\"allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation\" class=\"wide-content\"></iframe>"
+  ],
+  "images": [
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a9f076e8-5565-4555-8745-f4b259274ff4_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a9f076e8-5565-4555-8745-f4b259274ff4_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/ca9cbf75-62dd-4c1c-a8b6-b8e80ca10513_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/ca9cbf75-62dd-4c1c-a8b6-b8e80ca10513_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a7fcdd1f-cf83-43eb-89c7-b2fe566d9688_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a7fcdd1f-cf83-43eb-89c7-b2fe566d9688_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/76c170ce-538b-4e59-98f4-3eeee3567579_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/76c170ce-538b-4e59-98f4-3eeee3567579_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/5a8e6af1-6575-4fa7-90c3-201a3a0e56aa_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/5a8e6af1-6575-4fa7-90c3-201a3a0e56aa_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/b88d3e79-9e79-430b-914b-a179393f78a9_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/b88d3e79-9e79-430b-914b-a179393f78a9_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/0e6df211-3e46-4fc5-b05e-ac156b61e34d_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/0e6df211-3e46-4fc5-b05e-ac156b61e34d_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a013473b-b4c2-4d48-a18b-9b830fb05a6d_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a013473b-b4c2-4d48-a18b-9b830fb05a6d_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/2c5f4d39-f6a4-48f1-ac33-26546a712bef_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/2c5f4d39-f6a4-48f1-ac33-26546a712bef_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/f8872db8-24c8-4af9-8839-059f3ebb495d_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/f8872db8-24c8-4af9-8839-059f3ebb495d_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/0ce83889-13d5-43ba-8390-398986b0bbdb_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/0ce83889-13d5-43ba-8390-398986b0bbdb_base_resized.jpg"
+    }
+  ],
+  "order": null,
+  "gift": null,
+  "report_url": "https://apoapo7.booth.pm/items/8831909/report",
+  "share": {
+    "hashtags": [
+      "booth_pm"
+    ],
+    "text": "【MA対応】Long Cape Coat【3アバター対応】 | APOAPO"
+  },
+  "shop": {
+    "uuid": "baa762c6-c18c-445d-b59f-c4d18ded5c5e",
+    "name": "APOAPO",
+    "subdomain": "apoapo7",
+    "thumbnail_url": "https://booth.pximg.net/c/48x48/users/14013336/icon_image/5067d092-a850-4a42-bbca-2260300fba5e_base_resized.jpg",
+    "url": "https://apoapo7.booth.pm/",
+    "verified": false
+  },
+  "sound": null,
+  "tags": [
+    {
+      "name": "3DCG",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3DCG"
+    },
+    {
+      "name": "スカート",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B9%E3%82%AB%E3%83%BC%E3%83%88"
+    },
+    {
+      "name": "衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "name": "FBX",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=FBX"
+    },
+    {
+      "name": "ゆったり",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%86%E3%81%A3%E3%81%9F%E3%82%8A"
+    },
+    {
+      "name": "しなの",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE"
+    },
+    {
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "name": "VRC想定モデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRC%E6%83%B3%E5%AE%9A%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "name": "ケープコート",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B1%E3%83%BC%E3%83%97%E3%82%B3%E3%83%BC%E3%83%88"
+    },
+    {
+      "name": "Lapwing",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Lapwing"
+    },
+    {
+      "name": "Lapwing対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Lapwing%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "name": "PlusHead対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=PlusHead%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "name": "プラスヘッド",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%97%E3%83%A9%E3%82%B9%E3%83%98%E3%83%83%E3%83%89"
+    },
+    {
+      "name": "プラスヘッド対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%97%E3%83%A9%E3%82%B9%E3%83%98%E3%83%83%E3%83%89%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "name": "しなの対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "name": "Alué",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Alu%C3%A9"
+    },
+    {
+      "name": "アルエ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A2%E3%83%AB%E3%82%A8"
+    },
+    {
+      "name": "Alue",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Alue"
+    },
+    {
+      "name": "アルエ対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A2%E3%83%AB%E3%82%A8%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "name": "vrc 衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=vrc+%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "name": "Cape Coat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Cape+Coat"
+    }
+  ],
+  "tag_banners": [
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/c80ffe79-d9d7-4481-bc64-40d80bcd71e6/i/5813187/9163df6c-cc4e-4a07-ace2-d22e3be58be8_base_resized.jpg",
+      "name": "3DCG",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3DCG"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/87b70515-e32e-4a2e-bf41-317cf2c2177c/i/5485641/0cfec889-4f2c-4983-9b80-ffb359c6eb0d_base_resized.jpg",
+      "name": "スカート",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B9%E3%82%AB%E3%83%BC%E3%83%88"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "FBX",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=FBX"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/baa762c6-c18c-445d-b59f-c4d18ded5c5e/i/8831909/a9f076e8-5565-4555-8745-f4b259274ff4_base_resized.jpg",
+      "name": "ゆったり",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%86%E3%81%A3%E3%81%9F%E3%82%8A"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg",
+      "name": "しなの",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "VRC想定モデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRC%E6%83%B3%E5%AE%9A%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "image_url": null,
+      "name": "ケープコート",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%B1%E3%83%BC%E3%83%97%E3%82%B3%E3%83%BC%E3%83%88"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/a238249a-3754-4828-9be4-c031f8e3662d/i/4993931/b44c1ccb-5e99-4ba2-9a82-6d60e152b0d6_base_resized.jpg",
+      "name": "Lapwing",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Lapwing"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/e95a337c-686b-4252-97e8-94e654cdc840/i/7065708/34c88a80-5844-489e-85f7-70ccb423fe49_base_resized.jpg",
+      "name": "Lapwing対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Lapwing%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/c3f76366-e1de-47a7-8415-d476cdd67568/i/6623606/319efa6c-7fc8-4aca-afa4-0de6cccd18eb_base_resized.jpg",
+      "name": "PlusHead対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=PlusHead%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/27010a79-0136-4d30-9f96-72a42eb50fe3/i/6957623/e157c0ad-1087-4d89-8080-942062804289_base_resized.jpg",
+      "name": "プラスヘッド",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%97%E3%83%A9%E3%82%B9%E3%83%98%E3%83%83%E3%83%89"
+    },
+    {
+      "image_url": null,
+      "name": "プラスヘッド対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%83%97%E3%83%A9%E3%82%B9%E3%83%98%E3%83%83%E3%83%89%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/e95a337c-686b-4252-97e8-94e654cdc840/i/7065708/34c88a80-5844-489e-85f7-70ccb423fe49_base_resized.jpg",
+      "name": "しなの対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/27010a79-0136-4d30-9f96-72a42eb50fe3/i/6957623/e157c0ad-1087-4d89-8080-942062804289_base_resized.jpg",
+      "name": "Alué",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Alu%C3%A9"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/27010a79-0136-4d30-9f96-72a42eb50fe3/i/6957623/e157c0ad-1087-4d89-8080-942062804289_base_resized.jpg",
+      "name": "アルエ",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A2%E3%83%AB%E3%82%A8"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ebaa6de7-8ca7-4319-8a84-0e098ddaaa20/i/7160050/db587465-ab1f-433b-81a5-f8432f82984e_base_resized.jpg",
+      "name": "Alue",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Alue"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/27010a79-0136-4d30-9f96-72a42eb50fe3/i/6957623/e157c0ad-1087-4d89-8080-942062804289_base_resized.jpg",
+      "name": "アルエ対応",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%A2%E3%83%AB%E3%82%A8%E5%AF%BE%E5%BF%9C"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/76f61988-1822-4fc6-a48f-31b6bcd379b7/i/8735041/1e6e412f-2f06-41ad-858f-5334148f184c_base_resized.jpg",
+      "name": "vrc 衣装",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=vrc+%E8%A1%A3%E8%A3%85"
+    },
+    {
+      "image_url": null,
+      "name": "Cape Coat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Cape+Coat"
+    }
+  ],
+  "tag_combination": {
+    "category": "3D衣装",
+    "tag": "3DCG",
+    "url": "https://booth.pm/ja/browse/3D%E8%A1%A3%E8%A3%85?tags%5B%5D=3DCG"
+  },
+  "tracks": null,
+  "variations": [
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 14752631,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": null,
+      "order_url": null,
+      "price": 1400,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    }
+  ]
+}

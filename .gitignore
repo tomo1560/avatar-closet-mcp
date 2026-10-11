@@ -11,6 +11,15 @@ npm-debug.log*
 playwright-report/
 test-results/
 
-# Local BOOTH credentials and browser state
+# Local BOOTH credentials, browser state, and caches
 session.json
+storage-state.json
 browser-profile/
+.booth-mcp/
+.booth-library-mcp/
+/booth-library-mcp/
+# root-level only: src/cache/ (PLAN §4) must stay tracked
+/cache/
+
+# Raw logged-in page captures contain personal data; anonymize before copying into tests/fixtures/
+tests/fixtures/private/

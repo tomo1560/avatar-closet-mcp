@@ -28,7 +28,7 @@ export async function runInteractiveLogin(timeoutMs = 10 * 60_000): Promise<void
     const page = context.pages()[0] ?? (await context.newPage());
     await page.goto(`${MANAGE_ORIGIN}/`, { waitUntil: "domcontentloaded" });
     if (!(await isAuthenticated(page))) {
-      process.stderr.write("브라우저에서 BOOTH 로그인을 완료해 주세요. 로그인 정보는 booth-mcp가 읽지 않습니다.\n");
+      process.stderr.write("브라우저에서 BOOTH 로그인을 완료해 주세요. 로그인 정보는 booth-library-mcp가 읽지 않습니다.\n");
       const deadline = Date.now() + timeoutMs;
       let authenticated = false;
       while (Date.now() < deadline) {

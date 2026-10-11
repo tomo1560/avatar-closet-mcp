@@ -1,37 +1,33 @@
 {
-  "name": "booth-mcp",
-  "version": "0.2.2",
-  "description": "Read-only tools for safely querying BOOTH seller products, orders, sales, and customer conversations",
+  "name": "booth-library-mcp",
+  "version": "0.1.0",
+  "description": "Unofficial read-only tools for your own BOOTH purchases (library, gifts, orders) with VRChat avatar compatibility helpers",
   "author": {
-    "name": "cstria0106",
-    "url": "https://github.com/cstria0106"
+    "name": "booth-library-mcp contributors"
   },
-  "homepage": "https://github.com/cstria0106/booth-mcp#readme",
-  "repository": "https://github.com/cstria0106/booth-mcp",
   "license": "MIT",
   "keywords": [
     "booth",
-    "seller",
-    "sales",
-    "orders",
+    "library",
+    "purchases",
+    "vrchat",
     "mcp"
   ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "BOOTH",
-    "shortDescription": "Read BOOTH seller products, orders, sales, and messages",
-    "longDescription": "Safely query and analyze products, orders, sales, customer conversations, and public shop settings from a BOOTH seller account.",
-    "developerName": "cstria0106",
+    "displayName": "BOOTH Library",
+    "shortDescription": "Read your BOOTH library, gifts, and orders",
+    "longDescription": "Unofficial, read-only access to your own BOOTH purchases: library items, gifts, and order history, plus helpers that check VRChat avatar compatibility from public item data. Not affiliated with pixiv or BOOTH.",
+    "developerName": "booth-library-mcp contributors",
     "category": "Productivity",
     "capabilities": [
       "Read"
     ],
-    "websiteURL": "https://github.com/cstria0106/booth-mcp",
     "defaultPrompt": [
-      "Summarize my BOOTH shop and recent sales.",
-      "Show the BOOTH orders that need attention.",
-      "Show my recent BOOTH customer conversations."
+      "List the items in my BOOTH library.",
+      "Which of my BOOTH outfits support Shinano?",
+      "Show my recent BOOTH orders."
     ]
   }
 }

@@ -105,7 +105,7 @@ export class BoothHttpClient implements BoothReader {
         if (!nextUrl || new URL(nextUrl).hostname !== expectedHost) {
           throw new BoothError(
             "AUTH_REQUIRED",
-            "BOOTH 판매자 세션이 만료되었습니다. `booth_login` 도구를 호출하거나 `npx booth-mcp login`을 실행해 주세요.",
+            "BOOTH 판매자 세션이 만료되었습니다. `booth_login` 도구를 호출하거나 `npx booth-library-mcp login`을 실행해 주세요.",
             initialUrl,
           );
         }
@@ -119,7 +119,7 @@ export class BoothHttpClient implements BoothReader {
       if (new URL(finalUrl).hostname !== expectedHost) {
         throw new BoothError(
           "AUTH_REQUIRED",
-          "BOOTH 판매자 세션이 만료되었습니다. `booth_login` 도구를 호출하거나 `npx booth-mcp login`을 실행해 주세요.",
+          "BOOTH 판매자 세션이 만료되었습니다. `booth_login` 도구를 호출하거나 `npx booth-library-mcp login`을 실행해 주세요.",
           initialUrl,
         );
       }
@@ -137,7 +137,7 @@ export class BoothHttpClient implements BoothReader {
     } catch {
       throw new BoothError(
         "AUTH_REQUIRED",
-        "저장된 BOOTH 세션이 없습니다. `booth_login` 도구를 호출하거나 `npx booth-mcp login`을 실행해 주세요.",
+        "저장된 BOOTH 세션이 없습니다. `booth_login` 도구를 호출하거나 `npx booth-library-mcp login`을 실행해 주세요.",
         `${this.origin}/`,
       );
     }

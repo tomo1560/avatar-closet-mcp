@@ -1,0 +1,130 @@
+{
+  "3087170": {
+    "kind": "tool",
+    "compatible": [],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "lilToon 本体（シェーダー, category 215）。アバター非依存なので compatible は空。これ自体が依存先 'liltoon' の実体。無料バリエーションは未ログインでも variations[].downloadable.no_musics[] にファイル名と downloadables URL が出る"
+  },
+  "3681787": {
+    "kind": "avatar",
+    "avatar_id": "kikyo",
+    "compatible": [],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "アバター本体（桔梗, category 208）。JSON の description は「必ず下記の商品説明と利用規約をお読み下さい」の1行のみで、依存・Quest 情報は JSON から取れない"
+  },
+  "4866933": {
+    "kind": "costume",
+    "compatible": ["airi", "kikyo", "moe", "shinano", "manuka", "milfy", "milltina", "imeris", "lime", "selestia"],
+    "not_supported": [],
+    "dependencies": ["liltoon"],
+    "quest_support": "unknown",
+    "must_not_match": ["真冬", "サリア"],
+    "notes": "4ソースすべてで一致: 商品名に10体列挙 / variations が英字アバター名（'Kikyo Moe Selestia' の3体セット含む）/ description の『対応アバター』見出し以下に本体リンク付きで10体 / tags。冒頭の『真冬用、サリア用はこちら』は別商品へのリンクで本商品は非対応 → compatible にしてはいけない。依存は description の 'liltoon'（小文字）"
+  },
+  "4904935": {
+    "kind": "accessory",
+    "compatible": ["milltina", "chocolat", "shinano", "airi", "rurune", "mizuki", "chiffon", "mafuyu", "manuka", "lapwing", "lime", "shinra", "moe", "kikyo", "selestia", "maya", "grus", "karin", "ash", "rize"],
+    "not_supported": [],
+    "dependencies": ["modular_avatar"],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "3D装飾品（category 217, グローブ）。対応アバターは variations のみが根拠（'Full Set' + 20体, 表記は『和名 -English-』）。description は短く対応一覧なし。'Modular Avatarなどの各種改変ツール対応' → MA は対応（必須ではない）。tag 'Maya' は舞夜とも 3DCG ソフト Maya とも読めるが、本商品は variations に『舞夜 -Maya-』があるので maya は正解"
+  },
+  "4911160": {
+    "kind": "costume",
+    "compatible": ["nemia", "cyanos", "shizukusan", "liloumois", "mulicia", "shinra", "hakka", "selestia", "rindo", "manuka", "lime", "karin", "lasyusha", "shinano", "kikyo", "moe", "maya"],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": ["ルキフェル", "リセ", "イェーナ"],
+    "notes": "variations が2〜3体まとめ（例『しなの・桔梗用（Shinano・Kikyo）』『セレスティア・竜胆用・マヌカ（Selestia・Rindo・Manuka）』）。区切りは『・』、括弧内に英字名。ネミアの英字表記は 'Marubody'（tags: まるぼでぃ/marubody）。tags にはルキフェル・リセ・イェーナもあるが該当バリエーションが無いので購入しても使えない → compatible にしない。description に対応一覧なし"
+  },
+  "5359699": {
+    "kind": "costume",
+    "compatible": ["kumaly", "shinano", "milltina", "lumina", "ichigo", "manuka", "airi", "rurune", "moe", "kikyo", "selestia", "shinra", "lime", "lasyusha", "mizuki"],
+    "not_supported": [],
+    "dependencies": ["modular_avatar"],
+    "quest_support": "unknown",
+    "must_not_match": ["maya"],
+    "notes": "variations が『和名 - English』形式で15体 + 『全部入り - Fullset』（'桔梗用 - Kikyo' のみ『用』付き）。description に各アバター本体へのリンク一覧あり（瑞希・ルルネ・萌・愛莉はショップサブドメイン形式 URL）。商品名【MA対応】、description 'AvatarToolsかModuleAvatarを推奨'（'ModuleAvatar' は Modular Avatar の誤記）。tags にタイプミス多数（kiko, manuki, selesta）。tag 'maya' は舞夜ではない（variations に舞夜なし）。『ミルティナは 1.01.1 想定、それ以前はサポート外』はバージョン制約で not_supported ではない"
+  },
+  "5737352": {
+    "kind": "tool",
+    "compatible": [],
+    "not_supported": [],
+    "dependencies": ["modular_avatar"],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "MA ベースのアバターギミック（落ち影システム, category 215）。description 冒頭『MA対応』、tags 'MA対応' / 'modularavatar'。アバター非依存。無料の『利用規約』バリエーションに downloadable が出る"
+  },
+  "6106863": {
+    "kind": "avatar",
+    "avatar_id": "shinano",
+    "compatible": [],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "アバター本体（しなの, category 208, ponderogen）。JSON の description は1行のみ。tags の 'しなの' は自己言及であって『しなの対応』ではない"
+  },
+  "6115428": {
+    "kind": "other",
+    "compatible": ["shinano"],
+    "not_supported": [],
+    "dependencies": ["liltoon"],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "category は 208（3Dキャラクター）だがアバター本体ではなく、しなの用のロリ化 Prefab + 表情セット → kind=other（category 208 を一律 avatar にすると誤る）。商品名『しなの専用』、description で本体と lilToon（liltoon）の導入を要求、Shinano_AMSv0.0.11.unitypackage も前提"
+  },
+  "6289322": {
+    "kind": "costume",
+    "compatible": ["shinano"],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "単一アバター専用。variations は name=null の1件のみ。根拠は商品名【しなの対応】、tags（しなの用/しなの対応/しなの専用…）、description『「しなの」…に着用させることを前提として制作』（見出しなしの文中表現）"
+  },
+  "6659058": {
+    "kind": "costume",
+    "compatible": ["shinano"],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "yes",
+    "must_not_match": [],
+    "notes": "単一アバター専用。商品名『【しなの用】』、tags 'しなの用' / 'Shinano用'。Quest 対応の根拠は tags 'Quest対応' / 'Quest' のみ（description は英語で Quest に触れない）。description の PhysBone / Avatars 3.0 は VRChat SDK 機能なので依存に含めない"
+  },
+  "6745224": {
+    "kind": "accessory",
+    "compatible": ["chocolat", "rurune", "shinano", "uno", "mafuyu", "milfy", "milltina", "marycia", "sio", "manuka", "shinra", "nagi", "lapwing", "kipfel", "mamehinata", "nemesis", "elusion", "mayo"],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "3D髪型（category 230）。PLAN §3.5.5 の kind に hair が無いので accessory 扱い（hair を追加するか要検討）。variations は英字名のみ + 『フルパック』。'MameFriends (Kipfel / Mamehinata)' は1バリエーションに2体、'Nemesis_ELusion' はアンダースコア連結（tags 'ネメシス対応' / 'エルシオン対応'）。description に対応一覧なし"
+  },
+  "7065708": {
+    "kind": "costume",
+    "compatible": ["batsu", "misaki", "kumaly", "ramune", "selestia", "eku", "milfy", "elusion", "kipfel", "mafuyu", "rurune", "chocolat", "lapwing", "kuuta", "mao", "plushead", "kanata", "rize", "shinano", "madeleine", "manuka", "sio", "mumus"],
+    "not_supported": [],
+    "dependencies": [],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "variations のみが根拠（description は2行で対応一覧なし）。表記『和名-English-』、'Fullset' あり。誤記: 'セレスティア-SEKESTIA-'、tag 'selesta'。海咲(Misaki) に対し tags は『美咲』『みさき』。tags のショップ/シリーズ名（あまとうさぎ、こまいぬ通り、まめふれんず、IKUSIA）はアバターではない。'+Head' は plushead として扱う"
+  },
+  "8831909": {
+    "kind": "costume",
+    "compatible": ["lapwing", "shinano", "alue", "plushead"],
+    "not_supported": [],
+    "dependencies": ["liltoon", "modular_avatar"],
+    "quest_support": "unknown",
+    "must_not_match": [],
+    "notes": "variations は name=null の1件のみ。description の『対応アバター』見出し以下に【Lapwing】【しなの】【Alué】の3体（本体リンク付き）。plushead は tags（PlusHead対応/プラスヘッド対応）のみの主張で見出しには無い → low confidence 相当。『しなのはBreast_Flatにのみ対応』は部分対応で not_supported ではない。依存: description『シェーダーには【liltoon】』、商品名【MA対応】。落ち影システム（撮影用）・可愛いポーズツール・もちふぃった～・きせったは言及のみで依存ではない"
+  }
+}

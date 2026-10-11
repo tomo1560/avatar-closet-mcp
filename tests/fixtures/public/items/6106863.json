@@ -1,0 +1,175 @@
+{
+  "description": "必ず下記の商品説明と利用規約をお読み下さい",
+  "factory_description": null,
+  "id": 6106863,
+  "is_adult": false,
+  "is_buyee_possible": false,
+  "is_end_of_sale": false,
+  "is_placeholder": false,
+  "is_sold_out": false,
+  "name": "オリジナル3Dモデル「しなの」",
+  "published_at": "2024-09-20T01:42:03.000+09:00",
+  "price": "¥ 6,000",
+  "shipping_info": "ショップの通常発送日数：支払いから7日以内",
+  "small_stock": null,
+  "url": "https://ponderogen.booth.pm/items/6106863",
+  "wish_list_url": "https://booth.pm/items/6106863/wish_list",
+  "wish_lists_count": 52117,
+  "wished": false,
+  "purchase_limit": null,
+  "past_purchase_count": 0,
+  "buyee_variations": [],
+  "category": {
+    "id": 208,
+    "name": "3Dキャラクター",
+    "parent": {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/browse/3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    "url": "https://booth.pm/ja/browse/3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC"
+  },
+  "embeds": [],
+  "images": [
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/2dec9c3e-a1a1-44cc-94ef-5bcecd6c3317_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/2dec9c3e-a1a1-44cc-94ef-5bcecd6c3317_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/e476a329-8b2a-4198-8094-864f960eff8f_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/e476a329-8b2a-4198-8094-864f960eff8f_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/f14b7913-0ec7-4958-9f03-8612bef1877b_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/f14b7913-0ec7-4958-9f03-8612bef1877b_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/b943b640-2a2e-4fee-a70f-5385a8808c71_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/b943b640-2a2e-4fee-a70f-5385a8808c71_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/4e96e8f9-525d-4966-89dc-cd8e359ac76c_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/4e96e8f9-525d-4966-89dc-cd8e359ac76c_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/42ce469b-af22-4f21-94fc-ef3b44ed2505_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/42ce469b-af22-4f21-94fc-ef3b44ed2505_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/c11c430c-96fd-443c-9a69-180fad030826_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/c11c430c-96fd-443c-9a69-180fad030826_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/b9b8a1a8-169d-410c-b407-935e654cd518_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/b9b8a1a8-169d-410c-b407-935e654cd518_base_resized.jpg"
+    }
+  ],
+  "order": null,
+  "gift": null,
+  "report_url": "https://ponderogen.booth.pm/items/6106863/report",
+  "share": {
+    "hashtags": [
+      "booth_pm"
+    ],
+    "text": "オリジナル3Dモデル「しなの」 | ポンデロニウム研究所"
+  },
+  "shop": {
+    "uuid": "ed52788c-0b3b-4e38-9ded-1e5797daf0ef",
+    "name": "ポンデロニウム研究所",
+    "subdomain": "ponderogen",
+    "thumbnail_url": "https://booth.pximg.net/c/48x48/users/5091757/icon_image/4de52f0c-d671-4d86-a478-dd12c0a49458_base_resized.jpg",
+    "url": "https://ponderogen.booth.pm/",
+    "verified": false
+  },
+  "sound": null,
+  "tags": [
+    {
+      "name": "オリジナル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%8A%E3%83%AB"
+    },
+    {
+      "name": "3Dキャラクター",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC"
+    },
+    {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "name": "しなの",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE"
+    },
+    {
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    }
+  ],
+  "tag_banners": [
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg",
+      "name": "オリジナル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%8A%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/c80ffe79-d9d7-4481-bc64-40d80bcd71e6/i/5813187/9163df6c-cc4e-4a07-ace2-d22e3be58be8_base_resized.jpg",
+      "name": "3Dキャラクター",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/c80ffe79-d9d7-4481-bc64-40d80bcd71e6/i/5813187/9163df6c-cc4e-4a07-ace2-d22e3be58be8_base_resized.jpg",
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg",
+      "name": "しなの",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%81%97%E3%81%AA%E3%81%AE"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    }
+  ],
+  "tag_combination": {
+    "category": "3Dキャラクター",
+    "tag": "オリジナル",
+    "url": "https://booth.pm/ja/browse/3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC?tags%5B%5D=%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%8A%E3%83%AB"
+  },
+  "tracks": null,
+  "variations": [
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 10314597,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": null,
+      "order_url": null,
+      "price": 6000,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    }
+  ]
+}

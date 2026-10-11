@@ -4,7 +4,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "booth-mcp@0.2.2"
+        "booth-library-mcp@0.1.0"
       ]
     }
   }

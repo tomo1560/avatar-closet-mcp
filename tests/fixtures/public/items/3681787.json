@@ -1,0 +1,225 @@
+{
+  "description": "必ず下記の商品説明と利用規約をお読み下さい\n",
+  "factory_description": null,
+  "id": 3681787,
+  "is_adult": false,
+  "is_buyee_possible": false,
+  "is_end_of_sale": false,
+  "is_placeholder": false,
+  "is_sold_out": false,
+  "name": "オリジナル3Dモデル「桔梗」",
+  "published_at": "2022-02-26T02:16:48.000+09:00",
+  "price": "¥ 5,500",
+  "shipping_info": "ショップの通常発送日数：支払いから7日以内",
+  "small_stock": null,
+  "url": "https://ponderogen.booth.pm/items/3681787",
+  "wish_list_url": "https://booth.pm/items/3681787/wish_list",
+  "wish_lists_count": 30872,
+  "wished": false,
+  "purchase_limit": null,
+  "past_purchase_count": 0,
+  "buyee_variations": [],
+  "category": {
+    "id": 208,
+    "name": "3Dキャラクター",
+    "parent": {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/browse/3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    "url": "https://booth.pm/ja/browse/3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC"
+  },
+  "embeds": [],
+  "images": [
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/2409bb9f-24f3-42dd-8ad6-89a0656f2166_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/2409bb9f-24f3-42dd-8ad6-89a0656f2166_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/c3d9b059-af10-4c05-89d0-7dba57a9b15e_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/c3d9b059-af10-4c05-89d0-7dba57a9b15e_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/8896dce8-cb1c-48a7-bedb-536ee1ce73b6_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/8896dce8-cb1c-48a7-bedb-536ee1ce73b6_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/64524067-5e6e-4abf-8749-33d5915e051f_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/64524067-5e6e-4abf-8749-33d5915e051f_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/ac55db3d-fbf7-4d4a-b5f4-27c8d4d7eb83_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/ac55db3d-fbf7-4d4a-b5f4-27c8d4d7eb83_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/8c6b66b8-2459-4318-8db2-cf43ac95e56c_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/8c6b66b8-2459-4318-8db2-cf43ac95e56c_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/be71b92e-32f2-4130-9ba9-20e8d5ab23f9_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/be71b92e-32f2-4130-9ba9-20e8d5ab23f9_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/312cf824-b4f4-4d7e-8e2b-a90a92945900_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/312cf824-b4f4-4d7e-8e2b-a90a92945900_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/6d20f90e-6ed5-423c-81f9-420d4c20e4a1_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/6d20f90e-6ed5-423c-81f9-420d4c20e4a1_base_resized.jpg"
+    },
+    {
+      "caption": null,
+      "original": "https://booth.pximg.net/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/2077ecd4-ed65-4e65-bd4e-153401eccfbc_base_resized.jpg",
+      "resized": "https://booth.pximg.net/c/72x72_a2_g5/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/2077ecd4-ed65-4e65-bd4e-153401eccfbc_base_resized.jpg"
+    }
+  ],
+  "order": null,
+  "gift": null,
+  "report_url": "https://ponderogen.booth.pm/items/3681787/report",
+  "share": {
+    "hashtags": [
+      "booth_pm"
+    ],
+    "text": "オリジナル3Dモデル「桔梗」 | ポンデロニウム研究所"
+  },
+  "shop": {
+    "uuid": "ed52788c-0b3b-4e38-9ded-1e5797daf0ef",
+    "name": "ポンデロニウム研究所",
+    "subdomain": "ponderogen",
+    "thumbnail_url": "https://booth.pximg.net/c/48x48/users/5091757/icon_image/4de52f0c-d671-4d86-a478-dd12c0a49458_base_resized.jpg",
+    "url": "https://ponderogen.booth.pm/",
+    "verified": false
+  },
+  "sound": null,
+  "tags": [
+    {
+      "name": "オリジナル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%8A%E3%83%AB"
+    },
+    {
+      "name": "3D",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D"
+    },
+    {
+      "name": "Unity",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Unity"
+    },
+    {
+      "name": "3Dキャラクター",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC"
+    },
+    {
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "name": "桔梗",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A1%94%E6%A2%97"
+    },
+    {
+      "name": "FBX",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=FBX"
+    },
+    {
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "name": "VRC想定モデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRC%E6%83%B3%E5%AE%9A%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "name": "桔梗ちゃん",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A1%94%E6%A2%97%E3%81%A1%E3%82%83%E3%82%93"
+    }
+  ],
+  "tag_banners": [
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/6106863/07bd77df-a8ee-4244-8c4e-16cf7cb584bb_base_resized.jpg",
+      "name": "オリジナル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%8A%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/7ce128bd-12f6-4638-bfa8-de7bbc69f72b/i/205595/64842d1a-e82b-4033-8811-9c241bff8316_base_resized.jpg",
+      "name": "3D",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "Unity",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=Unity"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/c80ffe79-d9d7-4481-bc64-40d80bcd71e6/i/5813187/9163df6c-cc4e-4a07-ace2-d22e3be58be8_base_resized.jpg",
+      "name": "3Dキャラクター",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/c80ffe79-d9d7-4481-bc64-40d80bcd71e6/i/5813187/9163df6c-cc4e-4a07-ace2-d22e3be58be8_base_resized.jpg",
+      "name": "3Dモデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=3D%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "桔梗",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A1%94%E6%A2%97"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "FBX",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=FBX"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/11d082f4-13bc-482b-b48f-07e27703a8aa/i/7657840/03e2fc69-287b-4940-8ddd-d703530b078c_base_resized.jpg",
+      "name": "VRChat",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRChat"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ee3a7f91-fd48-4797-b534-d10bec8ac3b4/i/5479202/e7026531-3329-45a6-b000-c3257c4a3302_base_resized.jpg",
+      "name": "VRC想定モデル",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=VRC%E6%83%B3%E5%AE%9A%E3%83%A2%E3%83%87%E3%83%AB"
+    },
+    {
+      "image_url": "https://booth.pximg.net/c/150x150/ed52788c-0b3b-4e38-9ded-1e5797daf0ef/i/3681787/2409bb9f-24f3-42dd-8ad6-89a0656f2166_base_resized.jpg",
+      "name": "桔梗ちゃん",
+      "url": "https://booth.pm/ja/items?tags%5B%5D=%E6%A1%94%E6%A2%97%E3%81%A1%E3%82%83%E3%82%93"
+    }
+  ],
+  "tag_combination": {
+    "category": "3Dキャラクター",
+    "tag": "オリジナル",
+    "url": "https://booth.pm/ja/browse/3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC?tags%5B%5D=%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%8A%E3%83%AB"
+  },
+  "tracks": null,
+  "variations": [
+    {
+      "buyee_html": null,
+      "downloadable": null,
+      "factory_image_url": null,
+      "has_download_code": false,
+      "id": 6125221,
+      "is_anshin_booth_pack": false,
+      "is_empty_allocatable_stock_with_preorder": false,
+      "is_empty_stock": false,
+      "is_factory_item": false,
+      "is_mailbin": false,
+      "is_waiting_on_arrival": false,
+      "name": null,
+      "order_url": null,
+      "price": 5500,
+      "small_stock": null,
+      "status": "addable_to_cart",
+      "type": "digital",
+      "purchase_limit": null,
+      "past_purchase_count": 0
+    }
+  ]
+}
