@@ -1,8 +1,8 @@
 /**
  * Parsers for accounts.booth.pm/library and accounts.booth.pm/library/gifts (same markup).
  *
- * TODO(PLAN §7-1): verify against real page. The structure is reconstructed from third-party parsers that
- * agree on the 2026 markup (see tests/fixtures/buyer/library.html for the full source list).
+ * Verified against real page 2026-10-12 (/library and /library/gifts, logged in; see tests/fixtures/buyer/library.html
+ * for the anonymized structure). The selectors first came from third-party parsers that agreed on the 2026 markup.
  */
 import type { Cheerio, CheerioAPI } from "cheerio";
 import {
@@ -27,7 +27,10 @@ import {
 export interface LibraryDownloadable {
   readonly downloadable_id: string;
   readonly file_name: string | null;
-  /** Always null on library pages: no source shows variation names there (PLAN §7-13). */
+  /**
+   * Always null on library pages: they show no variation names (verified 2026-10-12, PLAN §7-13). Each file's
+   * "その他のDL方法" dropdown JSON does carry a `variation_id`, which is not used yet.
+   */
   readonly variation_name: string | null;
 }
 
@@ -47,16 +50,17 @@ export interface LibraryPage extends PageInfo {
 
 const LIBRARY_PATH = /^\/library\/?$/u;
 const GIFTS_PATH = /^\/library\/gifts\/?$/u;
-// TODO(PLAN §7-1): verify against real page. studio-projecta/library-finder-for-booth extension/content.js
-// (div.bg-white.p-16), ribeKim/booth-library-manager utils/parser.ts, Hoard tests/test_readers.py BOOTH_2026.
+// Verified against real page 2026-10-12 (`div.bg-white.p-16.desktop:rounded-8...`). Sources: studio-projecta/library-finder-for-booth
+// extension/content.js, ribeKim/booth-library-manager utils/parser.ts, Hoard tests/test_readers.py BOOTH_2026.
 const CARD_SELECTOR = "div.bg-white.p-16";
-// TODO(PLAN §7-1): verify against real page. iamlinggggg/cl-booth-library-manager src/scraper.lisp
-// (a[href*='/items/'] div.font-bold), studio-projecta content.js (.font-bold.break-all).
+// Verified against real page 2026-10-12 (a.no-underline > div.font-bold.break-all). Sources: iamlinggggg/cl-booth-library-manager
+// src/scraper.lisp, studio-projecta content.js.
 const NAME_SELECTOR = 'a[href*="/items/"] .font-bold';
-// TODO(PLAN §7-1): verify against real page. Myrkie/BoothDownloader BoothPageParser.cs, studio-projecta content.js,
-// cl-booth scraper.lisp (img.l-library-item-thumbnail).
+// Verified against real page 2026-10-12. Sources: Myrkie/BoothDownloader BoothPageParser.cs, studio-projecta content.js,
+// cl-booth scraper.lisp.
 const THUMBNAIL_SELECTOR = "img.l-library-item-thumbnail";
-// TODO(PLAN §7-1): verify against real page. studio-projecta content.js, cl-booth scraper.lisp (.text-text-gray600).
+// Verified against real page 2026-10-12 (shop link > div.text-14.text-text-gray600; the link also holds the shop icon).
+// Sources: studio-projecta content.js, cl-booth scraper.lisp.
 const SHOP_NAME_SELECTOR = ".text-text-gray600";
 
 export function parseLibraryPage(html: string, finalUrl: string): LibraryPage {

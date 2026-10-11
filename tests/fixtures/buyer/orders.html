@@ -1,73 +1,113 @@
 <!DOCTYPE html>
 <!--
-  FICTIONAL fixture: names, ids, prices and dates are made up.
-  accounts.booth.pm/orders (page 1 of 2), reconstructed from a single 2024 source, NOT captured
-  (TODO(PLAN §7-1): replace with a real, scrubbed capture; LOW confidence).
-  Structure: OptoCloud/AssetDownloader AssetDownloader/HtmlScrapers/Booth/BoothAccountOrdersScraper.cs
-  (div.manage-page-body > div.container, div.l-orders-index > div.sheet, a[href="/orders/{id}"], a[href*=items],
-  div.u-tpg-caption1 = item name, div.u-tpg-caption2 = order date, div.pager > nav > ul).
-  The status badge and the "合計" line are NOT backed by any source; they only exercise the best-effort fields.
-  Order link regex: Myrkie/BoothDownloader RegexStore.cs (OrdersRegex).
+  FICTIONAL fixture: accounts.booth.pm/orders (page 1 of 2).
+  Structure (tags, classes, nesting, data-* keys and fixed UI strings) follows a real logged-in capture of 2026-10-12;
+  every name, id, URL, file name and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the
+  footer are left out.
+  Each order is one link `.l-orders-index > a.nav-reverse[href="/orders/{id}"]` around a `div.sheet` with a status badge,
+  one item name and the order date. The list shows no total. NOT VERIFIED: badge texts other than 発送完了 and their
+  modifier classes (the capture only had `order-state completed`).
 -->
 <html lang="ja">
-<head><meta charset="utf-8"><meta name="csrf-token" content="REDACTED-FIXTURE"><title>注文履歴 - BOOTH</title></head>
+<head>
+<meta charset="utf-8">
+<meta name="csrf-token" content="REDACTED-FIXTURE">
+<title>購入履歴 - BOOTH</title>
+</head>
 <body>
-<main>
-<div class="manage-page-body">
-  <div class="container">
-    <h1 class="u-tpg-title1">注文履歴</h1>
-    <div class="l-orders-index">
-
-      <div class="sheet u-mb-400">
-        <div class="u-d-flex u-align-items-center u-mb-300">
-          <div class="u-flex-1">
-            <div class="u-tpg-caption2 u-text-gray-500">注文日時: 2026/09/14 21:05:33</div>
-            <div class="u-tpg-caption2 u-text-gray-500">注文番号: <a href="/orders/30000001">30000001</a></div>
+<header class="sticky top-0 w-full z-[1000]" role="banner">
+  <div>
+    <div class="w-full bg-white shadow-border300 shadow-header flex flex-col-reverse desktop:flex-col" id="js-header">
+      <nav class="flex h-[44px] desktop:h-[52px]" role="navigation">
+        <div class="flex flex-terminal items-center shrink">
+          <a class="block shrink-0" href="https://booth.pm/"><img class="h-[44px] desktop:h-[52px] w-[123px] desktop:w-[146px] align-top" alt="BOOTH" src="https://asset.booth.pm/assets/booth-logo.svg"></a>
+        </div>
+        <div class="flex items-stretch shrink-0">
+          <div class="hidden desktop:flex">
+            <div data-current-user="{&quot;nickname&quot;:&quot;Fictional Buyer&quot;,&quot;thumbnail_url&quot;:&quot;https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg&quot;}" data-shop="{}" id="js-user-pulldown"></div>
+            <div class="h-[52px] w-[52px]" data-unread="false" id="js-user-activities"></div>
+            <a class="flex items-center justify-center w-[52px] h-[52px] no-underline !text-ui-label" title="スキ！した商品" aria-label="スキ！した商品" href="https://accounts.booth.pm/wish_lists"><pixiv-icon name="24/BoothLikeOff"></pixiv-icon></a>
           </div>
-          <div class="u-flex-none"><span class="badge">支払済み</span></div>
-        </div>
-        <div class="u-d-flex u-mb-200">
-          <div class="u-flex-none u-mr-300"><a href="https://booth.pm/ja/items/1000001"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="48" height="48"></a></div>
-          <div class="u-flex-1"><div class="u-tpg-caption1">架空ドレス【しなの・桔梗対応】</div><div class="u-tpg-caption2">¥ 1,500</div></div>
-        </div>
-        <div class="u-d-flex u-mb-200">
-          <div class="u-flex-none u-mr-300"><a href="https://kakuu-hair.booth.pm/items/1000002"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000002/i/1000002/10000000-0000-4000-8000-000000000002_base_resized.jpg" alt="" width="48" height="48"></a></div>
-          <div class="u-flex-1"><div class="u-tpg-caption1">架空ヘア Short Bob</div><div class="u-tpg-caption2">¥ 800</div></div>
-        </div>
-        <div class="u-text-right"><span>合計</span> <b>¥ 2,300</b></div>
-      </div>
-
-      <div class="sheet u-mb-400">
-        <div class="u-d-flex u-align-items-center u-mb-300">
-          <div class="u-flex-1">
-            <div class="u-tpg-caption2 u-text-gray-500">注文日時: 2026/08/02 09:15:00</div>
-            <div class="u-tpg-caption2 u-text-gray-500">注文番号: <a href="https://accounts.booth.pm/orders/30000002">30000002</a></div>
-          </div>
-          <div class="u-flex-none"><span class="badge">支払待ち</span></div>
-        </div>
-        <div class="u-d-flex u-mb-200">
-          <div class="u-flex-none u-mr-300"><a href="https://booth.pm/ja/items/1000006"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000006/i/1000006/10000000-0000-4000-8000-000000000006_base_resized.jpg" alt="" width="48" height="48"></a></div>
-          <div class="u-flex-1"><div class="u-tpg-caption1">架空アクリルキーホルダー</div><div class="u-tpg-caption2">¥ 1,200</div></div>
-        </div>
-      </div>
-
-      <div class="sheet u-mb-400">
-        <div class="u-d-flex u-align-items-center u-mb-300">
-          <div class="u-flex-1">
-            <div class="u-tpg-caption2 u-text-gray-500">注文日時: 2026/07/30 23:59:59</div>
-            <div class="u-tpg-caption2 u-text-gray-500">注文番号: <a href="/orders/30000003">30000003</a></div>
+          <a class="flex items-center justify-center size-[44px] desktop:size-[52px] inline-block leading-none relative" id="show_cart" aria-label="ショッピングカート" href="https://booth.pm/carts"><pixiv-icon name="24/Basket"></pixiv-icon></a>
+          <div class="desktop:hidden">
+            <div data-library-url="https://accounts.booth.pm/library" data-orders-url="https://accounts.booth.pm/orders" data-settings-url="https://accounts.booth.pm/settings" data-signed-in="true" data-signin-url="/users/sign_in" data-signout-url="/users/sign_out" data-user-name="Fictional Buyer" data-user-notification-count="0" data-user-thumbnail-url="https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg" id="js-navigation"></div>
           </div>
         </div>
-        <div class="u-d-flex u-mb-200">
-          <div class="u-flex-none u-mr-300"><a href="https://booth.pm/ja/items/1000001"><img src="https://booth.pximg.net/c/48x48/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" alt="" width="48" height="48"></a></div>
-          <div class="u-flex-1"><div class="u-tpg-caption1">架空ドレス【しなの・桔梗対応】</div><div class="u-tpg-caption2">¥ 0</div></div>
-        </div>
-      </div>
-
+      </nav>
     </div>
-    <div class="pager"><nav><ul><li class="current"><a class="nav-item" href="/orders">1</a></li><li><a class="nav-item" href="/orders?page=2">2</a></li><li><a rel="next" class="nav-item" href="/orders?page=2"><i class="icon-arrow-open-right no-margin s-1x"></i></a></li><li><a class="nav-item last-page" href="/orders?page=2"><i class="icon-angle-double-right no-margin s-1x"></i></a></li></ul></nav></div>
   </div>
-</div>
+</header>
+<div class="page-wrap box-border relative z-[2] flex-grow basis-auto bg-[#f1f5f8]">
+<main role="main">
+  <div class="manage-page-head container static-3of4">
+    <h1 class="manage-page-head-title">購入履歴</h1>
+    <div class="u-tpg-caption1 text-[0.75rem] leading-[1.5] text-right desktop:text-[0.8125rem] desktop:leading-[1.4615384615]">
+      <a class="no-underline text-[#1b7f8c] p-0 hover:underline" href="/library"><span>ライブラリを表示する</span><i class="icon-arrow-open-right"></i></a>
+    </div>
+  </div>
+  <div class="container static-3of4 mx-auto mb-24">
+    <a href="https://booth.pm/announcements/1000" rel="noopener noreferrer" target="_blank"><img class="w-full h-auto" alt="Advertisement for Booth Library Manager" width="808" height="100" src="https://asset.booth.pm/assets/booth_library_manager/banner.png"></a>
+  </div>
+  <div class="manage-page-body">
+    <div class="container static-3of4">
+      <div class="border-b border-text-gray100 mb-24 pb-24 mobile:px-16" data-search-url="https://accounts.booth.pm/orders" id="js-line-item-search-box"></div>
+    </div>
+    <div class="container static-3of4 l-orders-index">
+      <a class="nav-reverse hover:no-underline" href="/orders/30000001">
+        <div class="sheet sheet--p250 sheet--outline0 mb-12 hover:bg-ui-background100">
+          <div class="relative flex">
+            <div class="pl-8">
+              <div class="on-white-bg"><img src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000001/i/1000001/10000000-0000-4000-8000-000000000001_base_resized.jpg" width="52" height="52"></div>
+            </div>
+            <div class="flex-1 pl-16">
+              <div class="badge mx-0 align-top order-state completed">発送完了</div>
+              <div class="u-tpg-caption1 text-[#505c6b]">架空ドレス【しなの・桔梗対応】</div>
+              <div class="u-tpg-caption2 text-[#505c6b]">注文日時: 2026/09/14 21:05:33</div>
+            </div>
+            <i class="icon-arrow-open-right relative !flex item-center ml-auto before:content-[&quot;&quot;] before:mr-0"></i>
+          </div>
+        </div>
+      </a>
+      <!-- badge text and class not in the capture -->
+      <a class="nav-reverse hover:no-underline" href="/orders/30000002">
+        <div class="sheet sheet--p250 sheet--outline0 mb-12 hover:bg-ui-background100">
+          <div class="relative flex">
+            <div class="pl-8">
+              <div class="on-white-bg"><img src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000004/i/1000004/10000000-0000-4000-8000-000000000004_base_resized.jpg" width="52" height="52"></div>
+            </div>
+            <div class="flex-1 pl-16">
+              <div class="badge mx-0 align-top order-state">支払待ち</div>
+              <div class="u-tpg-caption1 text-[#505c6b]">架空アクリルキーホルダー</div>
+              <div class="u-tpg-caption2 text-[#505c6b]">注文日時: 2026/08/02 09:15:00</div>
+            </div>
+            <i class="icon-arrow-open-right relative !flex item-center ml-auto before:content-[&quot;&quot;] before:mr-0"></i>
+          </div>
+        </div>
+      </a>
+      <a class="nav-reverse hover:no-underline" href="/orders/30000003">
+        <div class="sheet sheet--p250 sheet--outline0 mb-12 hover:bg-ui-background100">
+          <div class="relative flex">
+            <div class="pl-8">
+              <div class="on-white-bg"><img src="https://booth.pximg.net/c/72x72_a2_g5/00000000-0000-4000-8000-000000000002/i/1000002/10000000-0000-4000-8000-000000000002_base_resized.jpg" width="52" height="52"></div>
+            </div>
+            <div class="flex-1 pl-16">
+              <div class="badge mx-0 align-top order-state completed">発送完了</div>
+              <div class="u-tpg-caption1 text-[#505c6b]">架空ヘア Short Bob</div>
+              <div class="u-tpg-caption2 text-[#505c6b]">注文日時: 2026/07/30 23:59:59</div>
+            </div>
+            <i class="icon-arrow-open-right relative !flex item-center ml-auto before:content-[&quot;&quot;] before:mr-0"></i>
+          </div>
+        </div>
+      </a>
+      <div class="pager"><nav><ul>
+        <li class="current"><a class="nav-item" href="/orders">1</a></li>
+        <li><a class="nav-item" href="/orders?page=2">2</a></li>
+        <li><a class="nav-item" rel="next" href="/orders?page=2"><i class="icon-arrow-open-right no-margin s-1x"></i></a></li>
+        <li><a class="nav-item last-page" href="/orders?page=2"><i class="icon-angle-double-right no-margin s-1x"></i></a></li>
+      </ul></nav></div>
+    </div>
+  </div>
 </main>
+</div>
 </body>
 </html>

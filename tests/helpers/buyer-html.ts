@@ -20,24 +20,26 @@ export interface FakePager {
 export function libraryHtml(items: readonly FakeLibraryItem[], pager: FakePager): string {
   const path = pager.path ?? "/library";
   return `<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>ライブラリ - BOOTH</title></head><body>
-<main class="mx-auto"><div class="w-full">
+<main role="main"><div class="flex gap-40 mx-auto desktop:w-fit"><div class="w-full desktop:w-[808px] mb-24 flex flex-col gap-16">
 ${items.map(libraryCard).join("\n")}
 ${pagerHtml(path, pager.page, pager.lastPage)}
-</div></main></body></html>`;
+</div></div></main></body></html>`;
 }
 
 function libraryCard(item: FakeLibraryItem): string {
   const shop = item.shop ?? "架空ショップ";
   const files = (item.files ?? [])
     .map(
-      (file) => `<div class="desktop:flex"><div class="min-w-0"><div class="text-14 break-all">${file.name}</div></div>
-<div class="flex gap-8"><div class="js-download-button" data-href="https://booth.pm/downloadables/${file.id}" data-label="ダウンロード"></div></div></div>`,
+      (file) => `<div class="mt-16 desktop:flex desktop:justify-between desktop:items-center">
+<div class="min-w-0 break-words whitespace-pre-line"><div class="text-14">${file.name}</div></div>
+<div class="mt-8 desktop:mt-0 shrink-0 flex items-center gap-8"><div></div>
+<div><div class="js-download-button" data-href="https://booth.pm/downloadables/${file.id}" data-is-external="false" data-label="ダウンロード" data-test="downloadable"></div></div></div></div>`,
     )
     .join("\n");
-  return `<div class="desktop:rounded-8 bg-white p-16 mb-16"><div class="flex gap-16">
-<a href="https://booth.pm/ja/items/${item.id}"><img class="l-library-item-thumbnail" src="https://booth.pximg.net/c/72x72/${item.id}.jpg" alt=""></a>
-<div class="min-w-0"><a class="no-underline" href="https://booth.pm/ja/items/${item.id}"><div class="font-bold">${item.name}</div></a>
-<a class="no-underline" href="https://kakuu-shop.booth.pm/"><div class="text-14 text-text-gray600">${shop}</div></a></div></div>
+  return `<div class="bg-white p-16 desktop:rounded-8 desktop:py-24 desktop:px-40"><div class="flex gap-8 desktop:gap-16 border-b border-border300 pb-16">
+<a target="_blank" rel="noopener" href="https://booth.pm/ja/items/${item.id}"><img class="l-library-item-thumbnail" src="https://booth.pximg.net/c/300x300_a2_g5/${item.id}.jpg" width="80" height="80"></a>
+<div><a class="no-underline" target="_blank" rel="noopener" href="https://booth.pm/ja/items/${item.id}"><div class="text-text-default font-bold text-16 mb-8 break-all">${item.name}</div></a>
+<a class="no-underline w-fit flex gap-4 items-center" target="_blank" rel="noopener" href="https://kakuu-shop.booth.pm/"><div class="text-14 text-text-gray600 break-all">${shop}</div></a></div></div>
 <div class="mt-16">${files}</div></div>`;
 }
 

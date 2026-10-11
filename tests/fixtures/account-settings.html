@@ -1,20 +1,48 @@
 <!DOCTYPE html>
-<!-- Fictional fixture. TODO(PLAN §7): replace with an anonymized capture of https://accounts.booth.pm/settings -->
+<!--
+  FICTIONAL fixture: accounts.booth.pm/settings. The nickname, ids and URLs are made up.
+  Structure (tags, classes, nesting, data-* keys and fixed UI strings) follows a real logged-in capture of 2026-10-12;
+  every name, id, URL, file name and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the
+  footer are left out.
+  The settings form is rendered by JavaScript into #js-mount-point-settings, so the server HTML carries the display
+  name only in the global header: #js-user-pulldown[data-current-user] (JSON) and #js-navigation[data-user-name].
+-->
 <html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <meta name="csrf-token" content="fictional-csrf-token">
-    <title>アカウント設定 - BOOTH</title>
-  </head>
-  <body>
-    <main>
-      <h1>アカウント設定</h1>
-      <form action="/settings" method="post">
-        <label for="user_nickname">ニックネーム</label>
-        <input id="user_nickname" name="user[nickname]" type="text" value="  Fictional  Buyer  ">
-        <label for="user_email">メールアドレス</label>
-        <input id="user_email" name="user[email]" type="email" value="buyer@example.com">
-      </form>
-    </main>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="csrf-token" content="REDACTED-FIXTURE">
+<title>アカウント設定 - BOOTH</title>
+</head>
+<body class="font-default-family flex flex-col min-h-full bg-white text-text-default">
+<header class="sticky top-0 w-full z-[1000]" role="banner">
+  <div>
+    <div class="w-full bg-white shadow-border300 shadow-header flex flex-col-reverse desktop:flex-col" id="js-header">
+      <nav class="flex h-[44px] desktop:h-[52px]" role="navigation">
+        <div class="flex flex-terminal items-center shrink">
+          <a class="block shrink-0" href="https://booth.pm/"><img class="h-[44px] desktop:h-[52px] w-[123px] desktop:w-[146px] align-top" alt="BOOTH" src="https://asset.booth.pm/assets/booth-logo.svg"></a>
+        </div>
+        <div class="flex items-stretch shrink-0">
+          <div class="hidden desktop:flex">
+            <div data-current-user="{&quot;nickname&quot;:&quot;Fictional Buyer&quot;,&quot;thumbnail_url&quot;:&quot;https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg&quot;}" data-shop="{}" id="js-user-pulldown"></div>
+            <div class="h-[52px] w-[52px]" data-unread="false" id="js-user-activities"></div>
+            <a class="flex items-center justify-center w-[52px] h-[52px] no-underline !text-ui-label" title="スキ！した商品" aria-label="スキ！した商品" href="https://accounts.booth.pm/wish_lists"><pixiv-icon name="24/BoothLikeOff"></pixiv-icon></a>
+          </div>
+          <a class="flex items-center justify-center size-[44px] desktop:size-[52px] inline-block leading-none relative" id="show_cart" aria-label="ショッピングカート" href="https://booth.pm/carts"><pixiv-icon name="24/Basket"></pixiv-icon></a>
+          <div class="desktop:hidden">
+            <div data-library-url="https://accounts.booth.pm/library" data-orders-url="https://accounts.booth.pm/orders" data-settings-url="https://accounts.booth.pm/settings" data-signed-in="true" data-signin-url="/users/sign_in" data-signout-url="/users/sign_out" data-user-name="Fictional Buyer" data-user-notification-count="0" data-user-thumbnail-url="https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg" id="js-navigation"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+<div class="fixed top-0 w-full z-[2000]" id="js-flash-message"></div>
+<div id="js-toast-message"></div>
+<div class="page-wrap box-border relative z-[2] flex-grow basis-auto bg-[#f1f5f8]">
+<main role="main">
+  <div class="js-zendesk" data-zendesk-suggestions="{&quot;labels&quot;:[&quot;account&quot;]}"></div>
+  <div id="js-mount-point-settings"></div>
+</main>
+</div>
+</body>
 </html>

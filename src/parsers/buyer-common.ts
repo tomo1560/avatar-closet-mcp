@@ -1,9 +1,9 @@
 /**
  * Shared, pure helpers for the buyer-side HTML parsers (library, gifts, orders, search).
  *
- * Nothing here performs I/O. Selectors that come from third-party projects are marked with
- * `TODO(PLAN §7-1)` and the project/file they were taken from, because the logged-in BOOTH
- * pages could not be captured for this repository yet.
+ * Nothing here performs I/O. Selectors were first taken from third-party projects (cited next to each one) and
+ * then checked against real logged-in captures of /library, /library/gifts, /orders and /orders/{id} on 2026-10-12.
+ * The structural fallbacks (walking up from links, label/value pairs) stay in place for the next markup change.
  */
 import { load, type Cheerio, type CheerioAPI } from "cheerio";
 import { BoothError } from "../errors.js";
@@ -41,15 +41,15 @@ const ITEM_ID_PATTERN = /booth\.pm(?:\/[\w-]+)?\/items\/(\d+)/u;
 // Myrkie/BoothDownloader RegexStore.cs (DownloadRegex). The path must end at the id, which rejects
 // the BOOTH Library Manager deeplink variant `/downloadables/{id}/deeplink` (Hoard hoard/library.py BOOTH_JS).
 const DOWNLOADABLE_PATH_PATTERN = /^\/downloadables\/(\d+)\/?$/u;
-// TODO(PLAN §7-1): verify against real page. 2026 library markup draws download buttons as placeholders
-// carrying the URL in data-href (Soloflighter1010/Hoard-Asset-Manager hoard/library.py BOOTH_JS and
-// tests/test_readers.py BOOTH_2026; studio-projecta/library-finder-for-booth extension/content.js);
-// order pages and older library pages use plain links (OptoCloud/AssetDownloader BoothAccountOrderScraper.cs).
+// Verified against real page 2026-10-12: library, gifts and order detail all draw download buttons as
+// `div.js-download-button[data-href][data-test="downloadable"]` placeholders (as in Soloflighter1010/Hoard-Asset-Manager
+// hoard/library.py BOOTH_JS). Plain links are kept as a fallback for older markup (OptoCloud/AssetDownloader
+// BoothAccountOrderScraper.cs). The "その他のDL方法" control carries deeplinks only inside its data-dropdown-items JSON.
 const DOWNLOAD_CONTROL_SELECTOR = 'a[href*="/downloadables/"], [data-href*="/downloadables/"]';
-// TODO(PLAN §7-1): verify against real page. `.text-14` (Hoard tests/test_readers.py, studio-projecta content.js),
-// `typography-14` (tomacheese/booth-purchased-items-manager src/booth.ts), `u-flex-1 > b` (OptoCloud
-// BoothAccountOrderScraper.cs ExtractDownloadable).
-const FILE_NAME_SELECTOR = '.text-14, [class*="typography-14"], [class*="u-flex-1"] > b, b';
+// Verified against real page 2026-10-12: `.text-14` on library/gifts rows, `.u-text-wrap > b` on order detail rows.
+// Fallbacks: `typography-14` (tomacheese/booth-purchased-items-manager src/booth.ts), `u-flex-1 > b` (OptoCloud
+// BoothAccountOrderScraper.cs ExtractDownloadable), any `b`.
+const FILE_NAME_SELECTOR = '.text-14, [class*="u-text-wrap"] > b, [class*="typography-14"], [class*="u-flex-1"] > b, b';
 const CONTROL_LABEL_PATTERN =
   /ダウンロード|ブラウザで開く|その他のDL方法|Download|Open in Browser|Other Downloads/giu;
 const RESERVED_SUBDOMAINS = new Set(["accounts", "www", "asset", "manage", "api", "checkout", "s"]);
@@ -171,10 +171,10 @@ function pageFromHref(raw: string | undefined, base: string): number | null {
 }
 
 /**
- * Kaminari-style pager. Verified on the real tests/fixtures/public/search.html (`.pager li.current`,
- * `a[rel="next"]`, `a.nav-item.last-page`). For accounts pages: TODO(PLAN §7-1): verify against real page
- * (Myrkie/BoothDownloader BoothPageParser.cs GetPageCount `//a[@class='nav-item last-page']`;
- * OptoCloud/AssetDownloader BoothAccountOrdersScraper.cs `div.pager > nav > ul`).
+ * Kaminari-style pager (`.pager li.current`, `a[rel="next"]`, `a.nav-item.last-page`), as on the public
+ * tests/fixtures/public/search.html. Verified against real page 2026-10-12 for /library and /orders (first page of
+ * several); a single-page /library/gifts renders an empty `div.pager`. The last-page state of an accounts list is
+ * not verified yet.
  */
 export function parsePager($: CheerioAPI, finalUrl: string): PageInfo {
   const pager = $(".pager").first();
@@ -198,9 +198,10 @@ function maxPagerPage($: CheerioAPI, pager: Cheerio<Element>, base: string, curr
   return max;
 }
 
+/** Ids linked from inside `element`, or from `element` itself when it is a link (an /orders card is one big link). */
 export function idsWithin($: CheerioAPI, element: Cheerio<AnyNode>, idOf: IdExtractor): Set<string> {
   const ids = new Set<string>();
-  element.find("a[href]").each((_index, anchor) => {
+  element.find("a[href]").addBack("a[href]").each((_index, anchor) => {
     const id = idOf($(anchor).attr("href"));
     if (id) ids.add(id);
   });

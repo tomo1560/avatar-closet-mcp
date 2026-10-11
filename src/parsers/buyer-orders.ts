@@ -1,10 +1,13 @@
 /**
  * Parsers for accounts.booth.pm/orders and accounts.booth.pm/orders/{id} (the buyer's own orders).
  *
- * TODO(PLAN §7-1): verify against real page. LOW confidence: the only structural source is
- * OptoCloud/AssetDownloader (2024-07) BoothAccountOrdersScraper.cs / BoothAccountOrderScraper.cs, plus the
- * item block class from Myrkie/BoothDownloader BoothPageParser.cs (September 2026). The parsers therefore key on
- * links (order ids, item ids, downloadable ids) and on label texts, and only use classes as preferred hints.
+ * Verified against real page 2026-10-12 (/orders first page and one download-only /orders/{id}, logged in; see
+ * tests/fixtures/buyer/orders.html and order-detail.html for the anonymized structure). The first structural sources
+ * were OptoCloud/AssetDownloader (2024-07) BoothAccountOrdersScraper.cs / BoothAccountOrderScraper.cs and
+ * Myrkie/BoothDownloader BoothPageParser.cs (September 2026). The parsers still key on links (order ids, item ids,
+ * downloadable ids) and on label texts, and use classes only as preferred hints.
+ * Not verified: orders with physical goods (shipping block), more than one item per order, the empty state, and
+ * status / payment values other than the ones seen (発送完了, クレジットカード).
  *
  * Privacy: shipping/contact fields (name, address, phone, e-mail) are never selected. The two label fields that are
  * returned (status, payment method) are kept only when they are a known value of at most 60 characters (anything
@@ -32,6 +35,7 @@ import {
   type AnyNode,
   type Card,
   type Element,
+  type IdExtractor,
   type PageInfo,
 } from "./buyer-common.js";
 
@@ -72,24 +76,29 @@ export interface OrderDetail {
 
 const ORDERS_PATH = /^\/orders\/?$/u;
 const ORDER_DETAIL_PATH = /^\/orders\/(\d+)\/?$/u;
-// TODO(PLAN §7-1): verify against real page. OptoCloud BoothAccountOrdersScraper.cs (div.l-orders-index > div.sheet).
-const ORDER_CARD_SELECTOR = ".l-orders-index > .sheet";
-// TODO(PLAN §7-1): verify against real page. OptoCloud BoothAccountOrdersScraper.cs (div.u-tpg-caption1 = item name).
+// Verified against real page 2026-10-12: each order is one link, `.l-orders-index > a.nav-reverse[href="/orders/{id}"]`,
+// wrapping a `div.sheet.sheet--p250` (OptoCloud BoothAccountOrdersScraper.cs had the sheet as the direct child).
+const ORDER_CARD_SELECTOR = '.l-orders-index > a[href*="/orders/"]';
+// Verified against real page 2026-10-12: one `div.u-tpg-caption1` item name per order card (OptoCloud
+// BoothAccountOrdersScraper.cs). The list page shows no total, so OrderSummary.total_price is null there.
 const ORDER_ITEM_NAME_SELECTOR = '[class*="u-tpg-caption1"]';
-// TODO(PLAN §7-1): verify against real page. Not backed by any source (status badge is a guess).
-const STATUS_SELECTOR = '.badge, [class*="status"]';
-// TODO(PLAN §7-1): verify against real page. Myrkie/BoothDownloader BoothPageParser.cs
-// ("sheet sheet--p400 mobile:pt-[13px] mobile:px-16 mobile:pb-8"); OptoCloud BoothAccountOrderScraper.cs
-// (div.l-order-detail-by-shop, div.u-tpg-title4 > b > a).
+// Verified against real page 2026-10-12: `.badge.order-state.<state>` on both /orders cards and /orders/{id}.
+const STATUS_SELECTOR = '.order-state, .badge, [class*="status"]';
+/** Status badges appear only on order cards; seeing one without any order link means the markup changed. */
+const ORDER_CONTENT_SIGNAL_SELECTOR = ".order-state";
+// Verified against real page 2026-10-12: `.l-order-detail-by-shop` (first: shop header and item sheets; a second one
+// holds the invoice form), item sheet `div.sheet.sheet--p400.mobile:pt-[13px]...` (Myrkie/BoothDownloader
+// BoothPageParser.cs), name `div.text-14 > b > a.nav`. `u-tpg-title4` (OptoCloud, 2024) is kept as a fallback.
 const DETAIL_SCOPE_SELECTOR = ".l-order-detail-by-shop";
 const DETAIL_ITEM_SELECTOR = '[class*="sheet--p400"]';
-const DETAIL_NAME_SELECTOR = '[class*="u-tpg-title4"] a[href]';
-// TODO(PLAN §7-1): verify against real page. Not backed by any source: no project extracts variation names.
+const DETAIL_NAME_SELECTOR = '.text-14 b a[href], [class*="u-tpg-title4"] a[href]';
+// TODO(PLAN §7-1): not backed by any source, and the real download-only order seen on 2026-10-12 shows no variation
+// name at all (item name, price and a BOOST row only), so this is null in practice.
 const DETAIL_VARIATION_SELECTOR = '[class*="variation"]';
 /** Status and payment method are short labels; longer values are never returned. */
 const MAX_LABEL_LENGTH = 60;
-// TODO(PLAN §7-1): verify against real page. Known values only (Japanese and English UI); extend this list when a
-// real BOOTH label comes back as null. Matching is exact after NFKC, whitespace and case normalization.
+// Known values only (Japanese and English UI); extend this list when a real BOOTH label comes back as null. Matching is
+// exact after NFKC, whitespace and case normalization. Seen on the real pages 2026-10-12: 発送完了 / クレジットカード.
 const ORDER_STATUSES = [
   "支払待ち", "支払い待ち", "お支払い待ち", "入金待ち", "支払済み", "支払い済み", "お支払い済み", "支払済", "入金済み",
   "発送待ち", "発送準備中", "発送済み", "発送完了", "配送中", "キャンセル", "キャンセル済み", "返金済み",
@@ -104,7 +113,8 @@ const PAYMENT_METHODS = [
   "Credit card", "Convenience store", "Bank transfer",
 ] as const;
 const TOTAL_LABELS = ["合計", "合計金額", "お支払い金額", "お支払金額", "支払金額", "total"];
-// Label texts: OptoCloud BoothAccountOrderScraper.cs reads "order number" / "created at" (English UI).
+// Label texts: OptoCloud BoothAccountOrderScraper.cs reads "order number" / "created at" (English UI). Verified against
+// real page 2026-10-12 (Japanese UI): 注文日時 / 注文番号 / お支払方法 / お支払金額 in `.l-row` label/value columns.
 const DETAIL_LABELS = {
   orderId: ["注文番号", "order number"],
   orderedAt: ["注文日時", "注文日", "購入日時", "created at", "order date"],
@@ -120,8 +130,8 @@ export function parseOrdersPage(html: string, finalUrl: string): OrdersPage {
   const main = requireMain($, finalUrl, "注文履歴");
   const orderIdOf = (href: string | undefined): string | null => extractOrderId(href, finalUrl);
   const cards = findCards($, main, orderIdOf, ORDER_CARD_SELECTOR);
-  if (cards.length === 0 && idsWithin($, main, (href) => extractItemId(href, finalUrl)).size > 0) {
-    throw changed("注文履歴ページで商品は見つかりましたが注文番号のリンクが見つかりません。", finalUrl);
+  if (cards.length === 0 && hasOrderContent($, main, finalUrl)) {
+    throw changed("注文履歴ページで注文は見つかりましたが注文番号のリンクが見つかりません。", finalUrl);
   }
   const orders = mergeByOrderId(cards.map((card) => parseOrderCard($, card, finalUrl)));
   return { orders, ...parsePager($, finalUrl) };
@@ -133,16 +143,18 @@ export function parseOrderDetail(html: string, finalUrl: string): OrderDetail {
   const url = assertAccountsPage(finalUrl, ORDER_DETAIL_PATH, "注文詳細");
   const main = requireMain($, finalUrl, "注文詳細");
   const orderId = ORDER_DETAIL_PATH.exec(url.pathname)?.[1] ?? "";
-  const scope = itemScope($, main);
-  const cards = findCards($, scope, (href) => extractItemId(href, finalUrl), DETAIL_ITEM_SELECTOR);
+  const itemIdOf = (href: string | undefined): string | null => extractItemId(href, finalUrl);
+  const scope = itemScope($, main, itemIdOf);
+  const cards = findCards($, scope, itemIdOf, DETAIL_ITEM_SELECTOR);
   if (cards.length === 0) throw changed("注文詳細ページで商品が見つかりません。", finalUrl);
   const label = (labels: readonly string[]): string | null => findLabeledValue($, main, labels);
   const ordered = label(DETAIL_LABELS.orderedAt);
   const total = label(DETAIL_LABELS.total);
+  const badge = textOrNull(main.find(STATUS_SELECTOR).first().text());
   return {
     order_id: orderId,
     ordered_at: ordered === null ? null : parseJstDateTime(ordered),
-    status: knownLabel(label(DETAIL_LABELS.status), ORDER_STATUSES),
+    status: knownLabel(badge, ORDER_STATUSES) ?? knownLabel(label(DETAIL_LABELS.status), ORDER_STATUSES),
     payment_method: knownLabel(label(DETAIL_LABELS.paymentMethod), PAYMENT_METHODS),
     total_price: total === null ? null : (parseYenAmounts(total)[0] ?? null),
     items: cards.map((card) => parseDetailItem($, card, finalUrl)),
@@ -202,9 +214,17 @@ function mergeOrders(first: OrderSummary, second: OrderSummary): OrderSummary {
   };
 }
 
-function itemScope($: CheerioAPI, main: Cheerio<Element>): Cheerio<Element> {
-  const scope = main.find(DETAIL_SCOPE_SELECTOR).first();
-  return scope.length > 0 ? scope : main;
+/** Every per-shop block that links to an item (the invoice block links to none); `main` when the class is gone. */
+function itemScope($: CheerioAPI, main: Cheerio<Element>, itemIdOf: IdExtractor): Cheerio<Element> {
+  const groups = main.find(DETAIL_SCOPE_SELECTOR).filter((_index, group) => idsWithin($, $(group), itemIdOf).size > 0);
+  return groups.length > 0 ? groups : main;
+}
+
+function hasOrderContent($: CheerioAPI, main: Cheerio<Element>, finalUrl: string): boolean {
+  return (
+    main.find(ORDER_CONTENT_SIGNAL_SELECTOR).length > 0 ||
+    idsWithin($, main, (href) => extractItemId(href, finalUrl)).size > 0
+  );
 }
 
 function parseDetailItem($: CheerioAPI, card: Card, finalUrl: string): OrderItem {

@@ -1,22 +1,62 @@
 <!DOCTYPE html>
 <!--
-  FICTIONAL fixture. accounts.booth.pm/orders for an account without orders. No source shows BOOTH's empty state;
-  the parser relies on the absence of order links, not on the message text.
-  Wrapper classes from OptoCloud/AssetDownloader BoothAccountOrdersScraper.cs.
-  TODO(PLAN §7-1): replace with a real, scrubbed capture.
+  FICTIONAL fixture: accounts.booth.pm/orders for an account without orders.
+  Structure (tags, classes, nesting, data-* keys and fixed UI strings) follows a real logged-in capture of 2026-10-12;
+  every name, id, URL, file name and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the
+  footer are left out.
+  NOT VERIFIED: the empty-state message is reconstructed (no capture of an empty order history). The parser relies on
+  the absence of order links and status badges, not on that text.
 -->
 <html lang="ja">
-<head><meta charset="utf-8"><title>注文履歴 - BOOTH</title></head>
+<head>
+<meta charset="utf-8">
+<meta name="csrf-token" content="REDACTED-FIXTURE">
+<title>購入履歴 - BOOTH</title>
+</head>
 <body>
-<main>
-<div class="manage-page-body">
-  <div class="container">
-    <h1 class="u-tpg-title1">注文履歴</h1>
-    <div class="l-orders-index">
-      <p class="u-tpg-body2 u-text-center">注文履歴はありません</p>
+<header class="sticky top-0 w-full z-[1000]" role="banner">
+  <div>
+    <div class="w-full bg-white shadow-border300 shadow-header flex flex-col-reverse desktop:flex-col" id="js-header">
+      <nav class="flex h-[44px] desktop:h-[52px]" role="navigation">
+        <div class="flex flex-terminal items-center shrink">
+          <a class="block shrink-0" href="https://booth.pm/"><img class="h-[44px] desktop:h-[52px] w-[123px] desktop:w-[146px] align-top" alt="BOOTH" src="https://asset.booth.pm/assets/booth-logo.svg"></a>
+        </div>
+        <div class="flex items-stretch shrink-0">
+          <div class="hidden desktop:flex">
+            <div data-current-user="{&quot;nickname&quot;:&quot;Fictional Buyer&quot;,&quot;thumbnail_url&quot;:&quot;https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg&quot;}" data-shop="{}" id="js-user-pulldown"></div>
+            <div class="h-[52px] w-[52px]" data-unread="false" id="js-user-activities"></div>
+            <a class="flex items-center justify-center w-[52px] h-[52px] no-underline !text-ui-label" title="スキ！した商品" aria-label="スキ！した商品" href="https://accounts.booth.pm/wish_lists"><pixiv-icon name="24/BoothLikeOff"></pixiv-icon></a>
+          </div>
+          <a class="flex items-center justify-center size-[44px] desktop:size-[52px] inline-block leading-none relative" id="show_cart" aria-label="ショッピングカート" href="https://booth.pm/carts"><pixiv-icon name="24/Basket"></pixiv-icon></a>
+          <div class="desktop:hidden">
+            <div data-library-url="https://accounts.booth.pm/library" data-orders-url="https://accounts.booth.pm/orders" data-settings-url="https://accounts.booth.pm/settings" data-signed-in="true" data-signin-url="/users/sign_in" data-signout-url="/users/sign_out" data-user-name="Fictional Buyer" data-user-notification-count="0" data-user-thumbnail-url="https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg" id="js-navigation"></div>
+          </div>
+        </div>
+      </nav>
     </div>
   </div>
-</div>
+</header>
+<div class="page-wrap box-border relative z-[2] flex-grow basis-auto bg-[#f1f5f8]">
+<main role="main">
+  <div class="manage-page-head container static-3of4">
+    <h1 class="manage-page-head-title">購入履歴</h1>
+    <div class="u-tpg-caption1 text-[0.75rem] leading-[1.5] text-right desktop:text-[0.8125rem] desktop:leading-[1.4615384615]">
+      <a class="no-underline text-[#1b7f8c] p-0 hover:underline" href="/library"><span>ライブラリを表示する</span><i class="icon-arrow-open-right"></i></a>
+    </div>
+  </div>
+  <div class="container static-3of4 mx-auto mb-24">
+    <a href="https://booth.pm/announcements/1000" rel="noopener noreferrer" target="_blank"><img class="w-full h-auto" alt="Advertisement for Booth Library Manager" width="808" height="100" src="https://asset.booth.pm/assets/booth_library_manager/banner.png"></a>
+  </div>
+  <div class="manage-page-body">
+    <div class="container static-3of4">
+      <div class="border-b border-text-gray100 mb-24 pb-24 mobile:px-16" data-search-url="https://accounts.booth.pm/orders" id="js-line-item-search-box"></div>
+    </div>
+    <div class="container static-3of4 l-orders-index">
+
+      <p class="u-tpg-body2 text-center">購入履歴はありません</p>
+    </div>
+  </div>
 </main>
+</div>
 </body>
 </html>

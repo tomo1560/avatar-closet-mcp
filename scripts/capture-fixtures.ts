@@ -11,11 +11,13 @@
  * - Delete tests/fixtures/private/ once the anonymized fixtures exist.
  *
  * Usage (after signing in with `bun src/cli.ts login`):
- *   bun scripts/capture-fixtures.ts
+ *   npx tsx scripts/capture-fixtures.ts
+ * Under Bun (1.3.14, Windows) playwright-core's request context throws in its Set-Cookie handling
+ * ("/settings" cannot be parsed as a URL), so run it with tsx on Node (verified 2026-10-12).
  *
  * Behavior:
  * - Reuses the saved session file (src/profile.ts getSessionFile; BOOTH_MCP_SESSION_FILE overrides it).
- * - GET only, strictly sequential, at least 1.5 s between requests, about 6 requests in total.
+ * - GET only, strictly sequential, at least 1.5 s between requests, about 7 requests in total.
  * - Redirects are never followed. A redirect on an account page means the session is invalid and aborts the run.
  * - For one downloadable, only the redirect target host is recorded; the signed URL and the file body are never
  *   stored or printed.
@@ -105,6 +107,8 @@ async function main(): Promise<void> {
 }
 
 async function captureAll(context: APIRequestContext, records: CaptureRecord[]): Promise<void> {
+  // First, so an expired session aborts before any other page is requested (PLAN §2.1 validity check).
+  await capturePage(context, records, "account-settings", `${ACCOUNTS_ORIGIN}/settings`);
   const library = await capturePage(context, records, "library", `${ACCOUNTS_ORIGIN}/library`);
   await capturePage(context, records, "library-gifts", `${ACCOUNTS_ORIGIN}/library/gifts`);
   const orders = await capturePage(context, records, "orders", `${ACCOUNTS_ORIGIN}/orders`);
