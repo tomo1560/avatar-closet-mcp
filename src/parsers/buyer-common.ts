@@ -6,8 +6,13 @@
  * pages could not be captured for this repository yet.
  */
 import { load, type Cheerio, type CheerioAPI } from "cheerio";
-import type { AnyNode, Element } from "domhandler";
 import { BoothError } from "../errors.js";
+
+type NodeOf<C> = C extends Cheerio<infer N> ? N : never;
+/** DOM element node. Derived from cheerio's own types: `domhandler` is only a transitive dependency. */
+export type Element = NodeOf<ReturnType<Cheerio<never>["children"]>>;
+/** Any DOM node (element, text, comment, document). Derived from cheerio's own types like {@link Element}. */
+export type AnyNode = NodeOf<ReturnType<Cheerio<never>["contents"]>>;
 
 export const BOOTH_ORIGIN = "https://booth.pm";
 export const ACCOUNTS_HOST = "accounts.booth.pm";

@@ -10,7 +10,6 @@
  * returned (status, payment method) are additionally passed through redactSensitiveText.
  */
 import type { Cheerio, CheerioAPI } from "cheerio";
-import type { AnyNode, Element } from "domhandler";
 import { redactSensitiveText } from "../privacy.js";
 import {
   ACCOUNTS_HOST,
@@ -29,7 +28,9 @@ import {
   requireMain,
   resolveUrl,
   textOrNull,
+  type AnyNode,
   type Card,
+  type Element,
   type PageInfo,
 } from "./buyer-common.js";
 

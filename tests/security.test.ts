@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isAllowedBoothRequest, isBoothHost } from "../src/browser/read-only-guard.js";
-import { redactSensitiveText } from "../src/privacy.js";
+import { maskDirectIdentifier, redactionsIn, redactSensitiveText } from "../src/privacy.js";
 import { LOGIN_ANNOTATIONS, LOGOUT_ANNOTATIONS, READ_ONLY_ANNOTATIONS } from "../src/server.js";
 
 describe("read-only security boundary", () => {
@@ -51,5 +51,19 @@ describe("read-only security boundary", () => {
     expect(result.text).toContain("buyer-cat");
     expect(result.text).not.toContain("test@example.com");
     expect(result.redactions).toEqual(expect.arrayContaining(["email", "phone", "postal_code"]));
+  });
+
+  it("uses Japanese placeholders and can report them again from masked text", () => {
+    const result = redactSensitiveText("連絡先 test@example.com / 090-1234-5678 / 〒123-4567");
+    expect(result.text).toContain("[非表示: メールアドレス]");
+    expect(result.text).toContain("[非表示: 電話番号]");
+    expect(result.text).toContain("[非表示: 郵便番号]");
+    expect(redactionsIn([result.text, null])).toEqual(["email", "phone", "postal_code"]);
+    expect(redactionsIn(["銀行振込", undefined])).toEqual([]);
+  });
+
+  it("masks direct identifiers with a Japanese placeholder", () => {
+    expect(maskDirectIdentifier("架空 太郎")).toBe("[非表示]");
+    expect(maskDirectIdentifier("  ")).toBeUndefined();
   });
 });

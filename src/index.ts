@@ -4,6 +4,8 @@ export { clearLocalLogin, getLocalLoginPaths } from "./browser/logout.js";
 export type { BoothReader, BoothRedirectReader, ReadJsonOptions, RedirectLocation } from "./browser/reader.js";
 export type { BoothTransport, TransportFactory, TransportResponse } from "./browser/transport.js";
 export { ACCOUNTS_ORIGIN, BOOTH_ORIGIN } from "./browser/url-policy.js";
+export type { ItemSummary, ItemVariationSummary, ItemViewerState, SearchUrlParams } from "./booth/public.js";
+export { ItemCache, type ItemCacheOptions } from "./cache/item-cache.js";
 export { BoothError, boothErrorCodes, type BoothErrorCode } from "./errors.js";
 export {
   createServer,
@@ -13,5 +15,15 @@ export {
   SERVER_INSTRUCTIONS,
   startStdioServer,
 } from "./server.js";
-export { BoothService, type BoothServiceOptions } from "./service.js";
+export {
+  BoothService,
+  type AvatarSearchInput,
+  type BoothServiceOptions,
+  type CompatibilityInput,
+  type GetItemInput,
+  type LibraryQuery,
+  type SyncAllOptions,
+  type SyncProgress,
+} from "./service.js";
+export { VRCHAT_KINDS } from "./services/vrchat-info.js";
 export type * from "./types.js";

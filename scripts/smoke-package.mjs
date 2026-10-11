@@ -53,7 +53,23 @@ try {
   }
   const tools = await client.listTools();
   const toolNames = new Set(tools.tools.map((tool) => tool.name));
-  const missingTools = ["booth_login", "booth_auth_status", "booth_logout"].filter((name) => !toolNames.has(name));
+  const expectedTools = [
+    "booth_login",
+    "booth_auth_status",
+    "booth_logout",
+    "booth_get_item",
+    "booth_search_items",
+    "booth_suggest_tags",
+    "booth_check_compatibility",
+    "booth_search_for_avatar",
+    "booth_list_library",
+    "booth_list_gifts",
+    "booth_list_orders",
+    "booth_get_order",
+    "booth_list_my_avatars",
+    "booth_sync_library_metadata",
+  ];
+  const missingTools = expectedTools.filter((name) => !toolNames.has(name));
   if (missingTools.length > 0) {
     throw new Error(`packaged server did not expose the expected BOOTH tools: ${missingTools.join(", ")}`);
   }

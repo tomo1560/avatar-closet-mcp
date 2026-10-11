@@ -6,7 +6,6 @@
  * `.item-card__thumbnail-image[data-original]`, `.pager`, `<b>対象商品 N 件</b>` and `p.u-tpg-caption1`.
  */
 import type { Cheerio, CheerioAPI } from "cheerio";
-import type { Element } from "domhandler";
 import {
   assertNotSignInPage,
   changed,
@@ -17,6 +16,7 @@ import {
   parsePositiveInt,
   resolveUrl,
   textOrNull,
+  type Element,
   type PageInfo,
 } from "./buyer-common.js";
 

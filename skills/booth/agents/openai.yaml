@@ -1,7 +1,7 @@
 interface:
   display_name: "BOOTH Library"
-  short_description: "Unofficial: connect and read your own BOOTH buyer account"
-  default_prompt: "Use $booth to check whether my BOOTH account is connected."
+  short_description: "Unofficial: read your BOOTH purchases and check VRChat avatar compatibility"
+  default_prompt: "Use $booth to list the outfits in my BOOTH library that support Shinano."
 
 dependencies:
   tools:

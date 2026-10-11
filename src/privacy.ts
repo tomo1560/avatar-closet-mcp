@@ -7,17 +7,17 @@ const patterns: Array<{ name: string; pattern: RegExp; replacement: string }> = 
   {
     name: "email",
     pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/giu,
-    replacement: "[이메일 마스킹]",
+    replacement: "[非表示: メールアドレス]",
   },
   {
     name: "phone",
     pattern: /(?<!\d)(?:\+?81[-\s]?)?(?:0\d{1,4}[-\s]?\d{1,4}[-\s]?\d{3,4})(?!\d)/gu,
-    replacement: "[전화번호 마스킹]",
+    replacement: "[非表示: 電話番号]",
   },
   {
     name: "postal_code",
     pattern: /(?<!\d)〒?\s*\d{3}[-ー]\d{4}(?!\d)/gu,
-    replacement: "[우편번호 마스킹]",
+    replacement: "[非表示: 郵便番号]",
   },
 ];
 
@@ -37,6 +37,13 @@ export function redactSensitiveText(value: string): RedactionResult {
   return { text, redactions: [...redactions] };
 }
 
+/** Names of the redactions whose placeholder appears in already-masked texts (for `meta.redactions`). */
+export function redactionsIn(texts: readonly (string | null | undefined)[]): string[] {
+  return patterns
+    .filter((entry) => texts.some((text) => text?.includes(entry.replacement) === true))
+    .map((entry) => entry.name);
+}
+
 export function maskDirectIdentifier(value: string | undefined): string | undefined {
-  return value?.trim() ? "[마스킹]" : undefined;
+  return value?.trim() ? "[非表示]" : undefined;
 }

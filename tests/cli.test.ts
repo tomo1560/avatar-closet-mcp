@@ -26,16 +26,61 @@ describe("CLI argument parsing", () => {
     [["help"], { kind: "help" }],
     [["--help"], { kind: "help" }],
     [["-h"], { kind: "help" }],
+    [["library"], { kind: "library", json: false, query: { all: false } }],
+    [
+      ["library", "--all", "--page", "2", "--query=Dress", "--avatar", "しなの", "--kind", "costume", "--dependency", "liltoon", "--json"],
+      { kind: "library", json: true, query: { all: true, page: 2, query: "Dress", avatar: "しなの", kind: "costume", dependency: "liltoon" } },
+    ],
+    [["gifts", "--all"], { kind: "gifts", json: false, query: { all: true } }],
+    [["orders", "--page", "3"], { kind: "orders", json: false, page: 3 }],
+    [["order", "30000001", "--json"], { kind: "order", json: true, orderId: "30000001" }],
+    [["item", "https://booth.pm/ja/items/1", "--vrchat"], { kind: "item", json: false, item: "https://booth.pm/ja/items/1", vrchat: true }],
+    [
+      ["search", "しなの", "水着", "--category", "3D衣装", "--tag", "a", "--tag=b", "--page", "2", "--free"],
+      {
+        kind: "search",
+        json: false,
+        params: { query: "しなの 水着", category: "3D衣装", tags: ["a", "b"], page: 2, only_free: true, adult: false },
+      },
+    ],
+    [["search", "x", "--category", "209"], { kind: "search", json: false, params: { query: "x", category: 209, tags: [], only_free: false, adult: false } }],
+    [["tags", "しなの"], { kind: "tags", json: false, term: "しなの" }],
+    [["compat", "123", "桔梗", "--json"], { kind: "compat", json: true, item: "123", avatar: "桔梗" }],
+    [["avatars"], { kind: "avatars", json: false }],
+    [["avatars", "init"], { kind: "avatars-init", json: false }],
+    [["sync"], { kind: "sync", json: false }],
+    [["sync", "--max", "50"], { kind: "sync", json: false, max: 50 }],
   ] as Array<[string[], CliCommand]>)("parses %j", (args, expected) => {
     expect(parseCliArgs(args)).toEqual(expected);
   });
 
-  it.each([["bogus"], ["login", "--timeout", "abc"], ["login", "--timeout"], ["status", "--verbose"], ["logout", "now"]])(
+  it.each([
+    ["bogus"],
+    ["login", "--timeout", "abc"],
+    ["login", "--timeout"],
+    ["status", "--verbose"],
+    ["logout", "now"],
+    ["library", "--bogus"],
+    ["library", "--kind", "hat"],
+    ["library", "--page", "-1"],
+    ["library", "--all=yes"],
+    ["orders", "--page", "1", "--page", "2"],
+    ["order"],
+    ["compat", "123"],
+    ["avatars", "remove"],
+    ["sync", "--max"],
+  ])(
     "rejects %j",
     (...args) => {
       expect(() => parseCliArgs(args)).toThrow(BoothError);
     },
   );
+});
+
+describe("CLI usage errors", () => {
+  it("includes the command usage for unknown flags", () => {
+    expect(() => parseCliArgs(["library", "--bogus"])).toThrow(/使い方: booth-library-mcp library [--all]/u);
+  });
 });
 
 describe("CLI commands", () => {
@@ -75,7 +120,9 @@ describe("CLI commands", () => {
     const { io, out } = captureIo();
     await runCli({ kind: "help" }, deps({}, io));
     const text = out.stdout.join("");
-    for (const word of ["login", "status", "logout", "serve", "非公式"]) expect(text).toContain(word);
+    for (const word of ["login", "status", "logout", "serve", "非公式", "library", "gifts", "orders", "order", "item", "search", "tags", "compat", "avatars init", "sync"]) {
+      expect(text).toContain(word);
+    }
   });
 });
 

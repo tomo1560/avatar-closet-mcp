@@ -50,7 +50,7 @@ export interface ItemVariationSummary {
 }
 
 /** Compact, LLM-friendly view of `items/{id}.json`. Never contains download URLs. */
-export interface ItemDetail {
+export interface ItemSummary {
   item_id: string;
   name: string;
   url: string;
@@ -73,7 +73,7 @@ export interface ItemDetail {
 
 export interface GetItemResult {
   raw: RawBoothItem;
-  summary: ItemDetail;
+  summary: ItemSummary;
 }
 
 export interface SummarizeOptions {
@@ -130,7 +130,7 @@ function parseItemForId(json: unknown, itemId: string, finalUrl: string): RawBoo
   return item;
 }
 
-export function summarizeItem(raw: RawBoothItem, options: SummarizeOptions = {}): ItemDetail {
+export function summarizeItem(raw: RawBoothItem, options: SummarizeOptions = {}): ItemSummary {
   const description = truncateText(raw.description, options.descriptionMaxChars ?? DEFAULT_DESCRIPTION_MAX_CHARS);
   return {
     item_id: String(raw.id),

@@ -5,7 +5,6 @@
  * agree on the 2026 markup (see tests/fixtures/buyer/library.html for the full source list).
  */
 import type { Cheerio, CheerioAPI } from "cheerio";
-import type { Element } from "domhandler";
 import {
   assertAccountsPage,
   assertNotSignInPage,
@@ -21,6 +20,7 @@ import {
   resolveUrl,
   textOrNull,
   type Card,
+  type Element,
   type PageInfo,
 } from "./buyer-common.js";
 
