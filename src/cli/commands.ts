@@ -70,43 +70,43 @@ const NUMERIC_ID = /^\d{1,20}$/u;
 
 type SpecName = keyof typeof SPECS;
 
-export const HELP_TEXT = `booth-library-mcp - BOOTH 購入者向けの非公式・読み取り専用 MCP サーバー / CLI（pixiv・BOOTH とは無関係です）
+export const HELP_TEXT = `avatar-closet-mcp - BOOTH 購入者向けの非公式・読み取り専用 MCP サーバー / CLI（pixiv・BOOTH とは無関係です）
 
 使い方:
-  booth-library-mcp                          stdio MCP サーバーを起動（serve と同じ）
-  booth-library-mcp login [--timeout <秒>]   専用ブラウザで BOOTH にログイン（30〜1800 秒、既定 600）
-  booth-library-mcp status [--json]          ログイン状態を表示（未ログイン時は終了コード 1）
-  booth-library-mcp logout                   保存したセッションとログイン用ブラウザプロファイルを削除
-  booth-library-mcp ${SPECS.library.usage}
+  avatar-closet-mcp                          stdio MCP サーバーを起動（serve と同じ）
+  avatar-closet-mcp login [--timeout <秒>]   専用ブラウザで BOOTH にログイン（30〜1800 秒、既定 600）
+  avatar-closet-mcp status [--json]          ログイン状態を表示（未ログイン時は終了コード 1）
+  avatar-closet-mcp logout                   保存したセッションとログイン用ブラウザプロファイルを削除
+  avatar-closet-mcp ${SPECS.library.usage}
                                              ライブラリ（購入した商品）。--all で全ページ（最大 20 ページ）
-  booth-library-mcp ${SPECS.gifts.usage}
+  avatar-closet-mcp ${SPECS.gifts.usage}
                                              受け取ったギフト
-  booth-library-mcp ${SPECS.free.usage}
+  avatar-closet-mcp ${SPECS.free.usage}
                                              ライブラリの「無料ダウンロード」タブ（このタブにはファイルの一覧がありません）
-  booth-library-mcp ${SPECS.wishlist.usage}
+  avatar-closet-mcp ${SPECS.wishlist.usage}
                                              ほしいものリスト（スキ！した商品、1 ページ 20 件、--all で最大 20 ページ）。
                                              --list で名前付きリストに絞り込み、--vrchat で対応アバター・依存ツールの判定。
                                              wishlist names は名前付きリストの一覧
-  booth-library-mcp ${SPECS.orders.usage}            注文履歴
-  booth-library-mcp ${SPECS.order.usage}            注文詳細（氏名・住所・連絡先は表示しません）
-  booth-library-mcp ${SPECS.item.usage} 商品詳細（--vrchat で対応アバター・依存ツール）
-  booth-library-mcp ${SPECS.search.usage}
+  avatar-closet-mcp ${SPECS.orders.usage}            注文履歴
+  avatar-closet-mcp ${SPECS.order.usage}            注文詳細（氏名・住所・連絡先は表示しません）
+  avatar-closet-mcp ${SPECS.item.usage} 商品詳細（--vrchat で対応アバター・依存ツール）
+  avatar-closet-mcp ${SPECS.search.usage}
                                              BOOTH を検索（1〜5 ページ目）
-  booth-library-mcp ${SPECS.tags.usage}                 タグ候補
-  booth-library-mcp ${SPECS.compat.usage} アバター対応の判定（根拠付き）
-  booth-library-mcp avatars [--json]         所持アバターとアバター辞書
-  booth-library-mcp avatars init             所持アバターのうち辞書に無いものを avatars.json に追加
-  booth-library-mcp ${SPECS.sync.usage}         購入品の商品データをキャッシュに取り込む（1 件あたり約 1 秒）
-  booth-library-mcp ${SPECS.download.usage}
+  avatar-closet-mcp ${SPECS.tags.usage}                 タグ候補
+  avatar-closet-mcp ${SPECS.compat.usage} アバター対応の判定（根拠付き）
+  avatar-closet-mcp avatars [--json]         所持アバターとアバター辞書
+  avatar-closet-mcp avatars init             所持アバターのうち辞書に無いものを avatars.json に追加
+  avatar-closet-mcp ${SPECS.sync.usage}         購入品の商品データをキャッシュに取り込む（1 件あたり約 1 秒）
+  avatar-closet-mcp ${SPECS.download.usage}
                                              購入したファイルを保存（オプトイン: BOOTH_MCP_ENABLE_DOWNLOAD=1 が必要。
                                              保存先は --out か BOOTH_MCP_DOWNLOAD_DIR。既存ファイルは上書きしません）
-  booth-library-mcp ${SPECS.updates.usage}
+  avatar-closet-mcp ${SPECS.updates.usage}
                                              前回の確認から更新された購入品（ダウンロードファイルの追加・削除・改名）。
                                              初回は基準を記録するだけです。--avatar で対応アバターの商品に絞り込み
-  booth-library-mcp ${SPECS["unity-check"].usage}
+  avatar-closet-mcp ${SPECS["unity-check"].usage}
                                              Unity プロジェクトに入っている購入品を推定（Assets/ のフォルダ名と
                                              Packages/*.json だけを読みます）
-  booth-library-mcp help                     このヘルプを表示
+  avatar-closet-mcp help                     このヘルプを表示
 
 --kind: ${VRCHAT_KINDS.join(" / ")}
 対応判定は商品データからの根拠付きヒューリスティックです。根拠が無いものは unknown と表示します。
@@ -117,7 +117,7 @@ export function parseCliArgs(args: readonly string[]): CliCommand {
   if (command === undefined) return { kind: "serve" };
   if (command === "help" || command === "--help" || command === "-h") return { kind: "help" };
   if (!(command in SPECS)) {
-    throw new BoothError("INVALID_INPUT", `不明なコマンドです: ${command}（\`booth-library-mcp help\` を参照）`);
+    throw new BoothError("INVALID_INPUT", `不明なコマンドです: ${command}（\`avatar-closet-mcp help\` を参照）`);
   }
   const name = command as SpecName;
   return toCommand(name, parseArgs(rest, SPECS[name]));

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "booth-library-mcp",
+      "name": "avatar-closet-mcp",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "cheerio": "1.1.2",

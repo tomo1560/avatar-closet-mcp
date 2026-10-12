@@ -73,7 +73,7 @@ async function setup(handler: FakeHandler): Promise<{
   harness: FakeTransportHarness;
   clock: ReturnType<typeof createFakeClock>;
 }> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-retry-"));
+  const directory = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-retry-"));
   tempPaths.push(directory);
   const harness = new FakeTransportHarness(handler);
   const clock = createFakeClock();

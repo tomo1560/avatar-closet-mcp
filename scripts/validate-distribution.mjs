@@ -12,7 +12,9 @@ const marketplace = await readJson(".agents/plugins/marketplace.json");
 const skill = await readFile(resolve(root, "skills/booth/SKILL.md"), "utf8");
 const agentMetadata = await readFile(resolve(root, "skills/booth/agents/openai.yaml"), "utf8");
 
-assert(plugin.name === "booth-library-mcp", "plugin name must be booth-library-mcp");
+assert(packageJson.name === "avatar-closet-mcp", "package name must be avatar-closet-mcp");
+assert(packageJson.bin?.["avatar-closet-mcp"] === "dist/cli.js", "package must expose the avatar-closet-mcp bin");
+assert(plugin.name === "avatar-closet-mcp", "plugin name must be avatar-closet-mcp");
 assert(plugin.version === packageJson.version, "plugin version must match package.json");
 assertEnglish(packageJson.description, "package description");
 assertEnglish(plugin.description, "plugin description");
@@ -25,13 +27,13 @@ assert(plugin.skills === "./skills/", "plugin must expose ./skills/");
 assert(plugin.mcpServers === "./.mcp.json", "plugin must expose ./.mcp.json");
 assert(mcp?.mcpServers?.booth?.command === "npx", "booth MCP must use npx");
 assert(
-  JSON.stringify(mcp.mcpServers.booth.args) === JSON.stringify(["-y", `booth-library-mcp@${packageJson.version}`]),
+  JSON.stringify(mcp.mcpServers.booth.args) === JSON.stringify(["-y", `avatar-closet-mcp@${packageJson.version}`]),
   "booth MCP must pin the package version",
 );
-assert(marketplace.name === "booth-library-mcp", "marketplace name must be booth-library-mcp");
-const marketplacePlugin = marketplace.plugins?.find((entry) => entry.name === "booth-library-mcp");
+assert(marketplace.name === "avatar-closet-mcp", "marketplace name must be avatar-closet-mcp");
+const marketplacePlugin = marketplace.plugins?.find((entry) => entry.name === "avatar-closet-mcp");
 assert(marketplacePlugin?.source?.source === "npm", "marketplace must use an npm source");
-assert(marketplacePlugin?.source?.package === "booth-library-mcp", "marketplace must install booth-library-mcp");
+assert(marketplacePlugin?.source?.package === "avatar-closet-mcp", "marketplace must install avatar-closet-mcp");
 assert(marketplacePlugin?.source?.version === "latest", "marketplace must follow the latest dist-tag");
 assert(/^---\r?\nname: booth\r?\n/u.test(skill), "skill frontmatter name must be booth");
 const toolNames = [
@@ -63,7 +65,7 @@ assert(/evidence/u.test(skill) && /unknown/u.test(skill), "skill must require ev
 assert(/not affiliated with pixiv or BOOTH/u.test(skill), "skill must state that it is unofficial and unaffiliated");
 assert(/opt-in/u.test(skill) && /never overwrites/u.test(skill), "skill must describe booth_download as opt-in and non-overwriting");
 assert(/first_run/u.test(skill) && /baseline/u.test(skill), "skill must explain that the first booth_check_updates call only records a baseline");
-assert(skill.includes("booth-library-mcp unity-check"), "skill must route Unity project questions to the unity-check CLI command");
+assert(skill.includes("avatar-closet-mcp unity-check"), "skill must route Unity project questions to the unity-check CLI command");
 assert(agentMetadata.includes("allow_implicit_invocation: true"), "skill must allow implicit invocation");
 assert(agentMetadata.includes('value: "booth"'), "skill must depend on the booth MCP server");
 assertEnglish(skill, "skill instructions");

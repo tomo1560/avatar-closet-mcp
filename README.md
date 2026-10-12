@@ -1,11 +1,16 @@
-# booth-library-mcp
+# avatar-closet-mcp
 
 > [!IMPORTANT]
-> **非公式ツールです。pixiv / BOOTH とは一切関係ありません。** BOOTH の画面構造が変わると一部の機能が動かなくなることがあります。
+> **BOOTH 向けに作られた非公式ツールで、pixiv / BOOTH が開発・配布するものではありません。** 個人が開発したもので、ピクシブ株式会社・BOOTH・BOOTH Library Manager とは提携・承認・協賛の関係にありません。本ツールについて BOOTH 事務局やショップへ問い合わせないでください。BOOTH の画面構造が変わると一部の機能が動かなくなることがあります。
+>
+> **An unofficial tool built for BOOTH (booth.pm) buyers. It is not made or distributed by pixiv Inc. or BOOTH, and is not affiliated with or endorsed by pixiv Inc., BOOTH, or BOOTH Library Manager.**
+>
+> 「pixiv」「BOOTH」はピクシブ株式会社の商標または登録商標です。公式サービスとの混同を避けるため、本ツールの名前には「BOOTH」を含めていません（[調査メモ](docs/research-2026-10-12.md) §2）。
+> "pixiv" and "BOOTH" are trademarks or registered trademarks of pixiv Inc. This tool's name deliberately avoids "BOOTH" to prevent confusion with official services.
 
 自分の BOOTH アカウントの購入データ（ライブラリ・ギフト・無料ダウンロード・注文履歴・ほしいものリスト）と BOOTH の公開商品データを、**読み取り専用**で扱う MCP サーバー + CLI です（BOOTH 上のデータは変更しません。購入ファイルのダウンロードは[オプトイン](#ダウンロードオプトイン)です）。VRChat 向けに「持っている衣装のうち しなの 対応のものは？」「この商品は 桔梗 に対応してる？」に根拠付きで答えるための機能があります。
 
-本プロジェクトは [cstria0106/booth-mcp](https://github.com/cstria0106/booth-mcp)（MIT License）のフォークです。原作者に感謝します。ライセンスは MIT です（[LICENSE](LICENSE)）。
+本プロジェクトは [cstria0106/booth-mcp](https://github.com/cstria0106/booth-mcp)（MIT License）のフォークです。原作者に感謝します。ライセンスは MIT で、原作者の著作権表示を残したうえでフォーク側の変更分の表示を加えています（[LICENSE](LICENSE)）。リポジトリ: https://github.com/tomo1560/avatar-closet-mcp
 
 ## できること・できないこと
 
@@ -16,32 +21,37 @@
 ## 必要なもの
 
 - Node.js 20 以上
+- ソースからビルドする場合: [Bun](https://bun.sh/)（1.3.14 で確認）と Git
 - ログイン時のみ: Google Chrome または Microsoft Edge と、ブラウザ画面を表示できるデスクトップ環境
 
 ## インストール
 
-> **npm にはまだ公開していません。** 公開までは下の「ソースからビルドして使う」の手順を使ってください。`npx -y booth-library-mcp` は公開後に使える手順です。
+> **npm にはまだ公開していません。** 今は GitHub から取得してビルドしてください。`npx -y avatar-closet-mcp` を使う手順（このページの CLI の例を含む）は npm 公開後のものです。公開前は `npx -y avatar-closet-mcp` を `node <abs>/dist/cli.js` に読み替えてください。
 
-### ソースからビルドして使う
+### GitHub から取得してビルドする
 
 ```bash
+git clone https://github.com/tomo1560/avatar-closet-mcp
+cd avatar-closet-mcp
 bun install
 bun run build
-# Claude Code に登録（パスは clone した場所の dist/cli.js の絶対パスに置き換える）
-claude mcp add booth -- node /absolute/path/to/booth-mcp/dist/cli.js
+# Claude Code に登録（<abs> は clone したフォルダの絶対パスに置き換える）
+claude mcp add booth -- node <abs>/dist/cli.js
 # CLI として使う
 node dist/cli.js login
 node dist/cli.js library --all
 ```
 
-Claude Desktop などでは `"command": "node"`, `"args": ["/absolute/path/to/booth-mcp/dist/cli.js"]` を指定します。
+Claude Desktop などでは `"command": "node"`, `"args": ["<abs>/dist/cli.js"]` を指定します。
+
+旧名 `booth-library-mcp` から更新する場合は[移行](#移行旧名-booth-library-mcp-から)を参照してください。
 
 ### npm 公開後
 
 Claude Code:
 
 ```bash
-claude mcp add booth -- npx -y booth-library-mcp
+claude mcp add booth -- npx -y avatar-closet-mcp
 ```
 
 Claude Desktop（`claude_desktop_config.json`）や Cursor などの MCP 設定:
@@ -51,7 +61,7 @@ Claude Desktop（`claude_desktop_config.json`）や Cursor などの MCP 設定:
   "mcpServers": {
     "booth": {
       "command": "npx",
-      "args": ["-y", "booth-library-mcp"]
+      "args": ["-y", "avatar-closet-mcp"]
     }
   }
 }
@@ -62,7 +72,7 @@ Codex（プラグインを使わない場合）:
 ```toml
 [mcp_servers.booth]
 command = "npx"
-args = ["-y", "booth-library-mcp"]
+args = ["-y", "avatar-closet-mcp"]
 ```
 
 ## ログイン
@@ -70,7 +80,7 @@ args = ["-y", "booth-library-mcp"]
 MCP クライアントから `booth_login` を呼ぶか、ターミナルで次を実行します。
 
 ```bash
-npx -y booth-library-mcp login
+npx -y avatar-closet-mcp login
 ```
 
 専用プロファイルの Chrome / Edge が開くので、**自分で** pixiv アカウントでログインしてください。このツールはパスワードを読み取ったり自動入力したりしません（reCAPTCHA や二段階認証もそのままブラウザで操作します）。ログインが確認できるとセッション cookie が `session.json` に保存され、以降の問い合わせではブラウザを起動しません。
@@ -119,23 +129,23 @@ npx -y booth-library-mcp login
 MCP と同じ処理を CLI からも使えます。既定は表形式、`--json` で MCP と同じ JSON を出力します。
 
 ```bash
-npx -y booth-library-mcp library [--all] [--page N] [--query Q] [--avatar A] [--kind K] [--dependency D] [--json]
-npx -y booth-library-mcp gifts   （library と同じオプション）
-npx -y booth-library-mcp free    （library と同じオプション。無料ダウンロードのタブ）
-npx -y booth-library-mcp wishlist [--page N] [--list <コード|名前>] [--all] [--vrchat] [--json]
-npx -y booth-library-mcp wishlist names [--json]
-npx -y booth-library-mcp orders [--page N] [--json]
-npx -y booth-library-mcp order <注文ID> [--json]
-npx -y booth-library-mcp item <商品ID|URL> [--vrchat] [--json]
-npx -y booth-library-mcp search <検索語> [--category C] [--tag T]... [--sort S] [--page N] [--free] [--adult] [--json]
-npx -y booth-library-mcp tags <語> [--json]
-npx -y booth-library-mcp compat <商品ID|URL> <アバター> [--json]
-npx -y booth-library-mcp avatars [init] [--json]
-npx -y booth-library-mcp sync [--max N] [--json]
-npx -y booth-library-mcp download <ダウンロードID> [--variation N] [--out <dir>] [--json]   （オプトイン）
-npx -y booth-library-mcp updates [--item <商品ID>]... [--avatar A] [--json]
-npx -y booth-library-mcp unity-check <Unityプロジェクトのフォルダ> [--json]
-npx -y booth-library-mcp login [--timeout <秒>] | status [--json] | logout | serve | help
+npx -y avatar-closet-mcp library [--all] [--page N] [--query Q] [--avatar A] [--kind K] [--dependency D] [--json]
+npx -y avatar-closet-mcp gifts   （library と同じオプション）
+npx -y avatar-closet-mcp free    （library と同じオプション。無料ダウンロードのタブ）
+npx -y avatar-closet-mcp wishlist [--page N] [--list <コード|名前>] [--all] [--vrchat] [--json]
+npx -y avatar-closet-mcp wishlist names [--json]
+npx -y avatar-closet-mcp orders [--page N] [--json]
+npx -y avatar-closet-mcp order <注文ID> [--json]
+npx -y avatar-closet-mcp item <商品ID|URL> [--vrchat] [--json]
+npx -y avatar-closet-mcp search <検索語> [--category C] [--tag T]... [--sort S] [--page N] [--free] [--adult] [--json]
+npx -y avatar-closet-mcp tags <語> [--json]
+npx -y avatar-closet-mcp compat <商品ID|URL> <アバター> [--json]
+npx -y avatar-closet-mcp avatars [init] [--json]
+npx -y avatar-closet-mcp sync [--max N] [--json]
+npx -y avatar-closet-mcp download <ダウンロードID> [--variation N] [--out <dir>] [--json]   （オプトイン）
+npx -y avatar-closet-mcp updates [--item <商品ID>]... [--avatar A] [--json]
+npx -y avatar-closet-mcp unity-check <Unityプロジェクトのフォルダ> [--json]
+npx -y avatar-closet-mcp login [--timeout <秒>] | status [--json] | logout | serve | help
 ```
 
 `login` の `--timeout` は 30〜1800 秒（既定 600）。`status` は未ログインのとき終了コード 1 を返します（[終了コード](#エラーコードと終了コード)）。
@@ -171,8 +181,8 @@ npx -y booth-library-mcp login [--timeout <秒>] | status [--json] | logout | se
 ## Unity プロジェクトとの突き合わせ（CLI）
 
 ```bash
-npx -y booth-library-mcp unity-check "D:/Unity/MyAvatar"
-npx -y booth-library-mcp unity-check ./MyAvatarProject --json
+npx -y avatar-closet-mcp unity-check "D:/Unity/MyAvatar"
+npx -y avatar-closet-mcp unity-check ./MyAvatarProject --json
 ```
 
 - Unity プロジェクトの `Assets/` のフォルダ名（2 階層まで）と `Packages/vpm-manifest.json` / `Packages/manifest.json` だけを読み、ライブラリとギフトの商品名・ダウンロードファイル名、無料ダウンロードの商品名と照合します。アセットの中身は読みません。
@@ -186,7 +196,7 @@ npx -y booth-library-mcp unity-check ./MyAvatarProject --json
 - **推測はしません。** 根拠が見つからなければ `unknown` です。「〇〇には非対応」などの否定表現は `not_supported` になります。判定はヒューリスティックなので、最終確認は商品ページで行ってください。
 - `kind` は BOOTH のカテゴリから `avatar` / `costume` / `accessory` / `tool` / `motion` / `other` に分類します。
 - 依存ツール（lilToon, Poiyomi, Modular Avatar, VRCFury, Avatar Optimizer, NDMF など）と Quest 対応（`yes` / `no` / `unknown`）も同様に根拠付きで返します。
-- ライブラリの絞り込み（`avatar` / `kind` / `dependency`）や `booth_list_my_avatars` は、購入品ごとの商品データが必要です。1 回の呼び出しで取得するのは最大 20 件なので、購入品が多い場合は先に `npx -y booth-library-mcp sync` で取り込んでおくと速く答えられます。
+- ライブラリの絞り込み（`avatar` / `kind` / `dependency`）や `booth_list_my_avatars` は、購入品ごとの商品データが必要です。1 回の呼び出しで取得するのは最大 20 件なので、購入品が多い場合は先に `npx -y avatar-closet-mcp sync` で取り込んでおくと速く答えられます。
 
 ## ダウンロード（オプトイン）
 
@@ -207,7 +217,7 @@ npx -y booth-library-mcp unity-check ./MyAvatarProject --json
   "mcpServers": {
     "booth": {
       "command": "npx",
-      "args": ["-y", "booth-library-mcp"],
+      "args": ["-y", "avatar-closet-mcp"],
       "env": { "BOOTH_MCP_ENABLE_DOWNLOAD": "1", "BOOTH_MCP_DOWNLOAD_DIR": "D:\\BOOTH" }
     }
   }
@@ -225,7 +235,7 @@ npx -y booth-library-mcp unity-check ./MyAvatarProject --json
 - CLI でも `BOOTH_MCP_ENABLE_DOWNLOAD=1` が必要です（確認を省くフラグはありません）。`--out <dir>` はその実行に限り `BOOTH_MCP_DOWNLOAD_DIR` の代わりに使う保存先で、相対パスはカレントディレクトリ基準です。
 
 ```bash
-BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./booth
+BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y avatar-closet-mcp download 1234567 --out ./booth
 ```
 
 **自分が購入・受け取りしたファイル専用です。** 一度に大量のダウンロードはしないでください（pixiv の利用規約は過度な負荷や機械的な大量操作を禁じています）。保存したファイルの扱い（再配布の禁止など）は各商品の利用規約に従ってください。
@@ -245,7 +255,7 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 ```
 
 - `names` は先頭が正式名、残りが別名です。`restricted: true` は一般名詞と紛らわしい名前（萌・ライムなど）を、タグ・バリエーション名・「対応アバター」見出しの中と「〇〇用」「〇〇対応」のような書き方のときだけ照合します（`restricted_names` で別名ごとの指定も可）。
-- `npx -y booth-library-mcp avatars init` は、ライブラリにあるアバター本体のうち辞書に無いものを avatars.json に追記します。既存のエントリは変更しません。追記後に別名を手で足してください（ファイルは `{ "version": 1, "avatars": [...] }` 形式で書き直され、`id` / `names` / `restricted` / `restricted_names` 以外のキーは残りません）。
+- `npx -y avatar-closet-mcp avatars init` は、ライブラリにあるアバター本体のうち辞書に無いものを avatars.json に追記します。既存のエントリは変更しません。追記後に別名を手で足してください（ファイルは `{ "version": 1, "avatars": [...] }` 形式で書き直され、`id` / `names` / `restricted` / `restricted_names` 以外のキーは残りません）。
 - 辞書の変更は次の呼び出しから反映されます（判定結果は保存しません）。
 
 ## キャッシュ
@@ -269,9 +279,9 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 
 | OS | 場所 |
 | --- | --- |
-| Windows | `%LOCALAPPDATA%\booth-library-mcp` |
-| macOS | `~/Library/Application Support/booth-library-mcp` |
-| Linux | `$XDG_CONFIG_HOME/booth-library-mcp`（既定 `~/.config/booth-library-mcp`） |
+| Windows | `%LOCALAPPDATA%\avatar-closet-mcp` |
+| macOS | `~/Library/Application Support/avatar-closet-mcp` |
+| Linux | `$XDG_CONFIG_HOME/avatar-closet-mcp`（既定 `~/.config/avatar-closet-mcp`） |
 
 | ファイル | 内容 | 個別に変更する環境変数 |
 | --- | --- | --- |
@@ -282,10 +292,20 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 
 既定の場所はすべて `<アプリディレクトリ>` 直下です（`session.json`・`browser-profile/`・`cache/`・`avatars.json`）。`BOOTH_MCP_HOME` を変えるとこれらがまとめて移動します。
 
+### 移行（旧名 booth-library-mcp から）
+
+本ツールは `booth-library-mcp` から `avatar-closet-mcp` に改名しました（公式アプリ「BOOTH Library Manager」と紛らわしい名前を避けるため。[調査メモ](docs/research-2026-10-12.md) §2）。これに合わせて、データフォルダも同じ親フォルダの中で `booth-library-mcp` から `avatar-closet-mcp` に変わりました。
+
+- **移行は自動です。** CLI・MCP サーバーの起動時に、`avatar-closet-mcp` が無く `booth-library-mcp` があれば、フォルダの名前を 1 回だけ変更します。セッション・キャッシュ・avatars.json はそのまま引き継がれ、ログインのやり直しは不要です。
+- 名前を変更できなかったとき（ほかの MCP サーバーやログイン用ブラウザがフォルダ内のファイルを開いているなど）は、標準エラーに警告を 1 回出し、その回は `booth-library-mcp` をそのまま使います。それらを閉じてから起動し直すと移行されます。
+- `BOOTH_MCP_HOME` か個別の保存先（`BOOTH_MCP_SESSION_FILE`・`BOOTH_MCP_PROFILE_DIR`・`BOOTH_MCP_CACHE_DIR`・`BOOTH_MCP_AVATARS_FILE`）を指定しているときは移行しません。指定した場所はそのまま使い、指定していない分は `avatar-closet-mcp` が無ければ `booth-library-mcp` を使い続けます。
+- MCP クライアントに登録したコマンド（`dist/cli.js` のパスやパッケージ名）は手で書き換えてください。
+- 次のものは変わりません: MCP サーバー名 `booth`、ツール名 `booth_*`（連携するプラットフォームを示す機能的な表記で、ツール自体の名前に商標を使うこととは別）、環境変数 `BOOTH_MCP_*`（既存の設定との互換のため）、スキルのフォルダ `skills/booth`。
+
 ### 注意: 設定の変更とログインのやり直し
 
 - **`session.json` の場所が変わりました。** 常に `<アプリディレクトリ>/session.json` に保存され、`BOOTH_MCP_PROFILE_DIR` の隣には作られません。`BOOTH_MCP_SESSION_FILE` で場所を指定できます。`BOOTH_MCP_PROFILE_DIR` を指定していた場合、以前の `session.json` は見つからないので、**`login`（または `booth_login`）をやり直してください。**
-- **`logout` が削除するブラウザプロファイルは限定されています。** `booth-library-mcp-profile.json`（ログイン時に本ツールが作成したプロファイルに付くマーカー）があるものだけを削除します。カスタムの `BOOTH_MCP_PROFILE_DIR` の場合は、さらに Chromium のプロファイルらしい（`Local State` か `Default/` がある）ことも必要です。マーカーが無い古いプロファイルや別の方法で作ったプロファイルは削除されず、警告が出ます。その場合は手動で削除してください（pixiv の cookie を含むため）。
+- **`logout` が削除するブラウザプロファイルは限定されています。** `avatar-closet-mcp-profile.json`（ログイン時に本ツールが作成したプロファイルに付くマーカー。改名前の `booth-library-mcp-profile.json` も認めます）があるものだけを削除します。カスタムの `BOOTH_MCP_PROFILE_DIR` の場合は、さらに Chromium のプロファイルらしい（`Local State` か `Default/` がある）ことも必要です。マーカーが無い古いプロファイルや別の方法で作ったプロファイルは削除されず、警告が出ます。その場合は手動で削除してください（pixiv の cookie を含むため）。
 
 ## 環境変数一覧
 
@@ -309,7 +329,7 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 ## ログアウト
 
 ```bash
-npx -y booth-library-mcp logout
+npx -y avatar-closet-mcp logout
 ```
 
 `session.json` と、マーカー付きのログイン用ブラウザプロファイルを削除します（BOOTH には通信しません）。マーカーの無いプロファイルは削除せず、手動での削除を案内します（[注意](#注意-設定の変更とログインのやり直し)）。キャッシュと avatars.json は残るので、不要なら保存先のフォルダごと削除してください。
@@ -346,7 +366,7 @@ npx -y booth-library-mcp logout
 | `7` | BOOTH の仕様変更の可能性 | `BOOTH_CHANGED` |
 | `8` | 内部エラー・ローカルファイルの操作失敗、その他（想定外の例外も含む） | `INTERNAL_ERROR` |
 
-`booth-library-mcp help` の出力末尾にも同じ終了コードの一覧があります。
+`avatar-closet-mcp help` の出力末尾にも同じ終了コードの一覧があります。
 
 ## 開発
 

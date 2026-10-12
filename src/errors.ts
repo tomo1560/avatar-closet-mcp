@@ -40,7 +40,7 @@ const NETWORK_ERRNO: ReadonlySet<string> = new Set([
 const ERRNO_NAME = /^[A-Z][A-Z0-9_]{1,40}$/u;
 /** Playwright prefixes API errors with the failing call, e.g. `apiRequestContext.get: …`. */
 const PLAYWRIGHT_CALL = /^(?:apiRequestContext|apiResponse|request|browserContext|browserType|page)\.\w+:/u;
-const GENERIC_INTERNAL = "booth-library-mcp の内部でエラーが発生しました。再実行しても解決しない場合は報告してください。";
+const GENERIC_INTERNAL = "avatar-closet-mcp の内部でエラーが発生しました。再実行しても解決しない場合は報告してください。";
 
 /**
  * Converts any thrown value into a BoothError without leaking local paths, cookies or stacks:

@@ -93,7 +93,7 @@ describe("loading the saved session", () => {
 });
 
 async function createTempDirectory(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-session-"));
+  const directory = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-session-"));
   tempPaths.push(directory);
   return directory;
 }

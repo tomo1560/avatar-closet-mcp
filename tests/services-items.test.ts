@@ -17,7 +17,7 @@ afterEach(async () => {
 });
 
 async function setup(reader: RoutedFakeReader): Promise<{ service: BoothService; home: string }> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-items-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-items-"));
   tempPaths.push(home);
   return { service: new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }), home };
 }
@@ -95,7 +95,7 @@ describe("getItem", () => {
 
   it("masks quoted and bare local paths in avatars.json errors", () => {
     const quoted = dictionaryError(new Error("EACCES: permission denied, open 'C:\\Users\\taro\\avatars.json'"));
-    const bare = dictionaryError(new Error("cannot write /home/taro/.config/booth-library-mcp/avatars.json now"));
+    const bare = dictionaryError(new Error("cannot write /home/taro/.config/avatar-closet-mcp/avatars.json now"));
     const windows = dictionaryError(new Error("failed at C:\\Users\\taro\\AppData\\avatars.json"));
     for (const error of [quoted, bare, windows]) {
       expect(error.code).toBe("INVALID_INPUT");

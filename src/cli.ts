@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { realpathSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { migrateLegacyAppDir } from "./app-dir-migration.js";
 import { parseCliArgs } from "./cli/commands.js";
 import { exitCodeFor } from "./cli/exit-codes.js";
 import { runCli, type CliDeps } from "./cli/run.js";
@@ -14,6 +15,8 @@ export { EXIT_CODE_HELP, EXIT_CODES, exitCodeFor } from "./cli/exit-codes.js";
 export { runCli, type CliDeps, type CliIo } from "./cli/run.js";
 
 export async function main(args: readonly string[] = process.argv.slice(2)): Promise<void> {
+  // Before anything reads the session or the cache (never throws; warns once and keeps the old folder on failure).
+  await migrateLegacyAppDir();
   const exitCode = await runMain(args, {
     createService: () => new BoothService(),
     serve: startStdioServer,
@@ -30,7 +33,7 @@ export async function runMain(args: readonly string[], deps: CliDeps): Promise<n
   try {
     return await runCli(parseCliArgs(args), deps);
   } catch (error) {
-    deps.io.stderr(`booth-library-mcp エラー: ${describeCliError(error)}\n`);
+    deps.io.stderr(`avatar-closet-mcp エラー: ${describeCliError(error)}\n`);
     return exitCodeFor(error);
   }
 }
@@ -58,7 +61,7 @@ function invokedScriptUrl(): string {
 
 if (import.meta.url === invokedScriptUrl()) {
   main().catch((error: unknown) => {
-    process.stderr.write(`booth-library-mcp エラー: ${describeCliError(error)}\n`);
+    process.stderr.write(`avatar-closet-mcp エラー: ${describeCliError(error)}\n`);
     process.exitCode = exitCodeFor(error);
   });
 }

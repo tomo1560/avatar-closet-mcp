@@ -239,7 +239,7 @@ async function setup(
   handler: FakeHandler,
   options: { withSession?: boolean } = {},
 ): Promise<{ client: BoothHttpClient; harness: FakeTransportHarness; sessionFile: string }> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-http-"));
+  const directory = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-http-"));
   tempPaths.push(directory);
   const sessionFile = join(directory, "session.json");
   if (options.withSession !== false) await writeSession(sessionFile, [boothCookie("_plaza_session_test", "fictional-0")]);

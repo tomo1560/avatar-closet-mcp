@@ -119,7 +119,7 @@ function printStatus(result: BoothResult<AuthStatus>, json: boolean, io: CliIo):
   } else if (result.data.authenticated) {
     io.stdout(stripControl(`ログイン済みです${result.data.displayName ? `（${result.data.displayName}）` : ""}。\n`));
   } else {
-    io.stdout("未ログインです。`booth-library-mcp login` を実行してください。\n");
+    io.stdout("未ログインです。`avatar-closet-mcp login` を実行してください。\n");
   }
   return result.data.authenticated ? EXIT_OK : EXIT_NOT_LOGGED_IN;
 }

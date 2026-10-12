@@ -10,7 +10,7 @@ import {
   isAllowedDownloadHost,
 } from "../src/booth/download.js";
 
-const ABS_DIR = join(tmpdir(), "booth-library-mcp-config-test");
+const ABS_DIR = join(tmpdir(), "avatar-closet-mcp-config-test");
 
 describe("getDownloadConfig gating", () => {
   it("is disabled with defaults when nothing is set", () => {

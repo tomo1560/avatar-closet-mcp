@@ -16,7 +16,7 @@ afterEach(async () => {
 });
 
 async function withClient(env: Record<string, string>, run: (client: Client) => Promise<void>): Promise<void> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-untrusted-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-untrusted-"));
   tempPaths.push(home);
   const reader = new RoutedFakeReader(itemRoutes([6659058]));
   const service = new BoothService(reader, { env: { BOOTH_MCP_HOME: home, ...env, ...(env.BOOTH_MCP_DOWNLOAD_DIR ? { BOOTH_MCP_DOWNLOAD_DIR: join(home, "dl") } : {}) } });

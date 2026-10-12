@@ -3,7 +3,9 @@ import { homedir } from "node:os";
 import { dirname, isAbsolute, join, parse, relative, resolve, sep } from "node:path";
 
 /** Written by login only into a profile directory it created itself. */
-export const PROFILE_MARKER_FILE = "booth-library-mcp-profile.json";
+export const PROFILE_MARKER_FILE = "avatar-closet-mcp-profile.json";
+/** Marker written before the rename to avatar-closet-mcp (PLAN §7-7); logout still accepts it. */
+export const LEGACY_PROFILE_MARKER_FILE = "booth-library-mcp-profile.json";
 export const DEFAULT_PROFILE_DIR_NAME = "browser-profile";
 
 export interface ProfileDirPaths {
@@ -21,7 +23,7 @@ export async function prepareProfileDir(profileDir: string): Promise<void> {
   const existed = await pathExists(profileDir);
   await mkdir(profileDir, { recursive: true, mode: 0o700 });
   if (!existed) {
-    await writeFile(join(profileDir, PROFILE_MARKER_FILE), `${JSON.stringify({ createdBy: "booth-library-mcp" })}\n`, {
+    await writeFile(join(profileDir, PROFILE_MARKER_FILE), `${JSON.stringify({ createdBy: "avatar-closet-mcp" })}\n`, {
       encoding: "utf8",
       mode: 0o600,
     });
@@ -30,8 +32,9 @@ export async function prepareProfileDir(profileDir: string): Promise<void> {
 
 /**
  * Recursively deletes the login browser profile (it holds pixiv cookies), but only when it is
- * provably ours: it must carry PROFILE_MARKER_FILE (written by login into a directory it created),
- * and a custom location must also look like a Chromium profile (`Local State` or `Default/`).
+ * provably ours: it must carry PROFILE_MARKER_FILE or the pre-rename LEGACY_PROFILE_MARKER_FILE (written by
+ * login into a directory it created), and a custom location must also look like a Chromium profile
+ * (`Local State` or `Default/`).
  * Symlinks and any directory that is, or contains, the filesystem root, the home directory, the app
  * directory, the cache directory, the session file's directory or the working directory are refused.
  */
@@ -59,7 +62,7 @@ async function refusalReason(profileDir: string, paths: ProfileDirPaths): Promis
   if (info.isSymbolicLink()) return "シンボリックリンクです";
   if (!info.isDirectory()) return "ディレクトリではありません";
   if (await containsProtectedPath(profileDir, paths)) return "保護されたディレクトリかその親ディレクトリです";
-  if (!(await pathExists(join(profileDir, PROFILE_MARKER_FILE)))) return "booth-library-mcp が作成したプロファイルではありません";
+  if (!(await hasProfileMarker(profileDir))) return "avatar-closet-mcp が作成したプロファイルではありません";
   if (isDefaultProfileDir(profileDir, paths)) return undefined;
   if (!(await looksLikeChromiumProfile(profileDir))) return "Chromium のプロファイルに見えません";
   return undefined;
@@ -106,6 +109,10 @@ function isSameOrInside(ancestor: string, candidate: string): boolean {
 function comparable(path: string): string {
   const resolved = resolve(path);
   return process.platform === "win32" || process.platform === "darwin" ? resolved.toLowerCase() : resolved;
+}
+
+async function hasProfileMarker(profileDir: string): Promise<boolean> {
+  return (await pathExists(join(profileDir, PROFILE_MARKER_FILE))) || (await pathExists(join(profileDir, LEGACY_PROFILE_MARKER_FILE)));
 }
 
 async function looksLikeChromiumProfile(profileDir: string): Promise<boolean> {

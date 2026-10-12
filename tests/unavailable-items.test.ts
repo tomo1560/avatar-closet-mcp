@@ -12,7 +12,7 @@ afterEach(async () => {
 });
 
 async function tempFile(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "booth-library-mcp-unavailable-"));
+  const dir = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-unavailable-"));
   tempPaths.push(dir);
   return join(dir, "cache", "unavailable-items.json");
 }

@@ -51,5 +51,5 @@ export function registerDownloadTools(server: McpServer, service: BoothService):
 export function downloadStartupWarning(env: NodeJS.ProcessEnv, config: DownloadConfig): string | null {
   if (env.BOOTH_MCP_ENABLE_DOWNLOAD !== "1" || config.enabled) return null;
   const reasons = config.issues.length > 0 ? config.issues.join(" ") : "設定を確認してください。";
-  return `booth-library-mcp: BOOTH_MCP_ENABLE_DOWNLOAD=1 ですが booth_download は無効です。${reasons}\n`;
+  return `avatar-closet-mcp: BOOTH_MCP_ENABLE_DOWNLOAD=1 ですが booth_download は無効です。${reasons}\n`;
 }

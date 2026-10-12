@@ -17,7 +17,7 @@ afterEach(async () => {
 });
 
 async function tempHome(): Promise<string> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-owned-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-owned-"));
   tempPaths.push(home);
   return home;
 }

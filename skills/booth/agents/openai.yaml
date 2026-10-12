@@ -1,5 +1,5 @@
 interface:
-  display_name: "BOOTH Library"
+  display_name: "Avatar Closet"
   short_description: "Unofficial: read your BOOTH purchases and wish list, find updated items, and check VRChat avatar compatibility"
   default_prompt: "Use $booth to list the outfits in my BOOTH library that support Shinano."
 

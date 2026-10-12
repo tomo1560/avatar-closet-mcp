@@ -20,7 +20,7 @@ afterEach(async () => {
 });
 
 async function setup(reader: RoutedFakeReader): Promise<{ service: BoothService; home: string }> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-sync-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-sync-"));
   tempPaths.push(home);
   return { service: new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }), home };
 }

@@ -47,7 +47,7 @@ describe("CLI download arguments", () => {
     ["download", "42", "--json=true"],
   ])("rejects %j with the usage line", (...args) => {
     expect(() => parseCliArgs(args)).toThrow(BoothError);
-    expect(() => parseCliArgs(args)).toThrow(/使い方: booth-library-mcp download/u);
+    expect(() => parseCliArgs(args)).toThrow(/使い方: avatar-closet-mcp download/u);
   });
 
   it("resolves --out against the working directory", () => {

@@ -20,7 +20,7 @@ afterEach(async () => {
 });
 
 async function run(args: string[], routes: Record<string, FakeRoute>): Promise<{ code: number; stdout: string; stderr: string; home: string }> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-cli-run-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-cli-run-"));
   tempPaths.push(home);
   const out = { stdout: "", stderr: "" };
   const code = await runCli(parseCliArgs(args), {

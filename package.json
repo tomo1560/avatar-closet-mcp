@@ -1,10 +1,18 @@
 {
-  "name": "booth-library-mcp",
+  "name": "avatar-closet-mcp",
   "version": "0.1.0",
-  "description": "Unofficial read-only MCP server and CLI for your own BOOTH purchases (library, gifts, orders) with VRChat avatar compatibility helpers",
+  "description": "Unofficial read-only MCP server and CLI for BOOTH buyers of VRChat avatars and costumes: your own library, gifts, orders and wish list, with avatar compatibility helpers. Not made or distributed by pixiv Inc., and not affiliated with pixiv or BOOTH.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomo1560/avatar-closet-mcp.git"
+  },
+  "homepage": "https://github.com/tomo1560/avatar-closet-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/tomo1560/avatar-closet-mcp/issues"
+  },
   "type": "module",
   "bin": {
-    "booth-library-mcp": "dist/cli.js"
+    "avatar-closet-mcp": "dist/cli.js"
   },
   "main": "dist/cli.js",
   "types": "dist/index.d.ts",

@@ -14,7 +14,7 @@ export const MAX_LIBRARY_PAGES = 20;
 export const LIST_MAX_FETCH = 20;
 const MAX_QUERY_LENGTH = 100;
 export const SYNC_HINT =
-  "メタデータ未取得の商品があります。booth_sync_library_metadata を繰り返し呼ぶか、CLI の `booth-library-mcp sync` で事前に取り込んでください。";
+  "メタデータ未取得の商品があります。booth_sync_library_metadata を繰り返し呼ぶか、CLI の `avatar-closet-mcp sync` で事前に取り込んでください。";
 
 const SOURCES: Readonly<Record<LibrarySource, { url: string; parse: (html: string, url: string) => LibraryPage }>> = {
   library: { url: `${ACCOUNTS_ORIGIN}/library`, parse: parseLibraryPage },

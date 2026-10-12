@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { readFileSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -12,8 +12,16 @@ const packageVersion = (JSON.parse(readFileSync(new URL("../package.json", impor
 let client: Client | undefined;
 const tempPaths: string[] = [];
 
-/** Starts the real stdio server. Only `env` (plus the SDK's safe defaults) reaches the child process. */
+/**
+ * Starts the real stdio server with a throwaway BOOTH_MCP_HOME unless `env` names one. The SDK's safe defaults
+ * include LOCALAPPDATA / HOME, so without it the server would read (and migrate) the real per-user app directory.
+ */
 async function connect(env: Record<string, string> = {}): Promise<{ client: Client; stderr: () => string }> {
+  return connectWithEnv({ BOOTH_MCP_HOME: env.BOOTH_MCP_HOME ?? (await tempHome()), ...env });
+}
+
+/** Starts the real stdio server. Only `env` (plus the SDK's safe defaults) reaches the child process. */
+async function connectWithEnv(env: Record<string, string>): Promise<{ client: Client; stderr: () => string }> {
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: ["--import", "tsx", "src/cli.ts"],
@@ -23,14 +31,14 @@ async function connect(env: Record<string, string> = {}): Promise<{ client: Clie
   });
   let stderr = "";
   transport.stderr?.on("data", (chunk: Buffer) => void (stderr += chunk.toString("utf8")));
-  const connected = new Client({ name: "booth-library-mcp-contract-test", version: "1.0.0" });
+  const connected = new Client({ name: "avatar-closet-mcp-contract-test", version: "1.0.0" });
   client = connected;
   await connected.connect(transport);
   return { client: connected, stderr: () => stderr };
 }
 
 async function tempHome(): Promise<string> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-stdio-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-stdio-"));
   tempPaths.push(home);
   return home;
 }
@@ -44,7 +52,7 @@ describe("stdio MCP contract", () => {
 
   it("publishes every buyer tool (18) with schemas and annotations (booth_download is opt-in and absent)", async () => {
     const { client } = await connect();
-    expect(client.getServerVersion()).toMatchObject({ name: "booth-library-mcp", version: packageVersion });
+    expect(client.getServerVersion()).toMatchObject({ name: "avatar-closet-mcp", version: packageVersion });
     const response = await client.listTools();
     expect(response.tools.map((tool) => tool.name)).toEqual([
       "booth_login",
@@ -126,5 +134,21 @@ describe("stdio MCP contract", () => {
     expect(names).not.toContain("booth_download");
     expect(stderr()).toContain("booth_download は無効");
     expect(stderr()).toContain("BOOTH_MCP_DOWNLOAD_DIR");
+  });
+
+  // darwin derives the parent folder from the home directory only; Windows and Linux can point it at a temp dir.
+  it.skipIf(process.platform === "darwin")("moves the legacy booth-library-mcp data folder at startup", async () => {
+    const parent = await tempHome();
+    await mkdir(join(parent, "booth-library-mcp", "cache"), { recursive: true });
+    await writeFile(join(parent, "booth-library-mcp", "avatars.json"), '{"version":1,"avatars":[]}', "utf8");
+    const parentEnv = process.platform === "win32" ? { LOCALAPPDATA: parent } : { XDG_CONFIG_HOME: parent };
+
+    const { client, stderr } = await connectWithEnv(parentEnv);
+
+    expect(client.getServerVersion()?.name).toBe("avatar-closet-mcp");
+    expect(existsSync(join(parent, "booth-library-mcp"))).toBe(false);
+    expect(await readFile(join(parent, "avatar-closet-mcp", "avatars.json"), "utf8")).toBe('{"version":1,"avatars":[]}');
+    expect(existsSync(join(parent, "avatar-closet-mcp", "cache"))).toBe(true);
+    expect(stderr()).not.toContain("移行できませんでした");
   });
 });

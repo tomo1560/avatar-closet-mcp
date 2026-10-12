@@ -97,7 +97,7 @@ const loggedOutReader: BoothReader = {
 function captureDeps(overrides: Partial<CliDeps> = {}): { deps: CliDeps; out: { stdout: string; stderr: string } } {
   const out = { stdout: "", stderr: "" };
   const deps: CliDeps = {
-    createService: () => new BoothService(loggedOutReader, { env: { BOOTH_MCP_HOME: "/nonexistent-booth-library-mcp-home" } }),
+    createService: () => new BoothService(loggedOutReader, { env: { BOOTH_MCP_HOME: "/nonexistent-avatar-closet-mcp-home" } }),
     serve: () => Promise.reject(new Error("serve must not run in tests")),
     io: { stdout: (text) => void (out.stdout += text), stderr: (text) => void (out.stderr += text) },
     ...overrides,

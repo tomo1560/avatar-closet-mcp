@@ -21,7 +21,7 @@ afterEach(async () => {
 });
 
 async function tempHome(): Promise<string> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-cli-updates-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-cli-updates-"));
   tempPaths.push(home);
   return home;
 }
@@ -55,7 +55,7 @@ describe("CLI updates / unity-check parsing", () => {
   });
 
   it("rejects a non-numeric --item with the usage line", () => {
-    expect(() => parseCliArgs(["updates", "--item", "abc"])).toThrow(/--item.*\n使い方: booth-library-mcp updates/su);
+    expect(() => parseCliArgs(["updates", "--item", "abc"])).toThrow(/--item.*\n使い方: avatar-closet-mcp updates/su);
   });
 
   it("parses unity-check with exactly one project path", () => {

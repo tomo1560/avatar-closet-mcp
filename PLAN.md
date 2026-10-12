@@ -1,6 +1,6 @@
 # booth-mcp 作成プラン（購入者向け BOOTH MCP + CLI）
 
-調査日: 2026-10-12（同日 VRChat 購入者向け機能を追記: §0.1, §3.5, Phase 2.5）/ ステータス: **Phase 0〜5 実装済み（ブランチ `feat/buyer-mcp`）。ログインが必要な実ページでの検証も実施済み（2026-10-12）。残りは §9.2**
+調査日: 2026-10-12（同日 VRChat 購入者向け機能を追記: §0.1, §3.5, Phase 2.5）/ ステータス: **Phase 0〜5 実装済み・ログインした実アカウントで検証済み（2026-10-12、ブランチ `feat/buyer-mcp`）。ほかに、ほしいものリストと無料ダウンロードも実装済み（もとは §9.3 で見送っていたもの）。パッケージ名は `avatar-closet-mcp` に変更（§7-7）**
 
 ---
 
@@ -53,6 +53,7 @@ cstria0106/booth-mcp (MIT) の `src/` を確認した結果、再利用価値が
 ### 1.2 フォーク時の注意
 
 - **npm 名 `booth-mcp` は使用済み**（cstria0106）。例: `@<scope>/booth-mcp` や `booth-library-mcp` などに変更。
+  → 最終的なパッケージ名は **`avatar-closet-mcp`**。`booth-library-mcp` は公式アプリ「BOOTH Library Manager」と紛らわしく、pixiv の登録商標ガイドラインの「当社サービスと混同を招きかねない名称は避けてください」に当たるため改名した（§7-7、docs/research-2026-10-12.md §2）
 - MIT のライセンス表記・原作者クレジットを保持。
 - 上流が「出品者ダッシュボード専用」を明確にしているため、上流への PR は「認証部分の汎用化」程度に留め、購入者機能はフォーク側で持つのが無難（PR するかは任意）。
 - 上流の README/メッセージは韓国語 → 日本語化。
@@ -100,6 +101,7 @@ quolu/booth-mcp の README によると、BOOTH 側の Cloudflare が **Python �
 - pixiv サービス共通利用規約 **第14条23号**（サーバーへの過度な負荷の禁止）、**第14条24号**（機械的・短時間大量の操作の禁止）
 - pixiv 登録商標ガイドライン「アプリケーション、各種サービス等への使用について」: **クローラー等で作品を収集する行為、極端な負荷をかける行為は禁止**。規約違反でなくても停止を求められる場合あり
 - BOOTH 個別規約の第7条（禁止行為）は出品者向けの内容のみで、自動アクセスに関する条項は見当たらず。ただし**冒頭〜第3条は未読（取得時に途切れた）→ 未確認**
+  → 【2026-10-12】全 16 条を確認し、自動アクセスに関する条項は無かった（§7-6、docs/research-2026-10-12.md §1）
 - robots.txt: `Disallow: /terms, /carts, /cart` のみ
 
 **設計上の帰結**:
@@ -250,7 +252,7 @@ tests/
 ## 5. フェーズ計画
 
 ### Phase 0: ベース確立と実ページ調査（最優先）
-- [x] cstria0106/booth-mcp をフォーク（`git init` → `upstream` 追加 → merge）、パッケージ名を `booth-library-mcp`（v0.1.0）に変更、既存テストが通ることを確認（Windows の CRLF でテストが落ちるため `.gitattributes` で LF 固定）
+- [x] cstria0106/booth-mcp をフォーク（`git init` → `upstream` 追加 → merge）、パッケージ名を `booth-library-mcp`（v0.1.0）に変更（のち §7-7 により `avatar-closet-mcp` に改名）、既存テストが通ることを確認（Windows の CRLF でテストが落ちるため `.gitattributes` で LF 固定）
 - [ ] 実ブラウザでログインし、以下の**実 HTML を保存**して構造を確認（§7 の検証項目を潰す）:
   `accounts.booth.pm/library`, `/library/gifts`, `/orders`, `/orders/{id}`, `/wish_lists`, 検索結果ページ
   - [x] 検索結果ページ・`items/{id}.json` 14件・タグ補完は**ログイン不要分を実取得**（`tests/fixtures/public/`、2026-10-12、計20リクエスト）
@@ -279,11 +281,12 @@ tests/
 ### Phase 2.5: VRChat 購入者向け機能（§3.5）
 - [x] Phase 0 で保存したライブラリ内の実商品（衣装・アバター・小物）の items/{id}.json を集め、個人情報が無いことを確認して fixture 化（**抽出ロジックの評価用データセット**。正解ラベルを手で付ける）→ ログイン前のため**公開商品 14 件**（衣装 7・アバター 2・小物/髪 2・ツール 2・プレハブ 1）で代替し、`compat-labels.json` に正解ラベル。自分のライブラリでの評価は §9
   → 【2026-10-12】全件 `sync` 後、購入品のうち 208/209/210/217/230 の items JSON を gitignore 済みの `tests/fixtures/private/library-eval/` に集め、衣装中心に層化抽出した 52 件に手でラベルを付けた（購入リストは個人情報なのでコミットしない）。`tests/vrchat-library-eval.test.ts` がそのディレクトリがあるときだけ同じ指標を測る（CI では skip）。結果は §7-11
-- [x] `vrchat/compatibility.ts`: 抽出ロジックを TDD で実装 → 14件で high の誤検出 0・再現率 110/110（ただし同じデータでチューニングしたため過学習の可能性あり。実ライブラリでの再評価が必要）
+- [x] `vrchat/compatibility.ts`: 抽出ロジックを TDD で実装 → 14件で high の誤検出 0・再現率 110/110（ただし同じデータでチューニングしたため過学習の可能性あり。実ライブラリでの再評価が必要）→ 【2026-10-12】実ライブラリで再評価済み（下の「評価」）
 - [x] `vrchat/avatars.ts`: 辞書（シード 56 体 + ユーザーの `avatars.json`）+ ライブラリの 3Dキャラクターからの初期生成（CLI `avatars init`）
 - [x] `vrchat/dependencies.ts`, `kind.ts`
 - [x] `cache/item-cache.ts` + CLI `sync` コマンド（TTL は `BOOTH_MCP_CACHE_TTL_DAYS`、既定 7 日。ファイル構成が変わった商品は `forceIds` で即時再取得）
 - [x] ツール: `booth_get_item` 拡張, `booth_check_compatibility`, `booth_list_library` 拡張, `booth_list_my_avatars`, `booth_search_for_avatar`, `booth_sync_library_metadata`
+- [x] **評価（2026-10-12）**: 公開商品 14 件（コミット済みの fixture）と、自分のライブラリから手でラベルを付けた非公開サンプル 52 件（gitignore 済みの `tests/fixtures/private/library-eval/` に置きコミットしない。`tests/vrchat-library-eval.test.ts` はこれが無いと skip）で評価。規則修正後の非公開サンプルでの結果: high の誤検出 0、全信頼度の誤検出 1（low）、再現率 99.6%（high のみ 99.1%）、kind 正解率 92.3%（誤りは出品者が髪型・ヘイロー・Prefab・ギミックを衣装／小道具カテゴリに出品していたもの）、依存の完全一致 98.1%（詳細は §7-11）
 - **完了条件**: 「持ってる衣装でしなの対応のものは？」「この URL の商品は桔梗に対応してる？」に根拠付きで答えられる。未知のケースは `unknown` を返す
 
 ### Phase 3: ダウンロード（オプトイン）
@@ -294,7 +297,7 @@ tests/
 - **テスト**: 不正ファイル名、許可外ホストへのリダイレクト、オプトイン無効時にツールが存在しないこと
 
 ### Phase 4: CLI 整備
-- [x] `booth-library-mcp library [--all] [--json]`, `gifts`, `orders`, `order <id>`, `item <id>`, `search <q>`, `download <id> --out <dir>`（ほかに `tags`, `compat`, `avatars [init]`, `sync`, `updates`, `unity-check`）
+- [x] `avatar-closet-mcp library [--all] [--json]`, `gifts`, `orders`, `order <id>`, `item <id>`, `search <q>`, `download <id> --out <dir>`（ほかに `tags`, `compat`, `avatars [init]`, `sync`, `updates`, `unity-check`）
 - [x] 人間向け表形式 / `--json` 切替。MCP と同じ service 層を使い、ロジックを二重に持たない。終了コードはエラーコード別（README 参照）
 
 ### Phase 5（任意）: 便利機能
@@ -328,15 +331,20 @@ tests/
 2. **ウィッシュリストの一覧取得方法** — `accounts.booth.pm/wish_lists.json?item_ids[]=...` は**指定商品がお気に入り済みかの確認用**であって一覧 API ではない。一覧は `accounts.booth.pm/wish_lists` の HTML か別 API か未確認
    → 【OSS 調査】`/wish_lists` は JS で描画される器だけ。一覧は `GET accounts.booth.pm/wish_list_name_items.json?page=N[&wish_list_name_code=]`（`items[]` と `pagination`）、リスト名は `/wish_list_names.json`。v1 では未実装（§9.3）
    → 【2026-10-12 実測】3 エンドポイントとも 200（リダイレクトなし）。キーと型は `tests/fixtures/buyer/WISHLIST_CAPTURED.md`
+   → 【2026-10-12】実装済み（`booth_list_wishlist` / `booth_list_wishlist_names`、CLI `wishlist`。§9.3）
 3. **検索結果の JSON 版の有無** — 現状 HTML パース前提
    → 【確認済み】JSON 版は無い（`items.json` は HTML 検索へ 302）。カードは `li.item-card[data-product-id]`、1 ページ 60 件
 4. **`downloadables/{id}` のリダイレクト先ホスト**
    → 【2026-10-12 実測】**`s6.booth.pm`**（302 の Location のホストだけを記録）。OSS でも `s6.booth.pm`（Stashly）と `download.booth.pm`（omnooth）が使われている。cookie は不要（OSS 調査）。許可リストは `*.booth.pm`。実際のファイル保存までは試していない
+   → 【2026-10-12】実際のダウンロードも成功（§9.2）
 5. **"BOOTH Library Manager" の正体** — omnooth が `booth-library-manager://item-import?dlurl=...&item_id=...&order_id=...&variation_id=...` という URL スキームを登録しており、BOOTH 側にこのスキームへ受け渡す仕組みがあると推測されるが、**公式アプリかどうかは2回検索しても確認できず**。公式の受け渡し口なら DL 機能はこれに乗る方が安全な可能性あり
+   → 【2026-10-12 調査】**BOOTH 公式**のデスクトップアプリ（告知 `booth.pm/announcements/893`、2025-12-24、Windows 版アーリーアクセス）。deeplink `/downloadables/{id}/deeplink?client=booth-library-manager` は BOOTH が自社アプリへ受け渡すためのもので、第三者のツールが使う受け渡し口ではない。DL は従来どおり `/downloadables/{id}` を使う（docs/research-2026-10-12.md §3）
 6. **BOOTH 個別規約の冒頭〜第3条**（取得時に途切れて未読）
+   → 【2026-10-12 調査】自分のアカウントのデータを 1 req/s 以下で読むだけの個人用・読み取り専用ツールと矛盾する条項は無い。BOOTH ガイドライン（2026-07-08 改定）の「スクレイピング行為について」は、プログラムによる取得を一律には禁じず、サーバーへの極端な負荷・権利侵害・損害を基準に制限する。サービス共通利用規約第14条の 23 号（サーバーへの過度な負荷）・24 号（機械的・短時間大量の操作）にも当たらない設計（docs/research-2026-10-12.md §1）
 7. **pixiv 登録商標ガイドライン上、ツール名・パッケージ名に「BOOTH」を含めてよいか**（非公式である旨の表記要件含む）
+   → 【2026-10-12】公式アプリ「BOOTH Library Manager」との混同を避けるため、パッケージ・CLI・データフォルダの名前を `booth-library-mcp` から **`avatar-closet-mcp`** に改名した（旧フォルダは起動時に 1 回だけ自動で移動）。README・パッケージの説明に、BOOTH 向けの非公式ツールで pixiv / BOOTH が作成・配布するものではない旨（日本語と英語）を記載。ツール名 `booth_*` は連携するプラットフォームを示す機能的な表記としてそのまま、環境変数 `BOOTH_MCP_*` とスキルのフォルダ `skills/booth` は互換のためそのまま（docs/research-2026-10-12.md §2）
 8. **ログイン時の `items/{id}.json` の `order` / `gift` フィールドの中身** — 所有判定に使えるか
-   → 【2026-10-12 実測（全件 sync でログイン状態のまま取得した購入品すべて）】`wished` は boolean、`order` と `gift` は全件 null（受け取ったギフトも null）なので所有判定には使えない。代わりに購入したバリエーションの `status` が `addable_to_cart` ではなく `already_bought_digital` になる（購入品のうち 1 件を除く全件。受け取ったギフトには付かない）。`src/booth/public.ts` の `viewer.owned_variation_ids` で返すようにした。商品・バリエーションの `past_purchase_count` は全件 0、`order_url` は全件 null
+   → 【2026-10-12 実測（全件 sync でログイン状態のまま取得した購入品すべて）】`wished` は boolean、`order` と `gift` は全件 null（受け取ったギフトも null）なので所有判定には使えない。代わりに購入したバリエーションの `status` が `addable_to_cart` ではなく `already_bought_digital` になる（購入品のうち 1 件を除く全件。受け取ったギフトには付かない）。`src/booth/public.ts` の `viewer.owned_variation_ids` で返すようにした（キャッシュには残さず、保存時に `addable_to_cart` へ戻す）。商品・バリエーションの `past_purchase_count` は全件 0、`order_url` は全件 null
 9. セッション cookie の有効期限・ローテーション頻度
    → 【2026-10-12 実測（値は見ずに名前・ドメイン・期限とハッシュの比較のみ）】セッションは `.booth.pm` の `_plaza_session_*`（httpOnly, Secure, SameSite=Lax）。期限は「最後に応答を受けた時刻 + 1 年」で、応答ごとに書き戻される（ローリング）。値もログイン後に変わっており、sync の前後と終了時の 3 時点でハッシュがすべて異なった（リクエスト中にローテーションされる）。`cf_clearance` はログイン時刻 + 1 年で固定、`__cf_bm` は約 30 分
 10. **カテゴリ ID**: 208（3Dキャラクター）以外は Kyure-A/mcp-booth のコード由来で未確認。3D装飾品の ID は不明
@@ -374,7 +382,7 @@ tests/
 
 ### 9.1 実装済み（ブランチ `feat/buyer-mcp`、`main` は upstream と同一に保持）
 
-- MCP ツール 15 個（オプトイン時は `booth_download` を加えて 16 個）。CLI は同じ service 層を使う
+- MCP ツール 18 個（オプトイン時は `booth_download` を加えて 19 個）。CLI は同じ service 層を使う
 - lint / typecheck / build / check:distribution / check:package すべて通過。テスト約 1000 件（live テストは除外）
 - 依存の追加なし（upstream の 4 依存のまま）
 - **本物の経路での確認（2026-10-12、リクエスト 1 回）**: ビルドした CLI で `item 4866933 --vrchat` を実行。実 HTTP クライアント → BOOTH の items JSON → スキーマ検証 → キャッシュ → 対応判定まで通った。続く `compat 4866933 桔梗` はキャッシュから「supported（high、根拠: バリエーション名 Kikyo ほか）」と回答。Cloudflare による 403 は発生しなかった
@@ -389,14 +397,15 @@ tests/
 - [x] ダウンロードのリダイレクト先ホスト `s6.booth.pm` を実測（§7-4）
 
 残り（実例が無かった、または負荷を避けて実行しなかったもの）:
-1. ~~全件 `sync`~~ → 【2026-10-12 実施】`sync --max 400` がエラー 0 で完了（ライブラリ + ギフトの一覧と未キャッシュの全商品。削除済みなどで 404 の商品は unavailable として記録）。精度評価は §7-11
-2. 実例が無く未確認の構造 → 【2026-10-12】最終ページのページャ・範囲外ページ・空状態のマークアップ（範囲外ページで観察）・複数商品の注文・ギフト購入の注文は確認済み（§7-1）。**このアカウントでは観察できないもの**: 購入 0 件のライブラリと注文 0 件の注文一覧、サインインページ、物理商品の注文と配送先ブロック（ライブラリに無い商品を含む注文のうち詳細を取得した分はすべてギフト購入で、物理商品は見つからなかった。未取得の候補が 2 件残る）、「発送完了」以外の状態バッジ、クレジットカード以外の支払方法、英語 UI、空のウィッシュリスト
-3. ~~`booth_download` で実際にファイルを 1 件保存~~ → 【2026-10-12 実施】小さい PDF 1 件を保存できた（`content_type: application/pdf`、ファイル先頭は `%PDF`）。確認後に削除
+1. ~~全件 `sync`~~ → 【2026-10-12 実施】`sync --max 400` で購入品 164 件を 208 秒で取り込み、エラー 0（削除済みなどで 404 の 13 件は unavailable として記録）。精度評価は §7-11
+2. 実例が無く未確認の構造 → 【2026-10-12】最終ページのページャ・複数商品の注文・ギフト購入の注文は確認済み。アカウントの一覧で範囲外のページを指定すると最終ページではなく**空の一覧**が返ることを確認し、`has_next` の判定の不具合を修正した。空状態の実際のマークアップも取得済み（範囲外ページで観察。§7-1）。ほしいものリストと無料ダウンロードのエンドポイントも実際に取得した（§7-2、§7-1）。
+   **このアカウントでは観察できないもの**: 物理商品の注文と配送先ブロック（候補の注文 5 件はすべてギフト購入かダウンロード商品だった）、「発送完了」以外の状態、クレジットカード以外の支払方法、空の注文一覧・空のほしいものリスト・空の無料ダウンロードのページ、サインインページ、英語 UI（本ツールは設計上つねに日本語のページを要求する）
+3. ~~`booth_download` で実際にファイルを 1 件保存~~ → 【2026-10-12 実施】35 KB の PDF 1 件を保存できた（`content_type: application/pdf`、ファイル先頭は `%PDF`）。確認後に削除
 4. ライブラリの `variation_id`（§7-13）を使って「持っている版」をファイル名ではなく ID で判定する（改善案）→ items JSON の `already_bought_digital` でも特定できる（§7-8）
 5. 取得した実ページ `tests/fixtures/private/` は個人情報を含むので、不要になったら削除する
 
 ### 9.3 v1 の範囲外として見送ったもの
 
-- ウィッシュリスト一覧（§7-2 の調査で JSON API `accounts.booth.pm/wish_list_name_items.json` があると判明。read-only で追加は可能）
-- ライブラリの「無料ダウンロード」タブ（`/library/free_downloads`。調査で判明）
-- npm への公開（パッケージ名の商標可否 §7-7 が未確認のため、公開前に確認する）
+- ~~ウィッシュリスト一覧~~ → 【2026-10-12】実装済み（`booth_list_wishlist` / `booth_list_wishlist_names`、§7-2）
+- ~~ライブラリの「無料ダウンロード」タブ（`/library/free_downloads`）~~ → 【2026-10-12】実装済み（`booth_list_free_downloads`、CLI `free`）
+- npm への公開: まだ行っていない（公開するかはユーザーが決める）。パッケージ名は §7-7 のとおり `avatar-closet-mcp` に変更済み

@@ -67,7 +67,7 @@ describe("logout (local credential cleanup)", () => {
     expect(await exists(join(profileDir, "Local State"))).toBe(true);
   });
 
-  it("deletes a custom Chromium profile dir that booth-library-mcp created", async () => {
+  it("deletes a custom Chromium profile dir that avatar-closet-mcp created", async () => {
     const appDir = await createTempDirectory();
     const profileDir = join(await createTempDirectory(), "custom-profile");
     await prepareProfileDir(profileDir);
@@ -76,6 +76,21 @@ describe("logout (local credential cleanup)", () => {
     const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir });
 
     expect(result.profileDirRemoved).toBe(true);
+    expect(await exists(profileDir)).toBe(false);
+  });
+
+  it.each([
+    ["the default profile", false],
+    ["a custom Chromium profile", true],
+  ])("still deletes %s marked by the pre-rename booth-library-mcp login", async (_label, custom) => {
+    const appDir = await createTempDirectory();
+    const profileDir = custom ? join(await createTempDirectory(), "custom-profile") : join(appDir, "browser-profile");
+    await mkdir(join(profileDir, "Default"), { recursive: true });
+    await writeFile(join(profileDir, "booth-library-mcp-profile.json"), "{}", "utf8");
+
+    const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir });
+
+    expect(result).toMatchObject({ profileDirRemoved: true, warnings: [] });
     expect(await exists(profileDir)).toBe(false);
   });
 
@@ -99,6 +114,8 @@ describe("logout (local credential cleanup)", () => {
     const created = join(existing, "new-profile");
     await prepareProfileDir(created);
     expect(await exists(join(created, PROFILE_MARKER_FILE))).toBe(true);
+    expect(PROFILE_MARKER_FILE).toBe("avatar-closet-mcp-profile.json");
+    expect(await exists(join(created, "booth-library-mcp-profile.json"))).toBe(false);
   });
 
   it("refuses to delete a custom directory that is not a browser profile, but still removes the session", async () => {
@@ -175,7 +192,7 @@ function defaultPaths(appDir: string): { appDir: string; sessionFile: string; pr
 }
 
 async function createTempDirectory(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-logout-"));
+  const directory = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-logout-"));
   tempPaths.push(directory);
   return directory;
 }

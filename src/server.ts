@@ -20,7 +20,7 @@ export const SERVER_INSTRUCTIONS =
   "If a tool returns AUTH_REQUIRED, tell the user a browser window will open for a manual pixiv sign-in, call booth_login once the user agrees, then retry.";
 
 export function createServer(service = new BoothService()): { server: McpServer; service: BoothService } {
-  const server = new McpServer({ name: "booth-library-mcp", version: PACKAGE_VERSION }, { instructions: SERVER_INSTRUCTIONS });
+  const server = new McpServer({ name: "avatar-closet-mcp", version: PACKAGE_VERSION }, { instructions: SERVER_INSTRUCTIONS });
   registerAuthTools(server, service);
   registerItemTools(server, service);
   registerLibraryTools(server, service);

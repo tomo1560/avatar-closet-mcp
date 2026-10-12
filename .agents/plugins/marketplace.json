@@ -1,14 +1,14 @@
 {
-  "name": "booth-library-mcp",
+  "name": "avatar-closet-mcp",
   "interface": {
-    "displayName": "BOOTH Library MCP"
+    "displayName": "Avatar Closet MCP"
   },
   "plugins": [
     {
-      "name": "booth-library-mcp",
+      "name": "avatar-closet-mcp",
       "source": {
         "source": "npm",
-        "package": "booth-library-mcp",
+        "package": "avatar-closet-mcp",
         "version": "latest",
         "registry": "https://registry.npmjs.org"
       },

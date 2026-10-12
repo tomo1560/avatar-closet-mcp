@@ -28,7 +28,7 @@ afterEach(async () => {
 });
 
 async function run(args: string[], routes: Record<string, FakeRoute>): Promise<{ code: number; stdout: string }> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-cli-wishlist-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-cli-wishlist-"));
   tempPaths.push(home);
   let stdout = "";
   const code = await runCli(parseCliArgs(args), {
@@ -74,8 +74,8 @@ describe("CLI wishlist / free argument parsing", () => {
   });
 
   it("lists the new commands in the help text", () => {
-    expect(HELP_TEXT).toContain("booth-library-mcp free [--all]");
-    expect(HELP_TEXT).toContain("booth-library-mcp wishlist [--page N]");
+    expect(HELP_TEXT).toContain("avatar-closet-mcp free [--all]");
+    expect(HELP_TEXT).toContain("avatar-closet-mcp wishlist [--page N]");
     expect(HELP_TEXT).toContain("wishlist names");
   });
 });

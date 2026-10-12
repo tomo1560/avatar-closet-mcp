@@ -17,7 +17,7 @@ afterEach(async () => {
 });
 
 async function withClient(reader: RoutedFakeReader, run: (client: Client) => Promise<void>): Promise<void> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-tools-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-tools-"));
   tempPaths.push(home);
   const { server, service } = createServer(new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }));
   const client = new Client({ name: "booth-buyer-tools-test", version: "1.0.0" });

@@ -39,7 +39,7 @@ function routes(): Record<string, FakeRoute> {
 }
 
 async function service(reader: RoutedFakeReader): Promise<BoothService> {
-  return new BoothService(reader, { env: { BOOTH_MCP_HOME: await tempDir("booth-library-mcp-unity-home-") } });
+  return new BoothService(reader, { env: { BOOTH_MCP_HOME: await tempDir("avatar-closet-mcp-unity-home-") } });
 }
 
 describe("unityCheck (CLI unity-check)", () => {
@@ -60,7 +60,7 @@ describe("unityCheck (CLI unity-check)", () => {
   });
 
   it("masks local and git package locations in the result", async () => {
-    const project = await tempDir("booth-library-mcp-unity-project-");
+    const project = await tempDir("avatar-closet-mcp-unity-project-");
     await mkdir(join(project, "Assets", "Shinano"), { recursive: true });
     await mkdir(join(project, "Packages"), { recursive: true });
     const dependencies = {
@@ -93,7 +93,7 @@ describe("unityCheck (CLI unity-check)", () => {
 
   it("rejects a folder that is not a Unity project before reading the library", async () => {
     const reader = new RoutedFakeReader(routes());
-    const notProject = await tempDir("booth-library-mcp-unity-empty-");
+    const notProject = await tempDir("avatar-closet-mcp-unity-empty-");
     await expect((await service(reader)).unityCheck(notProject)).rejects.toMatchObject({ code: "INVALID_INPUT" });
     expect(reader.calls).toEqual([]);
   });

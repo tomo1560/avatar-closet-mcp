@@ -63,7 +63,7 @@ async function expectInvalidInput(promise: Promise<unknown>): Promise<void> {
 }
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "booth-library-mcp-item-cache-"));
+  root = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-item-cache-"));
   dir = join(root, "cache", "items");
   clock = new Date(START);
   corrupt = [];

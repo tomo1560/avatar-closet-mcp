@@ -44,7 +44,7 @@ describe("MCP auth tools", () => {
   });
 
   it("booth_logout deletes local credentials", async () => {
-    const appDir = await mkdtemp(join(tmpdir(), "booth-library-mcp-tool-"));
+    const appDir = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-tool-"));
     tempPaths.push(appDir);
     await writeFile(join(appDir, "session.json"), "{}", "utf8");
     await withClient({ env: { BOOTH_MCP_HOME: appDir } }, async (client) => {

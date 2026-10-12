@@ -94,7 +94,7 @@ export interface TempRoot {
 
 const tempPaths: string[] = [];
 
-export async function makeTempRoot(prefix = "booth-library-mcp-download-"): Promise<TempRoot> {
+export async function makeTempRoot(prefix = "avatar-closet-mcp-download-"): Promise<TempRoot> {
   const root = await mkdtemp(join(tmpdir(), prefix));
   tempPaths.push(root);
   return { root, real: await realpath(root) };

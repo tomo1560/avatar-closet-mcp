@@ -127,7 +127,7 @@ function createClient(sessionFile: string, warnings: string[]): BoothHttpClient 
 }
 
 async function createTempDirectory(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-session-write-"));
+  const directory = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-session-write-"));
   tempPaths.push(directory);
   return directory;
 }

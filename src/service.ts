@@ -249,7 +249,7 @@ export class BoothService {
 }
 
 function writeWarning(message: string): void {
-  process.stderr.write(`booth-library-mcp: ${message}\n`);
+  process.stderr.write(`avatar-closet-mcp: ${message}\n`);
 }
 
 function isRedirectReader(reader: BoothReader): reader is BoothReader & BoothRedirectReader {

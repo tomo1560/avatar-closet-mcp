@@ -75,7 +75,7 @@ export async function runInteractiveLogin(
     await page.goto(LOGIN_START_URL, { waitUntil: "domcontentloaded" });
     if (!hasLoggedInPage(context)) {
       process.stderr.write(
-        "ブラウザで BOOTH（pixiv アカウント）へのログインを完了してください。ID・パスワードを booth-library-mcp が読み取ることはありません。\n",
+        "ブラウザで BOOTH（pixiv アカウント）へのログインを完了してください。ID・パスワードを avatar-closet-mcp が読み取ることはありません。\n",
       );
       await waitForLogin(context, timeoutMs);
     }

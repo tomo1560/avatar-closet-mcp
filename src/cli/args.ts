@@ -49,7 +49,7 @@ export function parseArgs(args: readonly string[], spec: ArgSpec): ParsedArgs {
 }
 
 export function usageError(message: string, spec: Pick<ArgSpec, "usage">): BoothError {
-  return new BoothError("INVALID_INPUT", `${message}\n使い方: booth-library-mcp ${spec.usage}`);
+  return new BoothError("INVALID_INPUT", `${message}\n使い方: avatar-closet-mcp ${spec.usage}`);
 }
 
 export function stringFlag(parsed: ParsedArgs, name: string): string | undefined {

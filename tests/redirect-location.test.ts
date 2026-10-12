@@ -72,7 +72,7 @@ describe("getRedirectLocation (Phase 3 download primitive)", () => {
 });
 
 async function setup(handler: FakeHandler, withSession = true): Promise<{ client: BoothHttpClient; harness: FakeTransportHarness }> {
-  const directory = await mkdtemp(join(tmpdir(), "booth-library-mcp-redirect-"));
+  const directory = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-redirect-"));
   tempPaths.push(directory);
   const sessionFile = join(directory, "session.json");
   if (withSession) await writeFile(sessionFile, JSON.stringify({ cookies: [], origins: [] }), "utf8");

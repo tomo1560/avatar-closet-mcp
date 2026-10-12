@@ -53,7 +53,7 @@ function libraryRow(item: LibraryEntry, filtered: boolean): string[] {
 export function metadataLines(status: Partial<MetadataStatus>): string[] {
   const lines: string[] = [];
   if ((status.metadata_pending ?? 0) > 0) {
-    lines.push(`商品データ未取得: ${status.metadata_pending} 件（\`booth-library-mcp sync\` で事前に取り込めます）`);
+    lines.push(`商品データ未取得: ${status.metadata_pending} 件（\`avatar-closet-mcp sync\` で事前に取り込めます）`);
   }
   if ((status.metadata_unavailable ?? 0) > 0) lines.push(`削除・非公開の商品: ${status.metadata_unavailable} 件`);
   const errors = status.metadata_errors ?? [];
@@ -103,7 +103,7 @@ export function formatAvatars({ data }: BoothResult<MyAvatarsResult>): string {
         );
   const lines = [`辞書: ${data.dictionary.length} 件（組み込み + avatars.json）`];
   if (data.suggestions.length > 0) {
-    lines.push(`辞書に無いアバター: ${data.suggestions.map((suggestion) => suggestion.names.join("/")).join(", ")}（\`booth-library-mcp avatars init\` で追加）`);
+    lines.push(`辞書に無いアバター: ${data.suggestions.map((suggestion) => suggestion.names.join("/")).join(", ")}（\`avatar-closet-mcp avatars init\` で追加）`);
   }
   return `${owned}${[...lines, ...metadataLines(data)].join("\n")}\n`;
 }
@@ -117,7 +117,7 @@ export function formatAvatarInit({ data }: BoothResult<AvatarInitResult>, file: 
           ...data.added.map((entry) => `  ${entry.id}: ${entry.names.join(", ")}（商品 ${entry.source_item_id}）`),
           "別名（ひらがな・英字など）は avatars.json を編集して追記してください。",
         ];
-  if (data.metadata_pending > 0) lines.push(`商品データ未取得: ${data.metadata_pending} 件（先に \`booth-library-mcp sync\` を実行してください）`);
+  if (data.metadata_pending > 0) lines.push(`商品データ未取得: ${data.metadata_pending} 件（先に \`avatar-closet-mcp sync\` を実行してください）`);
   return `${lines.join("\n")}\n`;
 }
 
@@ -132,6 +132,6 @@ export function formatSync({ data }: BoothResult<SyncResult>): string {
   if (data.unavailable > 0) lines.push(`削除・非公開の商品: ${data.unavailable} 件`);
   for (const error of data.errors) lines.push(`エラー: 商品 ${error.item_id} ${error.code} ${error.message}`);
   if (data.truncated) lines.push("注意: ライブラリのページ数の上限で打ち切りました。");
-  if (data.remaining > 0) lines.push("残りがあります。時間をおいて再度 `booth-library-mcp sync` を実行してください。");
+  if (data.remaining > 0) lines.push("残りがあります。時間をおいて再度 `avatar-closet-mcp sync` を実行してください。");
   return `${lines.join("\n")}\n`;
 }

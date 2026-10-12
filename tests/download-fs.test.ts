@@ -162,7 +162,7 @@ describe("downloadPurchase: destination directory", () => {
   });
 
   it("refuses an absolute destDir outside the root", async () => {
-    const outside = await makeTempRoot("booth-library-mcp-outside-");
+    const outside = await makeTempRoot("avatar-closet-mcp-outside-");
     const { reader, promise } = await run([fileResponse("x")], { destDir: outside.root });
     expect((await captureError(promise)).code).toBe("INVALID_INPUT");
     expect(reader.calls).toEqual([]);
@@ -170,7 +170,7 @@ describe("downloadPurchase: destination directory", () => {
 
   it("refuses a linked sub-directory that escapes the root, without creating anything outside", async () => {
     const temp = await makeTempRoot();
-    const outside = await makeTempRoot("booth-library-mcp-outside-");
+    const outside = await makeTempRoot("avatar-closet-mcp-outside-");
     // "junction" needs no privileges on Windows; the type is ignored elsewhere.
     await symlink(outside.real, join(temp.real, "link"), "junction");
     for (const destDir of ["link", join("link", "new")]) {

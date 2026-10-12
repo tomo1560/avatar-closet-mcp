@@ -20,7 +20,7 @@ export const MIN_REQUEST_INTERVAL_MS = 1_000;
 export const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 const MAX_REDIRECTS = 5;
 const HTML_ACCEPT = "text/html,application/xhtml+xml";
-const LOGIN_HINT = "`booth_login` ツールを呼ぶか `npx booth-library-mcp login` を実行してください。";
+const LOGIN_HINT = "`booth_login` ツールを呼ぶか `npx avatar-closet-mcp login` を実行してください。";
 
 export interface BoothHttpClientOptions {
   /** Origin for relative paths: https://booth.pm (default) or https://accounts.booth.pm. */
@@ -248,7 +248,7 @@ export class BoothHttpClient implements BoothReader, BoothRedirectReader {
     if (this.writeBackWarned) return;
     this.writeBackWarned = true;
     const code = errnoCodeOf(error) ?? "UNKNOWN";
-    this.onWarning(`booth-library-mcp: 更新された BOOTH のログイン状態を保存できませんでした（${code}）。取得結果には影響しません。`);
+    this.onWarning(`avatar-closet-mcp: 更新された BOOTH のログイン状態を保存できませんでした（${code}）。取得結果には影響しません。`);
   }
 
   private async csrfHeaders(active: ActiveTransport, csrfFrom: string, apiUrl: string): Promise<Record<string, string>> {

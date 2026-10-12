@@ -88,11 +88,11 @@ const MAX_SIGNED_REDIRECTS = 1;
 const REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308]);
 const PRINTABLE_HOST = /^[a-z0-9.-]{1,253}$/u;
 const HTML_FILE = /\.html?$/iu;
-const LOGIN_HINT = "`booth_login` ツールを呼ぶか `npx booth-library-mcp login` を実行してください。";
+const LOGIN_HINT = "`booth_login` ツールを呼ぶか `npx avatar-closet-mcp login` を実行してください。";
 const SIGNED_REQUEST_HEADERS: Readonly<Record<string, string>> = Object.freeze({
   Accept: "*/*",
   "Accept-Encoding": "identity",
-  "User-Agent": `booth-library-mcp/${PACKAGE_VERSION}`,
+  "User-Agent": `avatar-closet-mcp/${PACKAGE_VERSION}`,
 });
 
 /** Downloads one purchased file into the opt-in download directory. Never overwrites a file. */

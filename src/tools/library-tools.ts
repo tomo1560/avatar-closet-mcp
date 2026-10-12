@@ -72,7 +72,7 @@ export function registerLibraryTools(server: McpServer, service: BoothService): 
   register(
     server,
     "booth_sync_library_metadata",
-    `ライブラリ・ギフト・無料ダウンロードの全商品の商品データ（items/{id}.json）をキャッシュに取り込みます（未取得分のみ、1 回あたり max_items 件まで）。remaining が 0 になるまで繰り返せます。大量の場合は CLI の \`booth-library-mcp sync\` を案内してください。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
+    `ライブラリ・ギフト・無料ダウンロードの全商品の商品データ（items/{id}.json）をキャッシュに取り込みます（未取得分のみ、1 回あたり max_items 件まで）。remaining が 0 になるまで繰り返せます。大量の場合は CLI の \`avatar-closet-mcp sync\` を案内してください。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
     {
       max_items: z
         .number()

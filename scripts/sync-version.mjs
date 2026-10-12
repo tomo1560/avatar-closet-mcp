@@ -23,9 +23,9 @@ const mcp = JSON.parse(originals[1]);
 plugin.version = packageJson.version;
 const boothArgs = mcp?.mcpServers?.booth?.args;
 if (!Array.isArray(boothArgs) || boothArgs.length !== 2 || boothArgs[0] !== "-y") {
-  throw new Error(".mcp.json must define booth args as [-y, booth-library-mcp@<version>]");
+  throw new Error(".mcp.json must define booth args as [-y, avatar-closet-mcp@<version>]");
 }
-boothArgs[1] = `booth-library-mcp@${packageJson.version}`;
+boothArgs[1] = `avatar-closet-mcp@${packageJson.version}`;
 
 const expected = [serialize(plugin), serialize(mcp)];
 const drifted = targets.filter((_, index) => originals[index] !== expected[index]);

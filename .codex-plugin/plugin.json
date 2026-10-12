@@ -1,10 +1,13 @@
 {
-  "name": "booth-library-mcp",
+  "name": "avatar-closet-mcp",
   "version": "0.1.0",
-  "description": "Unofficial read-only tools for your own BOOTH purchases (library, gifts, orders) with VRChat avatar compatibility helpers",
+  "description": "Unofficial read-only tools for BOOTH buyers: your own purchases (library, gifts, orders, wish list) with VRChat avatar compatibility helpers",
   "author": {
-    "name": "booth-library-mcp contributors"
+    "name": "tomo1560",
+    "url": "https://github.com/tomo1560"
   },
+  "homepage": "https://github.com/tomo1560/avatar-closet-mcp",
+  "repository": "https://github.com/tomo1560/avatar-closet-mcp",
   "license": "MIT",
   "keywords": [
     "booth",
@@ -16,14 +19,15 @@
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "BOOTH Library",
-    "shortDescription": "Read your BOOTH library, gifts, and orders",
-    "longDescription": "Unofficial, read-only access to your own BOOTH purchases: library items, gifts, and order history, plus helpers that check VRChat avatar compatibility from public item data. Not affiliated with pixiv or BOOTH.",
-    "developerName": "booth-library-mcp contributors",
+    "displayName": "Avatar Closet",
+    "shortDescription": "Read your BOOTH library, gifts, orders, and wish list",
+    "longDescription": "Unofficial, read-only access to your own BOOTH purchases: library items, gifts, free downloads, order history, and wish list, plus helpers that check VRChat avatar compatibility from public item data. An unofficial tool for BOOTH buyers; not made or distributed by pixiv Inc., and not affiliated with or endorsed by pixiv Inc., BOOTH, or BOOTH Library Manager.",
+    "developerName": "tomo1560",
     "category": "Productivity",
     "capabilities": [
       "Read"
     ],
+    "websiteURL": "https://github.com/tomo1560/avatar-closet-mcp",
     "defaultPrompt": [
       "List the items in my BOOTH library.",
       "Which of my BOOTH outfits support Shinano?",

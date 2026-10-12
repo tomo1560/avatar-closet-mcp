@@ -17,7 +17,7 @@ afterEach(async () => {
 });
 
 async function serviceFor(reader: RoutedFakeReader): Promise<BoothService> {
-  const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-library-"));
+  const home = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-library-"));
   tempPaths.push(home);
   return new BoothService(reader, { env: { BOOTH_MCP_HOME: home } });
 }

@@ -79,7 +79,7 @@ describe("CLI argument parsing", () => {
 
 describe("CLI usage errors", () => {
   it("includes the command usage for unknown flags", () => {
-    expect(() => parseCliArgs(["library", "--bogus"])).toThrow(/使い方: booth-library-mcp library [--all]/u);
+    expect(() => parseCliArgs(["library", "--bogus"])).toThrow(/使い方: avatar-closet-mcp library [--all]/u);
   });
 });
 
@@ -107,7 +107,7 @@ describe("CLI commands", () => {
   });
 
   it("logout removes the saved session", async () => {
-    const appDir = await mkdtemp(join(tmpdir(), "booth-library-mcp-cli-"));
+    const appDir = await mkdtemp(join(tmpdir(), "avatar-closet-mcp-cli-"));
     tempPaths.push(appDir);
     await writeFile(join(appDir, "session.json"), "{}", "utf8");
     const { io, out } = captureIo();

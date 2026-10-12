@@ -5,7 +5,7 @@ description: Use for requests about the user's own BOOTH account as a buyer (pur
 
 # BOOTH library (buyer)
 
-Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` tools for the user's own BOOTH buyer account and for public BOOTH item data.
+Unofficial tool (avatar-closet-mcp) for BOOTH buyers: not made or distributed by pixiv Inc., and not affiliated with pixiv or BOOTH. Use the bundled `booth_*` tools for the user's own BOOTH buyer account and for public BOOTH item data.
 
 ## Workflow
 
@@ -25,7 +25,7 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 
 - Results are evidence-based heuristics. Quote the returned `evidence` and its `confidence`.
 - Never claim that an item supports an avatar without evidence. `unknown` means no evidence was found, not "unsupported".
-- Library filters need cached item metadata. If `metadata_pending` is above zero, say that some items were not checked yet and offer `booth_sync_library_metadata` (repeat until `remaining` is 0) or the CLI command `booth-library-mcp sync` for large libraries.
+- Library filters need cached item metadata. If `metadata_pending` is above zero, say that some items were not checked yet and offer `booth_sync_library_metadata` (repeat until `remaining` is 0) or the CLI command `avatar-closet-mcp sync` for large libraries.
 - `booth_list_wishlist` with `include_vrchat: true` adds the same evidence-based `vrchat` view to wished items. Wished items are not covered by the library sync: if `metadata_pending` is above zero, call it again with the same arguments to check the rest.
 - `is_vrchat` on wish-list items is BOOTH's own seller-set flag, not a compatibility verdict.
 
@@ -52,7 +52,7 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 
 ## Unity projects
 
-- There is no MCP tool for scanning Unity projects. For "which of my purchases are in this Unity project?", suggest the CLI command `booth-library-mcp unity-check <projectPath>`, or combine `booth_list_library` (file names) with a Unity or file-system MCP server that can list the project's `Assets/` folders and `Packages/*.json`.
+- There is no MCP tool for scanning Unity projects. For "which of my purchases are in this Unity project?", suggest the CLI command `avatar-closet-mcp unity-check <projectPath>`, or combine `booth_list_library` (file names) with a Unity or file-system MCP server that can list the project's `Assets/` folders and `Packages/*.json`.
 
 ## Tool routing
 
