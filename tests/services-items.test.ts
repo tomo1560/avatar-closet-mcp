@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -20,6 +20,12 @@ async function setup(reader: RoutedFakeReader): Promise<{ service: BoothService;
   const home = await mkdtemp(join(tmpdir(), "booth-library-mcp-items-"));
   tempPaths.push(home);
   return { service: new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }), home };
+}
+
+/** A one-variation public fixture as its logged-in buyer receives it (verified 2026-10-12: only the status differs). */
+function boughtItem(id: number): { variations: { id: number; status: string }[] } {
+  const base = publicItem(id) as { variations: { id: number; status: string }[] };
+  return { ...base, variations: base.variations.map((variation) => ({ ...variation, status: "already_bought_digital" })) };
 }
 
 async function cachedRecord(home: string, id: string): Promise<{ item: Record<string, unknown> }> {
@@ -55,6 +61,15 @@ describe("getItem", () => {
     expect(data.viewer).toEqual({ wished: true, ordered: true, gifted: false, owned_variation_ids: [] });
     const cached = await cachedRecord(home, "6289322");
     expect(cached.item).toMatchObject({ wished: false, order: null, gift: null });
+  });
+
+  it("reports owned variations from a fresh logged-in fetch but caches the logged-out status", async () => {
+    const raw = boughtItem(6289322);
+    const { service, home } = await setup(new RoutedFakeReader({ [itemJsonUrlOf(6289322)]: { json: raw } }));
+    const { data } = await service.getItem({ item: "6289322" });
+    expect(data.viewer?.owned_variation_ids).toEqual([raw.variations[0]?.id]);
+    const cached = (await cachedRecord(home, "6289322")).item as { variations: { status: string }[] };
+    expect(cached.variations.map((variation) => variation.status)).toEqual(["addable_to_cart"]);
   });
 
   it("rejects non-BOOTH URLs before any request", async () => {
@@ -244,6 +259,18 @@ describe("getItem stale fallback", () => {
   it("rethrows when nothing is cached", async () => {
     const { service } = await setup(new RoutedFakeReader({ [itemJsonUrlOf(4866933)]: new BoothError("RATE_LIMITED", "slow down") }));
     await expect(service.getItem({ item: 4866933 })).rejects.toMatchObject({ code: "RATE_LIMITED" });
+  });
+
+  it("reports viewer null for a stale copy, even from a cache file that still holds the bought status", async () => {
+    const { service, home } = await setup(new RoutedFakeReader({ [itemJsonUrlOf(6289322)]: new BoothError("RATE_LIMITED", "slow down") }));
+    // Written as an older version did: logged-in state kept in the file.
+    const legacy = { item_id: 6289322, fetched_at: new Date(Date.now() - DAY_MS).toISOString(), etag: null, item: boughtItem(6289322) };
+    await mkdir(join(home, "cache", "items"), { recursive: true });
+    await writeFile(join(home, "cache", "items", "6289322.json"), JSON.stringify(legacy), "utf8");
+    const { data } = await service.getItem({ item: 6289322 });
+    expect(data.stale).toBe(true);
+    expect(data.viewer).toBeNull();
+    expect(data.variations.map((variation) => variation.status)).toEqual(["addable_to_cart"]);
   });
 
   it("does not hide NOT_FOUND behind a cached copy", async () => {

@@ -85,9 +85,11 @@ export async function listLibrary(
 }
 
 /**
- * Reads pages from `startPage` until the last page, at most MAX_LIBRARY_PAGES. BOOTH clamps a page past
- * the end and re-serves the last page, so the walk also stops when the parsed page differs from the
- * requested one or a page brings no new item ids.
+ * Reads pages from `startPage` until the last page, at most MAX_LIBRARY_PAGES. Real BOOTH answers a page past the end
+ * with an empty list whose pager still names the real last page (verified 2026-10-12,
+ * tests/fixtures/buyer/library-out-of-range.html), so the parser reports `has_next: false` there. As defensive guards
+ * against other server behaviour, the walk also stops when the parsed page differs from the requested one (e.g. a
+ * redirect to another page) or a page brings no new item ids.
  */
 export async function walkLibrary(ctx: ServiceContext, source: LibrarySource, startPage = 1): Promise<LibraryWalk> {
   const byId = new Map<string, LibraryItem>();
@@ -161,6 +163,8 @@ async function readPage(ctx: ServiceContext, source: LibrarySource, page: number
 
 async function readOnePage(ctx: ServiceContext, source: LibrarySource, page: number): Promise<LibraryWalk> {
   const { data, url } = await readPage(ctx, source, page);
+  // Real BOOTH answers an out-of-range page with an empty list (not the last page), which the parser already handles.
+  // Defensive only: if BOOTH ever served another page than requested, its items must not be reported as this page.
   const clamped = data.page !== page;
   return {
     items: clamped ? [] : data.items,

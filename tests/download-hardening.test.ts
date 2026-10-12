@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { downloadPurchase, type DownloadConfig } from "../src/booth/download.js";
 import {
   SIGNED_NAME,
@@ -111,17 +111,29 @@ describe("downloadPurchase: timeouts", () => {
   });
 
   it("does not time out a slow but steady body", async () => {
-    let index = 0;
-    const steady = new ReadableStream<Uint8Array>({
-      async pull(controller): Promise<void> {
-        await new Promise((resolve) => setTimeout(resolve, 20));
-        index += 1;
-        if (index > 5) controller.close();
-        else controller.enqueue(bytes(1));
-      },
-    });
-    const { run } = await setup(fakeFetch([fileResponse(steady)]).fetchImpl, FAST);
-    expect((await run()).bytes).toBe(5);
+    // Fake clock (only setTimeout / clearTimeout: streams and fs need the real setImmediate / nextTick). Time moves
+    // only when the server "sends" a chunk, so machine load cannot stretch a gap past the idle timeout. Each gap is
+    // under half the timeout (a read-ahead of one chunk before the timer is re-armed still fits), while the whole
+    // body takes well over it, so the test fails if chunks do not re-arm the idle timer.
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      const gapMs = Math.floor(FAST.idleTimeoutMs / 2) - 5;
+      const chunks = 5;
+      let pulls = 0;
+      const steady = new ReadableStream<Uint8Array>({
+        pull(controller): void {
+          vi.advanceTimersByTime(gapMs);
+          pulls += 1;
+          if (pulls > chunks) controller.close();
+          else controller.enqueue(bytes(1));
+        },
+      });
+      const { run } = await setup(fakeFetch([fileResponse(steady)]).fetchImpl, FAST);
+      expect((await run()).bytes).toBe(chunks);
+      expect(pulls * gapMs).toBeGreaterThan(FAST.idleTimeoutMs * 2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

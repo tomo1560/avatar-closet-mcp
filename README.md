@@ -105,6 +105,15 @@ npx -y booth-library-mcp login
 
 ツールは既定で 18 個、[ダウンロード](#ダウンロードオプトイン)を有効にすると `booth_download` が加わって 19 個です。
 
+### `booth_get_item` の `viewer`（ログイン中の状態）
+
+`viewer` は、ログイン中にその呼び出しで BOOTH から取得した商品データ（`items/{id}.json`）にだけ付きます。ログアウト中や閲覧者固有の状態が無いときは `null` です。
+
+- `owned_variation_ids`: BOOTH がログイン中の購入者に `status: "already_bought_digital"` で返すバリエーションの ID（購入したバリエーション）。その呼び出しの取得結果からだけ作り、キャッシュからは作りません。BOOTH に接続できずキャッシュを返した結果（`stale: true`）では `viewer` は `null` で、これは「所有状態が不明」という意味です（未購入という意味ではありません）。
+- 受け取ったギフトにはこの状態が付かず、購入品でも付かないものがありました（2026-10 確認）。空の配列は未所有の証明にならないため、所有の確認には `booth_list_library` / `booth_list_gifts` を使ってください。
+- `wished`: ほしいものリスト（スキ！）に入っているか。
+- `ordered` / `gifted`: BOOTH の `order` / `gift` から作りますが、購入済みの商品や受け取ったギフトでも常に `null` だったため（2026-10 確認）実質的に常に `false` です。所有の判定には使いません。
+
 ## CLI
 
 MCP と同じ処理を CLI からも使えます。既定は表形式、`--json` で MCP と同じ JSON を出力します。
@@ -246,7 +255,7 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y booth-library-mcp download 1234567 --out ./bo
 - ライブラリとギフトを全ページ読んだとき（`sync`・`booth_list_my_avatars` など）、前回からダウンロードファイルの構成が変わった商品は、キャッシュが新しくても優先して再取得します（記録は `cache/item-cache-snapshot.json`。ページ数の上限で打ち切った一覧は記録しません）。
 - `booth_get_item` は明示的な問い合わせなので常に BOOTH から取得します。BOOTH に制限された（`RATE_LIMITED`）・接続できない（`NETWORK_ERROR`）ときだけ、キャッシュがあればそれを `stale: true` と取得日時 `fetched_at` 付きで返します。
 - 2 MiB を超えるキャッシュファイルは読み込まず、壊れたものとして扱って再取得します。
-- キャッシュには公開データのみを保存し、ログイン中のお気に入り・購入状態などは保存しません。
+- キャッシュには公開データのみを保存し、ログイン中のお気に入り・購入状態などは保存しません。購入済みバリエーションの `already_bought_digital`（`already_bought` で始まる状態すべて）はログアウト時と同じ `addable_to_cart` に戻して保存し、この処理より前に書かれたキャッシュファイルも読み込み時に同じように戻します。そのためキャッシュから返す結果（`stale: true`）の `viewer` は常に `null` です。
 
 ## レート制限と利用規約への配慮
 

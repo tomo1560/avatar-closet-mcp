@@ -39,7 +39,10 @@ export interface ItemViewerState {
   ordered: boolean;
   /** Truthiness of `gift`. Null even on received gifts seen (2026-10-12). */
   gifted: boolean;
-  /** Variations whose logged-in `status` is `already_bought_digital`: the versions the viewer bought. */
+  /**
+   * Variations whose logged-in `status` is `already_bought_digital`: the versions the viewer bought. Only a fresh
+   * logged-in request carries it; the item cache stores the logged-out status instead (src/cache/cacheable-item.ts).
+   */
   owned_variation_ids: number[];
 }
 
@@ -71,7 +74,7 @@ export interface ItemSummary {
   wish_lists_count: number | null;
   description: string;
   description_truncated: boolean;
-  /** `null` unless the JSON carries viewer-specific (logged-in) state. */
+  /** `null` unless the JSON carries viewer-specific (logged-in) state, which only a fresh logged-in request does. */
   viewer: ItemViewerState | null;
 }
 

@@ -9,8 +9,9 @@
  * Also verified 2026-10-12 on all list pages of one account: a multi-item order is one /orders card per item (merged
  * here) and one sheet per item on /orders/{id}; a gift bought for someone else has a "ギフト" sheet, no file rows and a
  * private /gifts/{token}/edit link that is never returned (tests/fixtures/buyer/order-detail-multi.html, -gift.html).
- * Not seen with that account: physical goods (shipping block; no physical order among the details checked, a few
- * candidates unchecked), the empty state, and status / payment values other than the ones seen (発送完了, クレジットカード).
+ * Not seen with that account: physical goods (shipping block; every order whose items were missing from the library was
+ * opened on 2026-10-12 and all were gifts or download orders, so the account has no physical order), the empty state,
+ * and status / payment values other than the ones seen (発送完了, クレジットカード).
  *
  * Privacy: shipping/contact fields (name, address, phone, e-mail) are never selected. The two label fields that are
  * returned (status, payment method) are kept only when they are a known value of at most 60 characters (anything

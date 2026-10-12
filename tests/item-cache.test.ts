@@ -5,6 +5,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { parseRawBoothItem, type RawBoothItem } from "../src/booth/item-json.js";
+import { summarizeItem } from "../src/booth/public.js";
+import { toCacheableItem } from "../src/cache/cacheable-item.js";
 import {
   DEFAULT_ITEM_CACHE_TTL_MS,
   ItemCache,
@@ -209,6 +211,62 @@ describe("ItemCache records", () => {
 
   it("refuses to cache an item under another id", async () => {
     await expectInvalidInput(createCache().set(2, makeItem(1)));
+  });
+});
+
+describe("ItemCache viewer state", () => {
+  const BOUGHT = "already_bought_digital";
+
+  /** Item JSON as a logged-in buyer of its only (paid) variation receives it. */
+  function boughtItemJson(id: number): Record<string, unknown> {
+    const [variation] = baseItemJson.variations as Record<string, unknown>[];
+    return { ...baseItemJson, id, wished: true, variations: [{ ...variation, status: BOUGHT, order_url: "https://example.invalid/o" }] };
+  }
+
+  function variationStatuses(item: RawBoothItem): string[] {
+    return item.variations.map((variation) => variation.status);
+  }
+
+  it("maps the logged-in bought status to the logged-out one and leaves public statuses alone", () => {
+    const free = { ...(baseItemJson.variations as Record<string, unknown>[])[0], id: 2, price: 0, status: "free_download" };
+    const raw = parseRawBoothItem({ ...boughtItemJson(1), variations: [...(boughtItemJson(1).variations as unknown[]), free] });
+    const snapshot = structuredClone(raw);
+    const cacheable = toCacheableItem(raw);
+    expect(variationStatuses(cacheable)).toEqual(["addable_to_cart", "free_download"]);
+    expect(cacheable).toMatchObject({ wished: false, order: null, gift: null });
+    expect(cacheable.variations[0]).toMatchObject({ order_url: null });
+    expect(summarizeItem(cacheable).viewer).toBeNull();
+    expect(toCacheableItem(cacheable)).toEqual(cacheable);
+    expect(raw).toEqual(snapshot);
+  });
+
+  it("never writes the bought status to disk", async () => {
+    const record = await createCache().set(1, parseRawBoothItem(boughtItemJson(1)));
+    const onDisk = await readFile(join(dir, "1.json"), "utf8");
+    expect(onDisk).not.toContain(BOUGHT);
+    expect(variationStatuses(record.item)).toEqual(["addable_to_cart"]);
+    expect(record.item.wished).toBe(false);
+  });
+
+  it("strips viewer state from records written before it was stripped on write", async () => {
+    await mkdir(dir, { recursive: true });
+    const legacy = { item_id: 1, fetched_at: START, etag: null, item: boughtItemJson(1) };
+    await writeFile(join(dir, "1.json"), JSON.stringify(legacy));
+    const cache = createCache();
+    const { fetcher, calls } = fakeFetcher();
+    const reads = [(await cache.get(1))?.item, (await cache.getStale(1))?.item, (await cache.fetchMany([1], fetcher)).items[0]?.item];
+    expect(calls).toEqual([]);
+    for (const item of reads) {
+      expect(item && variationStatuses(item)).toEqual(["addable_to_cart"]);
+      expect(item && summarizeItem(item).viewer).toBeNull();
+    }
+    expect(corrupt).toEqual([]);
+  });
+
+  it("returns freshly fetched items without viewer state", async () => {
+    const fetcher: ItemFetcher = (id) => Promise.resolve(parseRawBoothItem(boughtItemJson(Number(id))));
+    const { items } = await createCache().fetchMany([1], fetcher);
+    expect(items[0] && variationStatuses(items[0].item)).toEqual(["addable_to_cart"]);
   });
 });
 

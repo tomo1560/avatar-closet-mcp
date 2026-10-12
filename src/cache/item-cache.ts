@@ -6,6 +6,7 @@ import { toItemId } from "../booth/item-id.js";
 import { describeIssues, rawBoothItemSchema, type RawBoothItem } from "../booth/item-json.js";
 import { BoothError, asBoothError, type BoothErrorCode } from "../errors.js";
 import { getCacheDir } from "../profile.js";
+import { toCacheableItem } from "./cacheable-item.js";
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
 /** PLAN §3.5.7: items are re-fetched after 7 days (configurable with BOOTH_MCP_CACHE_TTL_DAYS). */
@@ -160,7 +161,7 @@ export class ItemCache {
     return age >= 0 && age < this.ttlMs;
   }
 
-  /** Atomically writes `{dir}/{id}.json` (tmp file + rename). */
+  /** Atomically writes `{dir}/{id}.json` (tmp file + rename). Viewer-specific (logged-in) state is never stored. */
   async set(id: string | number, item: RawBoothItem, options: { etag?: string | null | undefined } = {}): Promise<ItemCacheRecord> {
     const itemId = toItemId(id);
     if (String(item.id) !== itemId) {
@@ -170,7 +171,7 @@ export class ItemCache {
       item_id: Number(itemId),
       fetched_at: formatTimestamp(this.now()),
       etag: options.etag ?? null,
-      item,
+      item: toCacheableItem(item),
     };
     await this.writeAtomic(itemId, `${JSON.stringify(record)}\n`);
     return record;
@@ -270,11 +271,11 @@ export class ItemCache {
   private async store(id: string, item: RawBoothItem, errors: FetchManyError[]): Promise<CachedItemEntry> {
     try {
       const record = await this.set(id, item);
-      return { item_id: id, item, fetched_at: record.fetched_at, from_cache: false, stale: false };
+      return { item_id: id, item: record.item, fetched_at: record.fetched_at, from_cache: false, stale: false };
     } catch (error) {
       // Only the error code: file system messages contain local paths (and thus the user name).
       errors.push({ item_id: id, code: "CACHE_WRITE_FAILED", message: `キャッシュファイルを書き込めませんでした（${errorCode(error)}）。` });
-      return { item_id: id, item, fetched_at: formatTimestamp(this.now()), from_cache: false, stale: false };
+      return { item_id: id, item: toCacheableItem(item), fetched_at: formatTimestamp(this.now()), from_cache: false, stale: false };
     }
   }
 
@@ -294,7 +295,8 @@ export class ItemCache {
     if (String(parsed.data.item_id) !== itemId || String(parsed.data.item.id) !== itemId) {
       return this.reportCorrupt(itemId, "item id does not match the file name");
     }
-    return { status: "ok", record: parsed.data };
+    // Files written before viewer state was stripped on write may still hold it (e.g. already_bought_digital).
+    return { status: "ok", record: { ...parsed.data, item: toCacheableItem(parsed.data.item) } };
   }
 
   private reportCorrupt(itemId: string, reason: string): Lookup {

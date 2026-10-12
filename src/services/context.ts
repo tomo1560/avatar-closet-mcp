@@ -2,6 +2,7 @@ import { isItemId } from "../booth/item-id.js";
 import type { RawBoothItem } from "../booth/item-json.js";
 import { getItem } from "../booth/public.js";
 import type { BoothReader } from "../browser/reader.js";
+import { toCacheableItem } from "../cache/cacheable-item.js";
 import type { FetchManyError, ItemCache, ItemFetcher } from "../cache/item-cache.js";
 import type { UnavailableItems } from "../cache/unavailable-items.js";
 import { BoothError } from "../errors.js";
@@ -99,31 +100,15 @@ export interface MetadataBatch {
   readonly errors: readonly FetchManyError[];
 }
 
-/** Viewer-specific (logged-in) fields are reset so the cache only holds public item data. */
-export function toCacheableItem(raw: RawBoothItem): RawBoothItem {
-  return {
-    ...raw,
-    wished: false,
-    order: null,
-    gift: null,
-    ...("past_purchase_count" in raw ? { past_purchase_count: 0 } : {}),
-    variations: raw.variations.map((variation) => ({
-      ...variation,
-      ...("order_url" in variation ? { order_url: null } : {}),
-      ...("past_purchase_count" in variation ? { past_purchase_count: 0 } : {}),
-    })),
-  };
-}
-
-/** Fetches `items/{id}.json` through the rate-limited reader (used by `ItemCache.fetchMany`). */
+/** Fetches `items/{id}.json` through the rate-limited reader (used by `ItemCache.fetchMany`), without viewer state. */
 export function createItemFetcher(reader: BoothReader): ItemFetcher {
   return async (itemId: string): Promise<RawBoothItem> => toCacheableItem((await getItem(reader, itemId)).raw);
 }
 
-/** Writes an item into the cache. A write failure is not fatal for the caller (the data was fetched). */
+/** Writes an item into the cache (viewer state stripped). A write failure is not fatal for the caller (the data was fetched). */
 export async function storeItem(ctx: ServiceContext, itemId: string, raw: RawBoothItem): Promise<string> {
   try {
-    return (await ctx.cache.set(itemId, toCacheableItem(raw))).fetched_at;
+    return (await ctx.cache.set(itemId, raw)).fetched_at;
   } catch {
     return new Date().toISOString().replace(/\.\d{3}Z$/u, "Z");
   }

@@ -70,7 +70,7 @@ describe("listLibrary paging", () => {
     expect(result.meta.nextPage).toBeUndefined();
   });
 
-  it("stops when BOOTH clamps a page past the end and re-serves the last page", async () => {
+  it("stops defensively when BOOTH answers another page than the requested one", async () => {
     const routes = libraryRoutes([fakeItems(100, 2), fakeItems(200, 2), fakeItems(300, 1)]);
     const page2 = routes[`${LIBRARY}?page=2`];
     const reader = new RoutedFakeReader({ ...routes, [`${LIBRARY}?page=3`]: page2 as FakeRoute });
@@ -97,7 +97,7 @@ describe("listLibrary paging", () => {
     expect(result.meta.nextPage).toBe(21);
   });
 
-  it("returns an empty page when the requested page is past the end", async () => {
+  it("returns an empty page when BOOTH answers a page past the end with another page (defensive)", async () => {
     const routes = libraryRoutes([fakeItems(100, 2)]);
     const reader = new RoutedFakeReader({ ...routes, [`${LIBRARY}?page=9`]: routes[LIBRARY] as FakeRoute });
     const result = await (await serviceFor(reader)).listLibrary({ page: 9 });

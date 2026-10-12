@@ -35,6 +35,13 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Free items the user obtained from BOOTH: `booth_list_free_downloads` (same inputs as `booth_list_library`). That tab lists no files, so `downloadables` is always empty there; files are downloaded from the item page.
 - `booth_list_my_avatars`, `booth_sync_library_metadata` and the CLI `unity-check` include free downloads. `booth_check_updates` covers purchases and gifts only, because free downloads list no files to compare.
 
+## Item ownership (`viewer`)
+
+- `booth_get_item` returns `viewer` only when the user is signed in and the item was just fetched from BOOTH. `viewer.owned_variation_ids` lists the variations BOOTH marks as bought for the signed-in user (`already_bought_digital`).
+- A cached copy (`stale: true`) always has `viewer: null`: ownership is unknown there, not "not owned". The cache never stores ownership.
+- Received gifts (and a few purchases) are not marked as bought, so an empty `owned_variation_ids` does not prove the user lacks the item. For "do I own this?", check `booth_list_library` and `booth_list_gifts`.
+- `viewer.ordered` and `viewer.gifted` come from BOOTH's `order` / `gift` fields, which are null even for purchased items and received gifts, so they are always false. Never use them as ownership signals.
+
 ## Purchase updates
 
 - `booth_check_updates` compares the download files of every purchased item with the previous check and records the current state as the next baseline. Call it once per user request; a second call right away reports nothing new.

@@ -11,6 +11,8 @@ const ORDERS_URL = `${ACCOUNTS_ORIGIN}/orders`;
 export async function listOrders(ctx: ServiceContext, page = 1): Promise<BoothResult<OrdersListing>> {
   if (!Number.isInteger(page) || page < 1) throw invalidInput("page は 1 以上の整数で指定してください。");
   const { data, url } = await ctx.reader.read(pagedUrl(ORDERS_URL, page), parseOrdersPage);
+  // Real BOOTH answers an out-of-range page with an empty list (not the last page). Defensive only: never report the
+  // orders of another page than the requested one.
   const clamped = data.page !== page;
   const listing: OrdersListing = {
     orders: clamped ? [] : data.orders,

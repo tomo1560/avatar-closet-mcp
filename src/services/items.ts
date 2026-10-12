@@ -37,6 +37,7 @@ export interface CompatibilityInput {
 /**
  * `items/{id}.json` → compact summary (+ VRChat info). An explicit lookup always asks BOOTH and stores the
  * result in the cache; only when BOOTH rate-limits or cannot be reached is a cached copy served (`stale`).
+ * `viewer` (wished / owned variations) comes only from that fresh request; a stale copy reports `viewer: null`.
  */
 export async function getItemDetail(ctx: ServiceContext, input: GetItemInput): Promise<BoothResult<ItemDetail>> {
   const itemId = parseItemId(input.item);
@@ -62,7 +63,8 @@ async function fetchFreshOrStale(
     if (!STALE_FALLBACK_CODES.has(asBoothError(error).code)) throw error;
     const record = await ctx.cache.getStale(itemId);
     if (!record) throw error;
-    return { raw: record.item, summary: summarizeItem(record.item), staleFetchedAt: record.fetched_at };
+    // The cache holds public data only, so ownership / wish state from an earlier fetch is unknown here, not stale.
+    return { raw: record.item, summary: { ...summarizeItem(record.item), viewer: null }, staleFetchedAt: record.fetched_at };
   }
 }
 
