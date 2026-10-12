@@ -5,8 +5,8 @@
 >
 > **An unofficial tool built for BOOTH (booth.pm) buyers. It is not made or distributed by pixiv Inc. or BOOTH, and is not affiliated with or endorsed by pixiv Inc., BOOTH, or BOOTH Library Manager.**
 >
-> 「pixiv」「BOOTH」はピクシブ株式会社の商標または登録商標です。公式サービスとの混同を避けるため、本ツールの名前には「BOOTH」を含めていません（[調査メモ](docs/research-2026-10-12.md) §2）。
-> "pixiv" and "BOOTH" are trademarks or registered trademarks of pixiv Inc. This tool's name deliberately avoids "BOOTH" to prevent confusion with official services.
+> 「pixiv」「BOOTH」はピクシブ株式会社の商標または登録商標です。公式サービスとの混同を避けるため、本ツールの名前には「BOOTH」を含めていません（[調査メモ](docs/research-2026-10-12.md) §2）。MCP サーバー名 `booth`・ツール名 `booth_*`・環境変数 `BOOTH_MCP_*` の「booth」は、連携先のプラットフォームを示す機能的な表記です。
+> "pixiv" and "BOOTH" are trademarks or registered trademarks of pixiv Inc. This tool's name deliberately avoids "BOOTH" to prevent confusion with official services. The `booth` server name, `booth_*` tool names, and `BOOTH_MCP_*` environment variables only describe the platform the tool works with.
 
 自分の BOOTH アカウントの購入データ（ライブラリ・ギフト・無料ダウンロード・注文履歴・ほしいものリスト）と BOOTH の公開商品データを、**読み取り専用**で扱う MCP サーバー + CLI です（BOOTH 上のデータは変更しません。購入ファイルのダウンロードは[オプトイン](#ダウンロードオプトイン)です）。VRChat 向けに「持っている衣装のうち しなの 対応のものは？」「この商品は 桔梗 に対応してる？」に根拠付きで答えるための機能があります。
 
@@ -43,8 +43,6 @@ node dist/cli.js library --all
 ```
 
 Claude Desktop などでは `"command": "node"`, `"args": ["<abs>/dist/cli.js"]` を指定します。
-
-旧名 `booth-library-mcp` から更新する場合は[移行](#移行旧名-booth-library-mcp-から)を参照してください。
 
 ### npm 公開後
 
@@ -292,20 +290,10 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y avatar-closet-mcp download 1234567 --out ./bo
 
 既定の場所はすべて `<アプリディレクトリ>` 直下です（`session.json`・`browser-profile/`・`cache/`・`avatars.json`）。`BOOTH_MCP_HOME` を変えるとこれらがまとめて移動します。
 
-### 移行（旧名 booth-library-mcp から）
+### セッションとブラウザプロファイル
 
-本ツールは `booth-library-mcp` から `avatar-closet-mcp` に改名しました（公式アプリ「BOOTH Library Manager」と紛らわしい名前を避けるため。[調査メモ](docs/research-2026-10-12.md) §2）。これに合わせて、データフォルダも同じ親フォルダの中で `booth-library-mcp` から `avatar-closet-mcp` に変わりました。
-
-- **移行は自動です。** CLI・MCP サーバーの起動時に、`avatar-closet-mcp` が無く `booth-library-mcp` があれば、フォルダの名前を 1 回だけ変更します。セッション・キャッシュ・avatars.json はそのまま引き継がれ、ログインのやり直しは不要です。
-- 名前を変更できなかったとき（ほかの MCP サーバーやログイン用ブラウザがフォルダ内のファイルを開いているなど）は、標準エラーに警告を 1 回出し、その回は `booth-library-mcp` をそのまま使います。それらを閉じてから起動し直すと移行されます。
-- `BOOTH_MCP_HOME` か個別の保存先（`BOOTH_MCP_SESSION_FILE`・`BOOTH_MCP_PROFILE_DIR`・`BOOTH_MCP_CACHE_DIR`・`BOOTH_MCP_AVATARS_FILE`）を指定しているときは移行しません。指定した場所はそのまま使い、指定していない分は `avatar-closet-mcp` が無ければ `booth-library-mcp` を使い続けます。
-- MCP クライアントに登録したコマンド（`dist/cli.js` のパスやパッケージ名）は手で書き換えてください。
-- 次のものは変わりません: MCP サーバー名 `booth`、ツール名 `booth_*`（連携するプラットフォームを示す機能的な表記で、ツール自体の名前に商標を使うこととは別）、環境変数 `BOOTH_MCP_*`（既存の設定との互換のため）、スキルのフォルダ `skills/booth`。
-
-### 注意: 設定の変更とログインのやり直し
-
-- **`session.json` の場所が変わりました。** 常に `<アプリディレクトリ>/session.json` に保存され、`BOOTH_MCP_PROFILE_DIR` の隣には作られません。`BOOTH_MCP_SESSION_FILE` で場所を指定できます。`BOOTH_MCP_PROFILE_DIR` を指定していた場合、以前の `session.json` は見つからないので、**`login`（または `booth_login`）をやり直してください。**
-- **`logout` が削除するブラウザプロファイルは限定されています。** `avatar-closet-mcp-profile.json`（ログイン時に本ツールが作成したプロファイルに付くマーカー。改名前の `booth-library-mcp-profile.json` も認めます）があるものだけを削除します。カスタムの `BOOTH_MCP_PROFILE_DIR` の場合は、さらに Chromium のプロファイルらしい（`Local State` か `Default/` がある）ことも必要です。マーカーが無い古いプロファイルや別の方法で作ったプロファイルは削除されず、警告が出ます。その場合は手動で削除してください（pixiv の cookie を含むため）。
+- `session.json` は常に `<アプリディレクトリ>/session.json` に保存され、`BOOTH_MCP_PROFILE_DIR` を指定してもその隣には作られません。場所を変えるときは `BOOTH_MCP_SESSION_FILE` を指定してください。
+- **`logout` が削除するブラウザプロファイルは限定されています。** `avatar-closet-mcp-profile.json`（ログイン時に本ツールが作成したプロファイルに付くマーカー）があるものだけを削除します。カスタムの `BOOTH_MCP_PROFILE_DIR` の場合は、さらに Chromium のプロファイルらしい（`Local State` か `Default/` がある）ことも必要です。マーカーが無いプロファイル（別の方法で作ったものなど）は削除されず、警告が出ます。その場合は手動で削除してください（pixiv の cookie を含むため）。
 
 ## 環境変数一覧
 
@@ -332,7 +320,7 @@ BOOTH_MCP_ENABLE_DOWNLOAD=1 npx -y avatar-closet-mcp download 1234567 --out ./bo
 npx -y avatar-closet-mcp logout
 ```
 
-`session.json` と、マーカー付きのログイン用ブラウザプロファイルを削除します（BOOTH には通信しません）。マーカーの無いプロファイルは削除せず、手動での削除を案内します（[注意](#注意-設定の変更とログインのやり直し)）。キャッシュと avatars.json は残るので、不要なら保存先のフォルダごと削除してください。
+`session.json` と、マーカー付きのログイン用ブラウザプロファイルを削除します（BOOTH には通信しません）。マーカーの無いプロファイルは削除せず、手動での削除を案内します（[詳細](#セッションとブラウザプロファイル)）。キャッシュと avatars.json は残るので、不要なら保存先のフォルダごと削除してください。
 
 ## エラーコードと終了コード
 
