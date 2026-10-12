@@ -10,10 +10,8 @@
  *   AGENTS.md: "Test fixtures must contain fictional data only."
  * - Delete tests/fixtures/private/ once the anonymized fixtures exist.
  *
- * Usage (after signing in with `bun src/cli.ts login`):
+ * Usage (after signing in with `npm run dev -- login`):
  *   npx tsx scripts/capture-fixtures.ts
- * Under Bun (1.3.14, Windows) playwright-core's request context throws in its Set-Cookie handling
- * ("/settings" cannot be parsed as a URL), so run it with tsx on Node (verified 2026-10-12).
  *
  * Behavior:
  * - Reuses the saved session file (src/profile.ts getSessionFile; BOOTH_MCP_SESSION_FILE overrides it).
@@ -153,7 +151,7 @@ async function capturePage(
       records.push({ name, path, status, ...(redirectHost ? { redirectHost } : {}), note: "aborted: redirected" });
       throw new SessionRedirectError(
         `${path} redirected to ${redirectHost ?? "an unknown location"}. The saved session is missing or expired. ` +
-          "Sign in again with `bun src/cli.ts login`, then rerun this script.",
+          "Sign in again with `npm run dev -- login`, then rerun this script.",
       );
     }
     if (status !== 200) {
@@ -231,7 +229,7 @@ async function loadStorageState(sessionFile: string): Promise<StorageState> {
   try {
     await access(sessionFile);
   } catch {
-    throw new Error(`No saved BOOTH session at ${sessionFile}. Sign in first with \`bun src/cli.ts login\`.`);
+    throw new Error(`No saved BOOTH session at ${sessionFile}. Sign in first with \`npm run dev -- login\`.`);
   }
   const parsed = storageStateSchema.safeParse(JSON.parse(await readFile(sessionFile, "utf8")));
   if (!parsed.success) throw new Error(`The session file at ${sessionFile} is not a Playwright storage state.`);

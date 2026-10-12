@@ -21,7 +21,7 @@
 ## 必要なもの
 
 - Node.js 20 以上
-- ソースからビルドする場合: [Bun](https://bun.sh/)（1.3.14 で確認）と Git
+- ソースからビルドする場合: Git（npm は Node.js に付属するものを使います）
 - ログイン時のみ: Google Chrome または Microsoft Edge と、ブラウザ画面を表示できるデスクトップ環境
 
 ## インストール
@@ -33,8 +33,8 @@
 ```bash
 git clone https://github.com/tomo1560/avatar-closet-mcp
 cd avatar-closet-mcp
-bun install
-bun run build
+npm ci
+npm run build
 # Claude Code に登録（<abs> は clone したフォルダの絶対パスに置き換える）
 claude mcp add booth -- node <abs>/dist/cli.js
 # CLI として使う
@@ -359,8 +359,8 @@ npx -y avatar-closet-mcp logout
 ## 開発
 
 ```bash
-bun install
-bun run lint && bun run typecheck && bun run test && bun run build
+npm ci
+npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-`bun run test:live` は実際の BOOTH アカウントに通信するため、明示的に必要なときだけ手動で実行してください。
+`npm run test:live` は実際の BOOTH アカウントに通信するため、明示的に必要なときだけ手動で実行してください。
