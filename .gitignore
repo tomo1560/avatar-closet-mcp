@@ -18,9 +18,6 @@ browser-profile/
 .booth-mcp/
 .avatar-closet-mcp/
 /avatar-closet-mcp/
-# pre-rename data folder names (PLAN §7-7)
-.booth-library-mcp/
-/booth-library-mcp/
 # root-level only: src/cache/ (PLAN §4) must stay tracked
 /cache/
 

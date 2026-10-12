@@ -79,21 +79,6 @@ describe("logout (local credential cleanup)", () => {
     expect(await exists(profileDir)).toBe(false);
   });
 
-  it.each([
-    ["the default profile", false],
-    ["a custom Chromium profile", true],
-  ])("still deletes %s marked by the pre-rename booth-library-mcp login", async (_label, custom) => {
-    const appDir = await createTempDirectory();
-    const profileDir = custom ? join(await createTempDirectory(), "custom-profile") : join(appDir, "browser-profile");
-    await mkdir(join(profileDir, "Default"), { recursive: true });
-    await writeFile(join(profileDir, "booth-library-mcp-profile.json"), "{}", "utf8");
-
-    const result = await clearLocalLogin({ ...defaultPaths(appDir), profileDir });
-
-    expect(result).toMatchObject({ profileDirRemoved: true, warnings: [] });
-    expect(await exists(profileDir)).toBe(false);
-  });
-
   it("refuses a Chromium profile it did not create (e.g. the user's real Chrome User Data)", async () => {
     const appDir = await createTempDirectory();
     const realProfile = await createTempDirectory();
@@ -115,7 +100,6 @@ describe("logout (local credential cleanup)", () => {
     await prepareProfileDir(created);
     expect(await exists(join(created, PROFILE_MARKER_FILE))).toBe(true);
     expect(PROFILE_MARKER_FILE).toBe("avatar-closet-mcp-profile.json");
-    expect(await exists(join(created, "booth-library-mcp-profile.json"))).toBe(false);
   });
 
   it("refuses to delete a custom directory that is not a browser profile, but still removes the session", async () => {

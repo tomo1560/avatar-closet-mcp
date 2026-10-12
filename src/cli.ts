@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { realpathSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { migrateLegacyAppDir } from "./app-dir-migration.js";
 import { parseCliArgs } from "./cli/commands.js";
 import { exitCodeFor } from "./cli/exit-codes.js";
 import { runCli, type CliDeps } from "./cli/run.js";
@@ -15,8 +14,6 @@ export { EXIT_CODE_HELP, EXIT_CODES, exitCodeFor } from "./cli/exit-codes.js";
 export { runCli, type CliDeps, type CliIo } from "./cli/run.js";
 
 export async function main(args: readonly string[] = process.argv.slice(2)): Promise<void> {
-  // Before anything reads the session or the cache (never throws; warns once and keeps the old folder on failure).
-  await migrateLegacyAppDir();
   const exitCode = await runMain(args, {
     createService: () => new BoothService(),
     serve: startStdioServer,

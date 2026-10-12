@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { existsSync, readFileSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -13,20 +13,16 @@ let client: Client | undefined;
 const tempPaths: string[] = [];
 
 /**
- * Starts the real stdio server with a throwaway BOOTH_MCP_HOME unless `env` names one. The SDK's safe defaults
- * include LOCALAPPDATA / HOME, so without it the server would read (and migrate) the real per-user app directory.
+ * Starts the real stdio server with a throwaway BOOTH_MCP_HOME unless `env` names one. Only `env` (plus the SDK's
+ * safe defaults, which include LOCALAPPDATA / HOME) reaches the child process, so without it the server would read
+ * the real per-user app directory.
  */
 async function connect(env: Record<string, string> = {}): Promise<{ client: Client; stderr: () => string }> {
-  return connectWithEnv({ BOOTH_MCP_HOME: env.BOOTH_MCP_HOME ?? (await tempHome()), ...env });
-}
-
-/** Starts the real stdio server. Only `env` (plus the SDK's safe defaults) reaches the child process. */
-async function connectWithEnv(env: Record<string, string>): Promise<{ client: Client; stderr: () => string }> {
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: ["--import", "tsx", "src/cli.ts"],
     cwd: process.cwd(),
-    env,
+    env: { BOOTH_MCP_HOME: env.BOOTH_MCP_HOME ?? (await tempHome()), ...env },
     stderr: "pipe",
   });
   let stderr = "";
@@ -134,21 +130,5 @@ describe("stdio MCP contract", () => {
     expect(names).not.toContain("booth_download");
     expect(stderr()).toContain("booth_download は無効");
     expect(stderr()).toContain("BOOTH_MCP_DOWNLOAD_DIR");
-  });
-
-  // darwin derives the parent folder from the home directory only; Windows and Linux can point it at a temp dir.
-  it.skipIf(process.platform === "darwin")("moves the legacy booth-library-mcp data folder at startup", async () => {
-    const parent = await tempHome();
-    await mkdir(join(parent, "booth-library-mcp", "cache"), { recursive: true });
-    await writeFile(join(parent, "booth-library-mcp", "avatars.json"), '{"version":1,"avatars":[]}', "utf8");
-    const parentEnv = process.platform === "win32" ? { LOCALAPPDATA: parent } : { XDG_CONFIG_HOME: parent };
-
-    const { client, stderr } = await connectWithEnv(parentEnv);
-
-    expect(client.getServerVersion()?.name).toBe("avatar-closet-mcp");
-    expect(existsSync(join(parent, "booth-library-mcp"))).toBe(false);
-    expect(await readFile(join(parent, "avatar-closet-mcp", "avatars.json"), "utf8")).toBe('{"version":1,"avatars":[]}');
-    expect(existsSync(join(parent, "avatar-closet-mcp", "cache"))).toBe(true);
-    expect(stderr()).not.toContain("移行できませんでした");
   });
 });

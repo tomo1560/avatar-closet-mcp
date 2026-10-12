@@ -41,7 +41,7 @@ try {
     command: resolve(destination, "node_modules", ".bin", process.platform === "win32" ? "avatar-closet-mcp.cmd" : "avatar-closet-mcp"),
     args: [],
     cwd: process.cwd(),
-    // A throwaway data directory: never read or migrate the real per-user app directory.
+    // A throwaway data directory: never read the real per-user app directory.
     env: { ...getDefaultEnvironment(), BOOTH_MCP_HOME: join(destination, "home") },
     stderr: "pipe",
   });
