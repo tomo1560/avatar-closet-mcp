@@ -94,6 +94,15 @@ describe("parseLibraryPage", () => {
     expect(last.items.map((item) => item.item_id)).toEqual(["1000009"]);
   });
 
+  it("reports no next page beyond the last page (verified out-of-range markup)", () => {
+    expect(parseLibraryPage(fixture("library-out-of-range.html"), `${LIBRARY_URL}?page=9`)).toEqual({
+      items: [],
+      page: 9,
+      last_page: 3,
+      has_next: false,
+    });
+  });
+
   it("returns an empty list for an empty library instead of throwing", () => {
     expect(parseLibraryPage(fixture("library-empty.html"), LIBRARY_URL)).toEqual({
       items: [],
@@ -214,7 +223,7 @@ describe("parseOrdersPage", () => {
     ]);
   });
 
-  it("merges rows that share an order id", () => {
+  it("merges rows that share an order id (a multi-item order is one card per item)", () => {
     const html = fixture("orders.html").replace('href="/orders/30000002"', 'href="/orders/30000001"');
     const merged = parseOrdersPage(html, ORDERS_URL);
     expect(merged.orders.map((order) => order.order_id)).toEqual(["30000001", "30000003"]);
@@ -380,5 +389,25 @@ describe("parseOrderDetail", () => {
 
   it("throws BOOTH_CHANGED for a URL that is not an order detail page", () => {
     expect(codeOf(() => parseOrderDetail(fixture("order-detail.html"), ORDERS_URL))).toBe("BOOTH_CHANGED");
+  });
+
+  it("reads every item of a multi-item order (verified layout)", () => {
+    const multi = parseOrderDetail(fixture("order-detail-multi.html"), "https://accounts.booth.pm/orders/30000002");
+    expect(multi).toMatchObject({ order_id: "30000002", status: "発送完了", payment_method: "クレジットカード", total_price: 3400 });
+    expect(multi.items.map((item) => [item.item_id, item.price, item.downloadables.map((file) => file.downloadable_id)])).toEqual([
+      ["1000011", 1800, ["2000011"]],
+      ["1000012", 800, ["2000012"]],
+      ["1000013", 500, ["2000013"]],
+    ]);
+  });
+
+  it("reads a gift purchase without files and never returns the private gift link", () => {
+    const html = fixture("order-detail-gift.html");
+    const gift = parseOrderDetail(html, "https://accounts.booth.pm/orders/30000003");
+    expect(gift.items).toEqual([
+      { item_id: "1000014", name: "架空ギフト用アクセサリー", variation_name: null, price: 700, downloadables: [] },
+    ]);
+    expect(html).toContain("/gifts/00000000-0000-4000-8000-00000000fa11/edit");
+    expect(JSON.stringify(gift)).not.toMatch(/gifts|fa11|ギフトを渡す|authenticity|Fictional Buyer/u);
   });
 });

@@ -125,16 +125,27 @@ describe("getItem", () => {
   it("reports viewer state only when the JSON carries logged-in fields", () => {
     const base = loadItem("6106863");
     const wished = summarizeItem(parseRawBoothItem({ ...base, wished: true }));
-    expect(wished.viewer).toEqual({ wished: true, ordered: false, gifted: false });
+    expect(wished.viewer).toEqual({ wished: true, ordered: false, gifted: false, owned_variation_ids: [] });
     const ordered = summarizeItem(parseRawBoothItem({ ...base, order: { purchased_at: "2026-01-01" } }));
-    expect(ordered.viewer).toEqual({ wished: false, ordered: true, gifted: false });
+    expect(ordered.viewer).toEqual({ wished: false, ordered: true, gifted: false, owned_variation_ids: [] });
     const gifted = summarizeItem(parseRawBoothItem({ ...base, gift: { id: 1 } }));
-    expect(gifted.viewer).toEqual({ wished: false, ordered: false, gifted: true });
+    expect(gifted.viewer).toEqual({ wished: false, ordered: false, gifted: true, owned_variation_ids: [] });
     const missing = { ...base };
     delete missing.wished;
     delete missing.order;
     delete missing.gift;
     expect(summarizeItem(parseRawBoothItem(missing)).viewer).toBeNull();
+  });
+
+  it("reads purchased variations from the logged-in status already_bought_digital (verified 2026-10-12)", () => {
+    // Logged in, purchased: wished false, order null, gift null; only the bought variation's status changes.
+    const base = loadItem("4866933") as { variations: { id: number; status: string }[] };
+    const [first, second, ...rest] = base.variations;
+    if (!first || !second) throw new Error("fixture needs two variations");
+    const bought = { ...base, wished: false, order: null, gift: null, variations: [first, { ...second, status: "already_bought_digital" }, ...rest] };
+    const summary = summarizeItem(parseRawBoothItem(bought));
+    expect(summary.viewer).toEqual({ wished: false, ordered: false, gifted: false, owned_variation_ids: [second.id] });
+    expect(summary.variations.find((variation) => variation.id === second.id)?.status).toBe("already_bought_digital");
   });
 
   it("tolerates missing optional fields and keeps unknown fields", () => {

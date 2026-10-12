@@ -4,8 +4,10 @@
   Structure (tags, classes, nesting, data-* keys and fixed UI strings) follows a real logged-in capture of 2026-10-12;
   every name, id, URL, file name and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the
   footer are left out.
-  NOT VERIFIED: the empty-state message below is reconstructed (no capture of an empty library). The parser relies on
-  the absence of item links, not on that text.
+  Empty-state markup VERIFIED 2026-10-12 on a real out-of-range page (/library?page= beyond the last page renders the
+  same "no items" block, see library-out-of-range.html). NOT OBSERVABLE with the capturing account: a library with zero
+  purchases; its pager is assumed to be the empty `div.pager` of a single page (as on the real one-page gifts list).
+  The parser relies on the absence of item links, not on the message text.
 -->
 <html lang="ja">
 <head>
@@ -57,7 +59,7 @@
     <div class="w-full desktop:w-[808px] mb-24 flex flex-col gap-16">
     <div class="h-32" id="js-library-search-header"></div>
 
-    <div class="bg-white p-16 desktop:rounded-8 text-center text-text-gray600">購入した商品はまだありません</div>
+    <div class="bg-white text-center text-16 font-bold text-text-gray600 py-64 desktop:rounded-8">購入したダウンロード商品はありません</div>
     <div class="pager border-0"></div>
     </div>
   </div>

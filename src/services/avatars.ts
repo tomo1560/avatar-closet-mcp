@@ -11,7 +11,7 @@ import { resolveAvatarId } from "../vrchat/matcher.js";
 import type { AvatarDictionary, AvatarEntry, AvatarSuggestion, CompatibilityCheck, VrchatKind } from "../vrchat/types.js";
 import { dictionaryError, fetchMetadata, loadDictionary, loadUserEntries, type MetadataBatch, type ServiceContext } from "./context.js";
 import { normalizeAvatarQuery } from "./items.js";
-import { collectOwnedItems, LIST_MAX_FETCH, metadataStatus } from "./library.js";
+import { collectOwnedWithFree, LIST_MAX_FETCH, metadataStatus } from "./library.js";
 import { fetchOwnedMetadata } from "./owned-snapshot.js";
 import { invalidInput, wrap } from "./result.js";
 import { HEURISTIC_NOTE } from "./vrchat-info.js";
@@ -41,7 +41,7 @@ export interface AvatarSearchInput {
   page?: number | undefined;
 }
 
-/** Avatar bodies the user owns (library + gifts) plus the current dictionary. */
+/** Avatar bodies the user owns (library + gifts + free downloads) plus the current dictionary. */
 export async function listMyAvatars(ctx: ServiceContext): Promise<BoothResult<MyAvatarsResult>> {
   const dictionary = await loadDictionary(ctx);
   const { items, batch } = await ownedMetadata(ctx);
@@ -122,10 +122,10 @@ export async function searchForAvatar(ctx: ServiceContext, input: AvatarSearchIn
 }
 
 async function ownedMetadata(ctx: ServiceContext): Promise<{ items: readonly LibraryItem[]; batch: MetadataBatch }> {
-  const owned = await collectOwnedItems(ctx);
+  const owned = await collectOwnedWithFree(ctx);
   const batch = await fetchOwnedMetadata(
     ctx,
-    owned,
+    owned.purchased,
     owned.items.map((item) => item.item_id),
     LIST_MAX_FETCH,
   );

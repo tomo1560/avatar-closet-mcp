@@ -13,6 +13,7 @@ import { itemJsonUrlOf, itemRoutes, publicItem, RoutedFakeReader, type FakeRoute
 const tempPaths: string[] = [];
 const LIBRARY = "https://accounts.booth.pm/library";
 const GIFTS = "https://accounts.booth.pm/library/gifts";
+const FREE = "https://accounts.booth.pm/library/free_downloads";
 
 afterEach(async () => {
   await Promise.all(tempPaths.splice(0).map(async (path) => rm(path, { recursive: true, force: true })));
@@ -41,6 +42,7 @@ const library: Record<string, FakeRoute> = {
     ),
   },
   [GIFTS]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/gifts" }) },
+  [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
 };
 
 describe("CLI data commands", () => {
@@ -95,6 +97,7 @@ describe("CLI data commands", () => {
     const routes: Record<string, FakeRoute> = {
       [LIBRARY]: { html: libraryHtml(items, { page: 1, lastPage: 1 }) },
       [GIFTS]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/gifts" }) },
+      [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
       ...Object.fromEntries(items.map((item) => [itemJsonUrlOf(item.id), { json: { ...source, id: item.id } }])),
     };
     const { stdout, stderr } = await run(["sync"], routes);
@@ -106,6 +109,7 @@ describe("CLI data commands", () => {
     const routes: Record<string, FakeRoute> = {
       [LIBRARY]: { html: libraryHtml([{ id: 777, name: "カクウ" }], { page: 1, lastPage: 1 }) },
       [GIFTS]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/gifts" }) },
+      [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
       [itemJsonUrlOf(777)]: { json: { ...(publicItem(6106863) as Record<string, unknown>), id: 777, name: "オリジナル3Dモデル「カクウ」" } },
     };
     const { stdout, home } = await run(["avatars", "init"], routes);

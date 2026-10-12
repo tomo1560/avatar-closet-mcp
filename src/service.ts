@@ -18,6 +18,7 @@ import { downloadPurchaseFile, type DownloadPurchaseInput, type DownloadResult }
 import { checkItemCompatibility, getItemDetail, searchItems, suggestTagNames, type CompatibilityInput, type GetItemInput } from "./services/items.js";
 import { listLibrary, type LibraryQuery } from "./services/library.js";
 import { getOrder, listOrders } from "./services/orders.js";
+import { listWishlist, listWishlistNames, type WishlistQuery } from "./services/wishlist.js";
 import { wrap } from "./services/result.js";
 import { syncAllMetadata, syncLibraryMetadata, type SyncAllOptions } from "./services/sync.js";
 import { checkUnityProject, type UnityCheckResult } from "./services/unity-check.js";
@@ -38,6 +39,8 @@ import type {
   SearchResult,
   SyncResult,
   TagSuggestions,
+  WishlistListing,
+  WishlistNamesResult,
 } from "./types.js";
 
 export type { AvatarSearchInput } from "./services/avatars.js";
@@ -47,6 +50,7 @@ export type { LibraryQuery } from "./services/library.js";
 export type { SyncAllOptions, SyncProgress } from "./services/sync.js";
 export type { UnityCheckResult } from "./services/unity-check.js";
 export type { UpdateCheckInput, UpdateCheckResult } from "./services/updates.js";
+export type { WishlistQuery } from "./services/wishlist.js";
 
 export const MIN_LOGIN_TIMEOUT_SEC = 30;
 export const MAX_LOGIN_TIMEOUT_SEC = 1_800;
@@ -96,6 +100,7 @@ export class BoothService {
       unavailable: new UnavailableItems({ file: join(cacheDir, "unavailable-items.json"), ttlMs: ttl.ttlMs }),
       avatarsFile: getAvatarDictionaryFile(this.env),
       ownedItems: new Memo(OWNED_ITEMS_TTL_MS),
+      freeItems: new Memo(OWNED_ITEMS_TTL_MS),
       cacheSnapshotFile: getCacheSnapshotFile(this.env),
       updateSnapshotFile: getSnapshotFile(this.env),
       warn,
@@ -122,7 +127,7 @@ export class BoothService {
     }
     await this.runLogin(timeoutSec * 1_000);
     await this.browser.close();
-    this.ctx.ownedItems.clear();
+    this.clearOwnedItems();
     return wrap({ authenticated: true }, ACCOUNT_SETTINGS_URL);
   }
 
@@ -143,7 +148,7 @@ export class BoothService {
   /** Deletes session.json and the login browser profile. Local only; BOOTH is not contacted. */
   async logout(): Promise<BoothResult<LogoutResult>> {
     await this.browser.close();
-    this.ctx.ownedItems.clear();
+    this.clearOwnedItems();
     return wrap(await clearLocalLogin(getLocalLoginPaths(this.env)), `${ACCOUNTS_ORIGIN}/`);
   }
 
@@ -165,6 +170,19 @@ export class BoothService {
 
   listGifts(query: LibraryQuery = {}): Promise<BoothResult<LibraryListing>> {
     return listLibrary(this.ctx, "gifts", query);
+  }
+
+  /** The library's "無料ダウンロード" tab (free items obtained from BOOTH; the cards list no files). */
+  listFreeDownloads(query: LibraryQuery = {}): Promise<BoothResult<LibraryListing>> {
+    return listLibrary(this.ctx, "free_downloads", query);
+  }
+
+  listWishlist(query: WishlistQuery = {}): Promise<BoothResult<WishlistListing>> {
+    return listWishlist(this.ctx, query);
+  }
+
+  listWishlistNames(): Promise<BoothResult<WishlistNamesResult>> {
+    return listWishlistNames(this.ctx);
   }
 
   listOrders(page?: number): Promise<BoothResult<OrdersListing>> {
@@ -221,6 +239,12 @@ export class BoothService {
   downloadPurchase(input: DownloadPurchaseInput, options: DownloadOptions = {}): Promise<BoothResult<DownloadResult>> {
     const deps = { redirectReader: this.redirectReader, fetchImpl: this.downloadFetch, config: this.downloadConfig(options) };
     return downloadPurchaseFile(deps, input);
+  }
+
+  /** Owned-item walks started before a login / logout must not be reused afterwards. */
+  private clearOwnedItems(): void {
+    this.ctx.ownedItems.clear();
+    this.ctx.freeItems.clear();
   }
 }
 

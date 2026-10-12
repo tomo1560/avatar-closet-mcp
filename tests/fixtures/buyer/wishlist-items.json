@@ -1,0 +1,141 @@
+{
+  "items": [
+    {
+      "category": {
+        "name": {
+          "en": "3D Clothing",
+          "ja": "3D衣装"
+        },
+        "url": "https://booth.pm/ja/browse/3D%E8%A1%A3%E8%A3%85"
+      },
+      "event": null,
+      "id": 1000201,
+      "is_adult": false,
+      "is_end_of_sale": false,
+      "is_placeholder": false,
+      "is_sold_out": false,
+      "is_vrchat": true,
+      "minimum_stock": null,
+      "music": null,
+      "name": "架空ワンピース【しなの・桔梗・マヌカ対応】フルセット版",
+      "price": "¥ 2,500~",
+      "shop": {
+        "thumbnail_url": "https://booth.pximg.net/c/48x48/users/9000002/icon_image/00000000-0000-4000-8000-000009000002_base_resized.jpg",
+        "name": "架空ショップ",
+        "url": "https://kakuu-shop.booth.pm/",
+        "verified": false
+      },
+      "thumbnail_image_urls": [
+        "https://booth.pximg.net/c/300x300_a2_g5/00000000-0000-4000-8000-000000000201/i/1000201/10000000-0000-4000-8000-000000000201_base_resized.jpg",
+        "https://booth.pximg.net/c/300x300_a2_g5/00000000-0000-4000-8000-000000000201/i/1000201/10000001-0000-4000-8000-000000000201_base_resized.jpg",
+        "https://booth.pximg.net/c/300x300_a2_g5/00000000-0000-4000-8000-000000000201/i/1000201/10000002-0000-4000-8000-000000000201_base_resized.jpg"
+      ],
+      "url": "https://booth.pm/ja/items/1000201",
+      "shop_item_url": "https://kakuu-shop.booth.pm/items/1000201",
+      "wish_list_url": "https://accounts.booth.pm/items/1000201/wish_list",
+      "tracking_data": {
+        "product_id": 1000201,
+        "product_name": "架空ワンピース【しなの・桔梗・マヌカ対応】フルセット版",
+        "product_price": 2500,
+        "product_brand": "kakuu-shop",
+        "product_category": 209,
+        "product_event": null,
+        "tracking": "impression_item"
+      }
+    },
+    {
+      "category": {
+        "name": {
+          "en": "3D Accessories",
+          "ja": "3D装飾品"
+        },
+        "url": "https://booth.pm/ja/browse/3D%E8%A3%85%E9%A3%BE%E5%93%81"
+      },
+      "event": {
+        "name": "架空イベント",
+        "url": "https://booth.pm/ja/events/kakuu-event"
+      },
+      "id": 1000202,
+      "is_adult": false,
+      "is_end_of_sale": false,
+      "is_placeholder": false,
+      "is_sold_out": false,
+      "is_vrchat": true,
+      "minimum_stock": null,
+      "music": null,
+      "name": "Kakuu Hair Pin",
+      "price": "¥ 500",
+      "shop": {
+        "thumbnail_url": "https://booth.pximg.net/c/48x48/users/9000012/icon_image/00000000-0000-4000-8000-000009000012_base_resized.jpg",
+        "name": "Kakuu Lab",
+        "url": "https://kakuu-lab.booth.pm/",
+        "verified": false
+      },
+      "thumbnail_image_urls": [
+        "https://booth.pximg.net/c/300x300_a2_g5/00000000-0000-4000-8000-000000000202/i/1000202/10000000-0000-4000-8000-000000000202_base_resized.jpg",
+        "https://booth.pximg.net/c/300x300_a2_g5/00000000-0000-4000-8000-000000000202/i/1000202/10000001-0000-4000-8000-000000000202_base_resized.jpg"
+      ],
+      "url": "https://booth.pm/ja/items/1000202",
+      "shop_item_url": "https://kakuu-lab.booth.pm/items/1000202",
+      "wish_list_url": "https://accounts.booth.pm/items/1000202/wish_list",
+      "tracking_data": {
+        "product_id": 1000202,
+        "product_name": "Kakuu Hair Pin",
+        "product_price": 500,
+        "product_brand": "kakuu-lab",
+        "product_category": 217,
+        "product_event": "kakuu-event",
+        "tracking": "impression_item"
+      }
+    },
+    {
+      "category": {
+        "name": {
+          "en": "Illustration book",
+          "ja": "イラスト集"
+        },
+        "url": "https://booth.pm/ja/browse/%E3%82%A4%E3%83%A9%E3%82%B9%E3%83%88%E9%9B%86"
+      },
+      "event": null,
+      "id": 1000203,
+      "is_adult": false,
+      "is_end_of_sale": false,
+      "is_placeholder": false,
+      "is_sold_out": false,
+      "is_vrchat": false,
+      "minimum_stock": null,
+      "music": null,
+      "name": "架空イラスト集",
+      "price": "¥ 1,000",
+      "shop": {
+        "thumbnail_url": "https://booth.pximg.net/c/48x48/users/9000013/icon_image/00000000-0000-4000-8000-000009000013_base_resized.jpg",
+        "name": "架空書房",
+        "url": "https://kakuu-books.booth.pm/",
+        "verified": false
+      },
+      "thumbnail_image_urls": [
+        "https://booth.pximg.net/c/300x300_a2_g5/00000000-0000-4000-8000-000000000203/i/1000203/10000000-0000-4000-8000-000000000203_base_resized.jpg"
+      ],
+      "url": "https://booth.pm/ja/items/1000203",
+      "shop_item_url": "https://kakuu-books.booth.pm/items/1000203",
+      "wish_list_url": "https://accounts.booth.pm/items/1000203/wish_list",
+      "tracking_data": {
+        "product_id": 1000203,
+        "product_name": "架空イラスト集",
+        "product_price": 1000,
+        "product_brand": "kakuu-books",
+        "product_category": 127,
+        "product_event": null,
+        "tracking": "impression_item"
+      }
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "prev_page": null,
+    "next_page": 2,
+    "limit_value": 20,
+    "total_pages": 2,
+    "total_count": 23
+  }
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--
+  FICTIONAL fixture: accounts.booth.pm/library?page=9 when the library has only 3 pages (an out-of-range page).
+  Structure (tags, classes, nesting, data-* keys and fixed UI strings) follows a real logged-in capture of 2026-10-12;
+  every name, id, URL and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the footer are
+  left out.
+  VERIFIED: BOOTH does NOT return the last page for an out-of-range page. It renders the "no items" block and a pager
+  without numbered links: first-page, rel="prev" (page-1), a gap, rel="next" (page+1) and a.last-page (the real last
+  page). has_next must therefore come from a.last-page, not from the rel="next" link.
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="csrf-token" content="REDACTED-FIXTURE">
+<title>ライブラリ - BOOTH</title>
+</head>
+<body>
+<header class="sticky top-0 w-full z-[1000]" role="banner">
+  <div>
+    <div class="w-full bg-white shadow-border300 shadow-header flex flex-col-reverse desktop:flex-col" id="js-header">
+      <nav class="flex h-[44px] desktop:h-[52px]" role="navigation">
+        <div class="flex flex-terminal items-center shrink">
+          <a class="block shrink-0" href="https://booth.pm/"><img class="h-[44px] desktop:h-[52px] w-[123px] desktop:w-[146px] align-top" alt="BOOTH" src="https://asset.booth.pm/assets/booth-logo.svg"></a>
+        </div>
+        <div class="flex items-stretch shrink-0">
+          <div class="hidden desktop:flex">
+            <div data-current-user="{&quot;nickname&quot;:&quot;Fictional Buyer&quot;,&quot;thumbnail_url&quot;:&quot;https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg&quot;}" data-shop="{}" id="js-user-pulldown"></div>
+            <div class="h-[52px] w-[52px]" data-unread="false" id="js-user-activities"></div>
+            <a class="flex items-center justify-center w-[52px] h-[52px] no-underline !text-ui-label" title="スキ！した商品" aria-label="スキ！した商品" href="https://accounts.booth.pm/wish_lists"><pixiv-icon name="24/BoothLikeOff"></pixiv-icon></a>
+          </div>
+          <a class="flex items-center justify-center size-[44px] desktop:size-[52px] inline-block leading-none relative" id="show_cart" aria-label="ショッピングカート" href="https://booth.pm/carts"><pixiv-icon name="24/Basket"></pixiv-icon></a>
+          <div class="desktop:hidden">
+            <div data-library-url="https://accounts.booth.pm/library" data-orders-url="https://accounts.booth.pm/orders" data-settings-url="https://accounts.booth.pm/settings" data-signed-in="true" data-signin-url="/users/sign_in" data-signout-url="/users/sign_out" data-user-name="Fictional Buyer" data-user-notification-count="0" data-user-thumbnail-url="https://booth.pximg.net/c/48x48/users/9000001/icon_image/00000000-0000-4000-8000-000009000001_base_resized.jpg" id="js-navigation"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+<div class="page-wrap box-border relative z-[2] flex-grow basis-auto bg-[#f1f5f8]">
+<main role="main">
+  <div class="text-center">
+    <h1 class="text-text-default typography-16 my-16 desktop:typography-20 desktop:mt-64 desktop:mb-40">ライブラリ</h1>
+  </div>
+  <div class="mx-auto desktop:w-[808px] desktop:mb-24">
+    <a href="https://booth.pm/announcements/1000" rel="noopener noreferrer" target="_blank"><img class="w-full h-auto" alt="Advertisement for Booth Library Manager" width="808" height="100" src="https://asset.booth.pm/assets/booth_library_manager/banner.png"></a>
+  </div>
+  <nav class="ui-segmented-tablet-nav centered">
+    <ul>
+      <li><a class="nav-item current" href="/library">購入した商品</a></li>
+      <li><a class="nav-item" href="/library/gifts?page=1">ギフト</a></li>
+      <li><a class="nav-item" href="/library/free_downloads?page=1">無料ダウンロード</a></li>
+    </ul>
+  </nav>
+  <div class="hidden" data-ga-from="library_show" data-parent-category-options="[]" data-search-params="{&quot;page&quot;:9}" data-search-url="https://accounts.booth.pm/library" data-sub-category-options="[]" id="js-library-search-data"></div>
+  <div class="flex gap-40 mx-auto desktop:w-fit desktop:pt-16 desktop:border-t desktop:border-t-border500">
+    <div class="hidden screen4:block w-[176px] mb-64 mt-[48px]" id="js-library-search-sidebar"></div>
+    <div class="w-full desktop:w-[808px] mb-24 flex flex-col gap-16">
+    <div class="h-32" id="js-library-search-header"></div>
+
+    <div class="bg-white text-center text-16 font-bold text-text-gray600 py-64 desktop:rounded-8">購入したダウンロード商品はありません</div>
+    <div class="pager border-0"><nav><ul>
+        <li><a class="nav-item first-page" href="/library"><i class="icon-angle-double-left no-margin s-1x"></i></a></li>
+        <li><a class="nav-item" rel="prev" href="/library?page=8"><i class="icon-arrow-open-left no-margin s-1x"></i></a></li>
+        <li class="page gap">…</li>
+        <li><a class="nav-item" rel="next" href="/library?page=10"><i class="icon-arrow-open-right no-margin s-1x"></i></a></li>
+        <li><a class="nav-item last-page" href="/library?page=3"><i class="icon-angle-double-right no-margin s-1x"></i></a></li>
+      </ul></nav></div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

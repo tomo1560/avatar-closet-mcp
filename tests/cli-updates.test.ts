@@ -12,6 +12,7 @@ import { RoutedFakeReader, type FakeRoute } from "./helpers/fake-reader.js";
 
 const LIBRARY = "https://accounts.booth.pm/library";
 const GIFTS = "https://accounts.booth.pm/library/gifts";
+const FREE = "https://accounts.booth.pm/library/free_downloads";
 const FIXTURE = fileURLToPath(new URL("./fixtures/unity-project", import.meta.url));
 const tempPaths: string[] = [];
 
@@ -29,6 +30,7 @@ function routes(library: readonly FakeLibraryItem[]): Record<string, FakeRoute> 
   return {
     [LIBRARY]: { html: libraryHtml(library, { page: 1, lastPage: 1 }) },
     [GIFTS]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/gifts" }) },
+    [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
   };
 }
 

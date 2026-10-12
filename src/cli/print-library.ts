@@ -3,6 +3,7 @@ import type {
   BoothResult,
   LibraryEntry,
   LibraryListing,
+  LibrarySource,
   MetadataStatus,
   MyAvatarsResult,
   OrderResult,
@@ -12,11 +13,13 @@ import type {
 import type { SyncProgress } from "../services/sync.js";
 import { orDash, renderTable, yen } from "./format.js";
 
-/** Human-readable output for the buyer commands (library, gifts, orders, avatars, sync). */
+/** Human-readable output for the buyer commands (library, gifts, free, orders, avatars, sync). */
+
+const SOURCE_LABELS: Readonly<Record<LibrarySource, string>> = { library: "ライブラリ", gifts: "ギフト", free_downloads: "無料ダウンロード" };
 
 export function formatLibrary({ data }: BoothResult<LibraryListing>): string {
   const filtered = data.filters.avatar !== undefined || data.filters.kind !== undefined || data.filters.dependency !== undefined;
-  const label = data.source === "library" ? "ライブラリ" : "ギフト";
+  const label = SOURCE_LABELS[data.source];
   const table =
     data.items.length === 0
       ? "該当する商品はありません。\n"

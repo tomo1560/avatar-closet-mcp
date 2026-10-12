@@ -186,7 +186,9 @@ export function parsePager($: CheerioAPI, finalUrl: string): PageInfo {
   if (lastPage === null && !hasNextLink) {
     lastPage = pager.length > 0 ? maxPagerPage($, pager, finalUrl, page) : page;
   }
-  return { page, last_page: lastPage, has_next: hasNextLink || (lastPage !== null && page < lastPage) };
+  // Verified 2026-10-12: an out-of-range ?page renders an empty list whose pager still has rel="next" (page+1) and an
+  // a.last-page pointing at the real last page, so a known last page wins over the rel="next" link.
+  return { page, last_page: lastPage, has_next: lastPage !== null ? page < lastPage : hasNextLink };
 }
 
 function maxPagerPage($: CheerioAPI, pager: Cheerio<Element>, base: string, current: number): number {

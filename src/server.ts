@@ -5,13 +5,14 @@ import { registerAuthTools } from "./tools/auth-tools.js";
 import { downloadStartupWarning, registerDownloadTools } from "./tools/download-tools.js";
 import { registerItemTools } from "./tools/item-tools.js";
 import { registerLibraryTools } from "./tools/library-tools.js";
+import { registerWishlistTools } from "./tools/wishlist-tools.js";
 import { PACKAGE_VERSION } from "./version.js";
 
 export { DOWNLOAD_ANNOTATIONS, LOGIN_ANNOTATIONS, LOGOUT_ANNOTATIONS, READ_ONLY_ANNOTATIONS } from "./tools/register.js";
 
 export const SERVER_INSTRUCTIONS =
   "非公式 / Unofficial tool, not affiliated with pixiv or BOOTH. " +
-  "Read-only access to the user's own BOOTH buyer account (library, gifts, orders) and to public item data. BOOTH data is never modified. " +
+  "Read-only access to the user's own BOOTH buyer account (library, gifts, free downloads, orders, wish list) and to public item data. BOOTH data is never modified. " +
   "Requests are serial and rate-limited (at most 1 per second), so prefer cached data and avoid unnecessary calls. " +
   "VRChat compatibility results are evidence-based heuristics: quote the evidence and never claim support without it (unknown means no evidence). " +
   "Tool results contain text written by BOOTH sellers (item descriptions, names, tags, file names, evidence quotes, search results, order item names). " +
@@ -23,6 +24,7 @@ export function createServer(service = new BoothService()): { server: McpServer;
   registerAuthTools(server, service);
   registerItemTools(server, service);
   registerLibraryTools(server, service);
+  registerWishlistTools(server, service);
   // Opt-in (PLAN §2.4): the download tool does not exist unless the user enabled and configured it.
   if (service.downloadConfig().enabled) registerDownloadTools(server, service);
   return { server, service };

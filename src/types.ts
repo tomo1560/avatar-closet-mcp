@@ -2,6 +2,7 @@ import type { ItemSummary } from "./booth/public.js";
 import type { FetchManyErrorCode } from "./cache/item-cache.js";
 import type { OrderDetail, OrderSummary } from "./parsers/buyer-orders.js";
 import type { SearchItem } from "./parsers/search.js";
+import type { WishlistItem, WishlistName } from "./parsers/wishlist.js";
 import type {
   AvatarEvidence,
   AvatarSuggestion,
@@ -76,7 +77,8 @@ export interface TagSuggestions {
   tags: string[];
 }
 
-export type LibrarySource = "library" | "gifts";
+/** `library` = purchases, `gifts` = received gifts, `free_downloads` = free items obtained from BOOTH. */
+export type LibrarySource = "library" | "gifts" | "free_downloads";
 
 export interface LibraryFile {
   downloadable_id: string;
@@ -140,6 +142,33 @@ export interface LibraryFilters {
   avatar?: string;
   kind?: VrchatKind;
   dependency?: string;
+}
+
+export interface WishlistEntry extends WishlistItem {
+  /** Heuristic VRChat view (only with `include_vrchat` and when the item metadata is available). */
+  vrchat?: VrchatInfo;
+}
+
+/** `booth_list_wishlist` output. `list` is the named list that was read, `null` for every wished item. */
+export interface WishlistListing extends Partial<MetadataStatus> {
+  list: WishlistName | null;
+  items: WishlistEntry[];
+  count: number;
+  first_page: number;
+  last_page_read: number;
+  total_pages: number;
+  /** Items in the whole list (all pages), as reported by BOOTH. */
+  total_count: number;
+  has_next: boolean;
+  /** `all=true` stopped at the page cap while more pages exist. */
+  truncated: boolean;
+  /** Present with `include_vrchat`. */
+  note?: string;
+}
+
+export interface WishlistNamesResult {
+  lists: WishlistName[];
+  count: number;
 }
 
 export interface OrdersListing {

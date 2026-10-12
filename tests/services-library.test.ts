@@ -112,6 +112,25 @@ describe("listLibrary paging", () => {
   });
 });
 
+describe("listFreeDownloads", () => {
+  const FREE = "https://accounts.booth.pm/library/free_downloads";
+
+  it("reads the free-downloads tab with the library inputs (cards without files)", async () => {
+    const reader = new RoutedFakeReader(libraryRoutes([fakeItems(600, 1), fakeItems(700, 2)], FREE));
+    const result = await (await serviceFor(reader)).listFreeDownloads({ page: 2 });
+    expect(reader.calls).toEqual([`${FREE}?page=2`]);
+    expect(result.data).toMatchObject({ source: "free_downloads", count: 2, last_page: 2, has_next: false });
+    expect(result.data.items.every((item) => item.downloadables.length === 0)).toBe(true);
+  });
+
+  it("applies the local query filter and walks with all=true", async () => {
+    const reader = new RoutedFakeReader(libraryRoutes([fakeItems(600, 1), [{ id: 701, name: "Free Shader" }]], FREE));
+    const result = await (await serviceFor(reader)).listFreeDownloads({ all: true, query: "shader" });
+    expect(reader.calls).toEqual([FREE, `${FREE}?page=2`]);
+    expect(result.data.items.map((item) => item.item_id)).toEqual(["701"]);
+  });
+});
+
 describe("listLibrary filters", () => {
   it("filters locally by name or shop, case-insensitively, without item requests", async () => {
     const reader = new RoutedFakeReader(libraryRoutes([OWNED]));

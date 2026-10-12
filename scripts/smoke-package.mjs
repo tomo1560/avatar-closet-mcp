@@ -64,11 +64,14 @@ try {
     "booth_search_for_avatar",
     "booth_list_library",
     "booth_list_gifts",
+    "booth_list_free_downloads",
     "booth_list_orders",
     "booth_get_order",
     "booth_list_my_avatars",
     "booth_sync_library_metadata",
     "booth_check_updates",
+    "booth_list_wishlist",
+    "booth_list_wishlist_names",
   ];
   const missingTools = expectedTools.filter((name) => !toolNames.has(name));
   if (missingTools.length > 0) {

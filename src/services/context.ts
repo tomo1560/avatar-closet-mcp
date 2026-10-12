@@ -18,6 +18,8 @@ export interface ServiceContext {
   readonly avatarsFile: string;
   /** Recent library + gifts walk, reused by sync / avatar calls for a few minutes. */
   readonly ownedItems: Memo<OwnedItems>;
+  /** Recent free-downloads walk (same lifetime as `ownedItems`). */
+  readonly freeItems: Memo<OwnedItems>;
   /** Library file composition at the last complete walk; drives metadata re-fetches (PLAN §3.5.7). */
   readonly cacheSnapshotFile: string;
   /** Baseline of `booth_check_updates` (advanced only by that check). */

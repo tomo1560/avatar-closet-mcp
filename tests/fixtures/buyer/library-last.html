@@ -4,8 +4,9 @@
   Structure (tags, classes, nesting, data-* keys and fixed UI strings) follows a real logged-in capture of 2026-10-12;
   every name, id, URL, file name and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the
   footer are left out.
-  NOT VERIFIED: the capture was a first page. The last-page pager (first/prev links, no rel="next", no `last-page`)
-  is Kaminari's default markup, as on the real public search pages.
+  VERIFIED 2026-10-12 against a real last page (library and orders): the pager has `a.nav-item.first-page`, a
+  rel="prev" link, numbered links ending in `li.current`, and no rel="next" or `last-page` link. A long list also
+  has a `li.page.gap` after the prev link; this 3-page fixture does not need one.
 -->
 <html lang="ja">
 <head>

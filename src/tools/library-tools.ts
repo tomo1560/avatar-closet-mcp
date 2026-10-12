@@ -39,6 +39,13 @@ export function registerLibraryTools(server: McpServer, service: BoothService): 
   );
   register(
     server,
+    "booth_list_free_downloads",
+    `ライブラリの「無料ダウンロード」タブ（BOOTH で入手した無料配布の商品）を一覧します。入力と出力は booth_list_library と同じですが、このタブにはファイルの一覧が無いため downloadables は常に空です（ファイルは商品ページから入手します）。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
+    libraryInput,
+    (input) => service.listFreeDownloads(input),
+  );
+  register(
+    server,
     "booth_list_orders",
     `自分の BOOTH の注文履歴（注文 ID・日時・金額・状態・商品名）を 1 ページ分返します。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
     { page: z.number().int().min(1).max(1_000).optional().describe("ページ番号（既定 1）") },
@@ -58,14 +65,14 @@ export function registerLibraryTools(server: McpServer, service: BoothService): 
   register(
     server,
     "booth_list_my_avatars",
-    `ライブラリとギフトのうちアバター本体（3Dキャラクター）を一覧し、アバター辞書（avatars.json + 組み込み）に未登録の候補と辞書の内容も返します。商品データはキャッシュ優先で 1 回あたり最大 20 件取得します。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
+    `ライブラリ・ギフト・無料ダウンロードのうちアバター本体（3Dキャラクター）を一覧し、アバター辞書（avatars.json + 組み込み）に未登録の候補と辞書の内容も返します。商品データはキャッシュ優先で 1 回あたり最大 20 件取得します。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
     {},
     () => service.listMyAvatars(),
   );
   register(
     server,
     "booth_sync_library_metadata",
-    `ライブラリとギフトの全商品の商品データ（items/{id}.json）をキャッシュに取り込みます（未取得分のみ、1 回あたり max_items 件まで）。remaining が 0 になるまで繰り返せます。大量の場合は CLI の \`booth-library-mcp sync\` を案内してください。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
+    `ライブラリ・ギフト・無料ダウンロードの全商品の商品データ（items/{id}.json）をキャッシュに取り込みます（未取得分のみ、1 回あたり max_items 件まで）。remaining が 0 になるまで繰り返せます。大量の場合は CLI の \`booth-library-mcp sync\` を案内してください。${LOGIN_NOTE}${UNOFFICIAL_NOTE}`,
     {
       max_items: z
         .number()

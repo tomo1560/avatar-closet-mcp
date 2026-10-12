@@ -25,7 +25,8 @@ export const SEED_AVATARS: AvatarDictionary = [
   { id: "shinra", names: ["森羅", "Shinra"] },
   { id: "mizuki", names: ["瑞希", "Mizuki"] },
   { id: "hakka", names: ["薄荷", "Hakka"], restricted: true },
-  { id: "airi", names: ["愛莉", "Airi"] },
+  // アイリ / あいり: real variation and tag spellings; restricted in free text (アイリス etc.).
+  { id: "airi", names: ["愛莉", "Airi", "アイリ"], restricted_names: ["アイリ"] },
   { id: "milltina", names: ["ミルティナ", "Milltina"] },
   { id: "milfy", names: ["ミルフィ", "Milfy"] },
   { id: "imeris", names: ["イメリス", "Imeris"] },

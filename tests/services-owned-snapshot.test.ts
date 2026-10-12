@@ -9,6 +9,7 @@ import { itemJsonUrlOf, publicItem, RoutedFakeReader, type FakeRoute } from "./h
 
 const LIBRARY = "https://accounts.booth.pm/library";
 const GIFTS = "https://accounts.booth.pm/library/gifts";
+const FREE = "https://accounts.booth.pm/library/free_downloads";
 const tempPaths: string[] = [];
 
 afterEach(async () => {
@@ -29,6 +30,7 @@ function ownedRoutes(library: readonly FakeLibraryItem[]): Record<string, FakeRo
   return {
     [LIBRARY]: { html: libraryHtml(library, { page: 1, lastPage: 1 }) },
     [GIFTS]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/gifts" }) },
+    [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
   };
 }
 
@@ -109,6 +111,7 @@ describe("metadata re-fetch for items whose download files changed (PLAN §3.5.7
     const reader = new RoutedFakeReader({
       ...routes,
       [GIFTS]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/gifts" }) },
+      [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
       ...Object.fromEntries(pages.map((page) => [itemJsonUrlOf(8000 + page), itemJson(8000 + page)])),
     });
     const result = await new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }).syncLibraryMetadata();

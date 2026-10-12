@@ -1,6 +1,7 @@
 import type { SearchUrlParams } from "../booth/public.js";
 import { BoothError } from "../errors.js";
 import type { LibraryQuery } from "../services/library.js";
+import type { WishlistQuery } from "../services/wishlist.js";
 import { VRCHAT_KINDS } from "../services/vrchat-info.js";
 import type { VrchatKind } from "../vrchat/types.js";
 import { booleanFlag, integerFlag, listFlag, parseArgs, stringFlag, usageError, type ArgSpec, type ParsedArgs } from "./args.js";
@@ -11,7 +12,9 @@ export type CliCommand =
   | { kind: "status"; json: boolean }
   | { kind: "logout" }
   | { kind: "help" }
-  | { kind: "library" | "gifts"; json: boolean; query: LibraryQuery }
+  | { kind: "library" | "gifts" | "free"; json: boolean; query: LibraryQuery }
+  | { kind: "wishlist"; json: boolean; query: WishlistQuery }
+  | { kind: "wishlist-names"; json: boolean }
   | { kind: "orders"; json: boolean; page?: number }
   | { kind: "order"; json: boolean; orderId: string }
   | { kind: "item"; json: boolean; item: string; vrchat: boolean }
@@ -33,6 +36,13 @@ const SPECS = {
   logout: { flags: {}, minPositionals: 0, maxPositionals: 0, usage: "logout" },
   library: { flags: LIBRARY_FLAGS, minPositionals: 0, maxPositionals: 0, usage: "library [--all] [--page N] [--query Q] [--avatar A] [--kind K] [--dependency D] [--json]" },
   gifts: { flags: LIBRARY_FLAGS, minPositionals: 0, maxPositionals: 0, usage: "gifts [--all] [--page N] [--query Q] [--avatar A] [--kind K] [--dependency D] [--json]" },
+  free: { flags: LIBRARY_FLAGS, minPositionals: 0, maxPositionals: 0, usage: "free [--all] [--page N] [--query Q] [--avatar A] [--kind K] [--dependency D] [--json]" },
+  wishlist: {
+    flags: { page: "integer", list: "string", all: "boolean", vrchat: "boolean", json: "boolean" },
+    minPositionals: 0,
+    maxPositionals: 1,
+    usage: "wishlist [--page N] [--list <コード|名前>] [--all] [--vrchat] [--json] | wishlist names [--json]",
+  },
   orders: { flags: { page: "integer", json: "boolean" }, minPositionals: 0, maxPositionals: 0, usage: "orders [--page N] [--json]" },
   order: { flags: { json: "boolean" }, minPositionals: 1, maxPositionals: 1, usage: "order <注文ID> [--json]" },
   item: { flags: { vrchat: "boolean", json: "boolean" }, minPositionals: 1, maxPositionals: 1, usage: "item <商品ID|URL> [--vrchat] [--json]" },
@@ -71,6 +81,12 @@ export const HELP_TEXT = `booth-library-mcp - BOOTH 購入者向けの非公式�
                                              ライブラリ（購入した商品）。--all で全ページ（最大 20 ページ）
   booth-library-mcp ${SPECS.gifts.usage}
                                              受け取ったギフト
+  booth-library-mcp ${SPECS.free.usage}
+                                             ライブラリの「無料ダウンロード」タブ（このタブにはファイルの一覧がありません）
+  booth-library-mcp ${SPECS.wishlist.usage}
+                                             ほしいものリスト（スキ！した商品、1 ページ 20 件、--all で最大 20 ページ）。
+                                             --list で名前付きリストに絞り込み、--vrchat で対応アバター・依存ツールの判定。
+                                             wishlist names は名前付きリストの一覧
   booth-library-mcp ${SPECS.orders.usage}            注文履歴
   booth-library-mcp ${SPECS.order.usage}            注文詳細（氏名・住所・連絡先は表示しません）
   booth-library-mcp ${SPECS.item.usage} 商品詳細（--vrchat で対応アバター・依存ツール）
@@ -120,7 +136,10 @@ function toCommand(name: SpecName, parsed: ParsedArgs): CliCommand {
       return { kind: "status", json };
     case "library":
     case "gifts":
+    case "free":
       return { kind: name, json, query: libraryQuery(parsed, SPECS[name]) };
+    case "wishlist":
+      return wishlistCommand(parsed, json);
     case "orders":
       return withOptional({ kind: "orders", json }, "page", integerFlag(parsed, "page"));
     case "order":
@@ -144,6 +163,26 @@ function toCommand(name: SpecName, parsed: ParsedArgs): CliCommand {
     case "unity-check":
       return { kind: "unity-check", json, projectPath: first };
   }
+}
+
+function wishlistCommand(parsed: ParsedArgs, json: boolean): CliCommand {
+  const [sub] = parsed.positionals;
+  if (sub === "names") {
+    if (Object.keys(parsed.flags).some((flag) => flag !== "json")) {
+      throw usageError("wishlist names に指定できるのは --json だけです。", SPECS.wishlist);
+    }
+    return { kind: "wishlist-names", json };
+  }
+  if (sub !== undefined) throw usageError(`不明なサブコマンドです: ${sub}`, SPECS.wishlist);
+  const list = stringFlag(parsed, "list");
+  if (list !== undefined && list.trim() === "") throw usageError("--list にはリストのコードか名前を指定してください。", SPECS.wishlist);
+  const query: WishlistQuery = {
+    page: integerFlag(parsed, "page"),
+    list,
+    all: booleanFlag(parsed, "all"),
+    includeVrchat: booleanFlag(parsed, "vrchat"),
+  };
+  return { kind: "wishlist", json, query };
 }
 
 function updatesCommand(parsed: ParsedArgs, json: boolean): CliCommand {

@@ -52,7 +52,7 @@ describe("getItem", () => {
     const raw = { ...(publicItem(6289322) as Record<string, unknown>), wished: true, order: { id: 1 }, gift: null };
     const { service, home } = await setup(new RoutedFakeReader({ [itemJsonUrlOf(6289322)]: { json: raw } }));
     const { data } = await service.getItem({ item: "6289322" });
-    expect(data.viewer).toEqual({ wished: true, ordered: true, gifted: false });
+    expect(data.viewer).toEqual({ wished: true, ordered: true, gifted: false, owned_variation_ids: [] });
     const cached = await cachedRecord(home, "6289322");
     expect(cached.item).toMatchObject({ wished: false, order: null, gift: null });
   });

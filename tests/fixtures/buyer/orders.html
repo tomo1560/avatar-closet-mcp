@@ -5,8 +5,11 @@
   every name, id, URL, file name and token is FICTIONAL. Scripts, analytics attributes, category option blobs and the
   footer are left out.
   Each order is one link `.l-orders-index > a.nav-reverse[href="/orders/{id}"]` around a `div.sheet` with a status badge,
-  one item name and the order date. The list shows no total. NOT VERIFIED: badge texts other than 発送完了 and their
-  modifier classes (the capture only had `order-state completed`).
+  one item name and the order date. The list shows no total.
+  VERIFIED 2026-10-12 on every list page of a real account: an order with several items is listed as one card per
+  item, all linking to the same /orders/{id}; the last page has first-page / rel="prev" links and no rel="next" or
+  last-page link. NOT OBSERVABLE with that account: badge texts other than 発送完了 and their modifier classes (every
+  order, including download-only and gift purchases, had `order-state completed`).
 -->
 <html lang="ja">
 <head>

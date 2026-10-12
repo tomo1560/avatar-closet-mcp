@@ -6,8 +6,11 @@
  * were OptoCloud/AssetDownloader (2024-07) BoothAccountOrdersScraper.cs / BoothAccountOrderScraper.cs and
  * Myrkie/BoothDownloader BoothPageParser.cs (September 2026). The parsers still key on links (order ids, item ids,
  * downloadable ids) and on label texts, and use classes only as preferred hints.
- * Not verified: orders with physical goods (shipping block), more than one item per order, the empty state, and
- * status / payment values other than the ones seen (発送完了, クレジットカード).
+ * Also verified 2026-10-12 on all list pages of one account: a multi-item order is one /orders card per item (merged
+ * here) and one sheet per item on /orders/{id}; a gift bought for someone else has a "ギフト" sheet, no file rows and a
+ * private /gifts/{token}/edit link that is never returned (tests/fixtures/buyer/order-detail-multi.html, -gift.html).
+ * Not seen with that account: physical goods (shipping block; no physical order among the details checked, a few
+ * candidates unchecked), the empty state, and status / payment values other than the ones seen (発送完了, クレジットカード).
  *
  * Privacy: shipping/contact fields (name, address, phone, e-mail) are never selected. The two label fields that are
  * returned (status, payment method) are kept only when they are a known value of at most 60 characters (anything

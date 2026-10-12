@@ -3,7 +3,7 @@ import type { FetchManyError } from "../cache/item-cache.js";
 import type { BoothErrorCode } from "../errors.js";
 import type { BoothResult, SyncResult } from "../types.js";
 import type { MetadataBatch, ServiceContext } from "./context.js";
-import { collectOwnedItems } from "./library.js";
+import { collectOwnedWithFree } from "./library.js";
 import { fetchOwnedMetadata } from "./owned-snapshot.js";
 import { invalidInput, wrap } from "./result.js";
 
@@ -29,12 +29,12 @@ export interface SyncAllOptions {
   onProgress?: ((progress: SyncProgress) => void) | undefined;
 }
 
-/** One cache-first pass over the owned items (library + gifts), fetching at most `maxItems` uncached ones. */
+/** One cache-first pass over the owned items (library + gifts + free downloads), fetching at most `maxItems` uncached ones. */
 export async function syncLibraryMetadata(ctx: ServiceContext, maxItems = DEFAULT_SYNC_ITEMS): Promise<BoothResult<SyncResult>> {
   assertRange(maxItems, MAX_SYNC_ITEMS, "max_items");
-  const owned = await collectOwnedItems(ctx);
+  const owned = await collectOwnedWithFree(ctx);
   const ids = owned.items.map((item) => item.item_id);
-  const batch = await fetchOwnedMetadata(ctx, owned, ids, maxItems);
+  const batch = await fetchOwnedMetadata(ctx, owned.purchased, ids, maxItems);
   return wrap(toSyncResult(ids.length, [batch], owned.truncated), LIBRARY_URL);
 }
 
@@ -45,13 +45,13 @@ export async function syncLibraryMetadata(ctx: ServiceContext, maxItems = DEFAUL
 export async function syncAllMetadata(ctx: ServiceContext, options: SyncAllOptions = {}): Promise<BoothResult<SyncResult>> {
   const maxItems = options.maxItems ?? MAX_SYNC_ALL_ITEMS;
   assertRange(maxItems, MAX_SYNC_ALL_ITEMS, "max");
-  const owned = await collectOwnedItems(ctx);
+  const owned = await collectOwnedWithFree(ctx);
   const ids = owned.items.map((item) => item.item_id);
   const batches: MetadataBatch[] = [];
   let pending: readonly string[] = ids;
   let attempts = 0;
   while (attempts < maxItems) {
-    const batch = await fetchOwnedMetadata(ctx, owned, pending, Math.min(SYNC_BATCH_SIZE, maxItems - attempts));
+    const batch = await fetchOwnedMetadata(ctx, owned.purchased, pending, Math.min(SYNC_BATCH_SIZE, maxItems - attempts));
     batches.push(batch);
     attempts += batch.attempts;
     const madeProgress = batch.remaining.length < pending.length;

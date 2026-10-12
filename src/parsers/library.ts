@@ -71,7 +71,8 @@ export function parseGiftsPage(html: string, finalUrl: string): LibraryPage {
   return parseLibraryLikePage(html, finalUrl, GIFTS_PATH, "ギフト");
 }
 
-function parseLibraryLikePage(html: string, finalUrl: string, path: RegExp, label: string): LibraryPage {
+/** Shared by every library tab (/library, /library/gifts, /library/free_downloads): same card markup. */
+export function parseLibraryLikePage(html: string, finalUrl: string, path: RegExp, label: string): LibraryPage {
   const $ = loadDocument(html);
   assertNotSignInPage($, finalUrl);
   assertAccountsPage(finalUrl, path, label);

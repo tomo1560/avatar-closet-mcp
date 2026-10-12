@@ -8,8 +8,9 @@
   Status is a badge; date, order number, payment method and amount are `.l-row` label/value columns; items are
   `div.sheet.sheet--p400` blocks inside the first `.l-order-detail-by-shop` (price, then a BOOST row); a second
   `.l-order-detail-by-shop` holds the invoice form. The real page shows no variation name.
-  NOT VERIFIED (reconstructed): the お届け先 block (download-only orders have none; it is fake PII that must never
-  reach the parser output) and a second item in the same order.
+  The second item follows the multi-item layout verified on 2026-10-12 (see order-detail-multi.html).
+  NOT SEEN with the capturing account (no physical-goods order found): the お届け先 block below is reconstructed fake PII
+  that must never reach the parser output.
 -->
 <html lang="ja">
 <head>
@@ -132,7 +133,7 @@
               </div>
             </div>
           </div>
-          <!-- reconstructed, not in the capture: a second item of the same order -->
+          <!-- a second item of the same order (layout verified, see order-detail-multi.html) -->
           <div class="sheet sheet--p400 mobile:pt-[13px] mobile:px-16 mobile:pb-8">
             <div class="flex">
               <div class="u-mr-500 flex-[none]">

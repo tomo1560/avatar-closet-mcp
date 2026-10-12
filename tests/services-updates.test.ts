@@ -8,6 +8,7 @@ import { itemJsonUrlOf, itemRoutes, publicItem, RoutedFakeReader, type FakeRoute
 
 const LIBRARY = "https://accounts.booth.pm/library";
 const GIFTS = "https://accounts.booth.pm/library/gifts";
+const FREE = "https://accounts.booth.pm/library/free_downloads";
 const ITEMS = "https://booth.pm/ja/items/";
 const tempPaths: string[] = [];
 
@@ -25,6 +26,8 @@ function ownedRoutes(library: readonly FakeLibraryItem[], gifts: readonly FakeLi
   return {
     [LIBRARY]: { html: libraryHtml(library, { page: 1, lastPage: 1 }) },
     [GIFTS]: { html: libraryHtml(gifts, { page: 1, lastPage: 1, path: "/library/gifts" }) },
+    // Read only by sync (owned-item walks); booth_check_updates must never request it.
+    [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
   };
 }
 
@@ -65,6 +68,12 @@ describe("checkUpdates (booth_check_updates)", () => {
     expect(meta.sourceUrl).toBe(LIBRARY);
     expect(reader.count(ITEMS)).toBe(0);
     await expect(stat(baselinePath(home))).resolves.toBeTruthy();
+  });
+
+  it("does not read the free-downloads tab (its cards list no files to compare)", async () => {
+    const { service, reader } = serviceFor(await tempHome(), ownedRoutes(BEFORE));
+    await service.checkUpdates();
+    expect(reader.calls).toEqual([LIBRARY, GIFTS]);
   });
 
   it("reports added, removed and changed items against the previous check", async () => {

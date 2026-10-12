@@ -22,9 +22,10 @@ export interface AvatarMention {
   readonly evidence: string;
 }
 
-const MAX_BLOCK_LINES = 60;
+/** Real lists reach 57 avatars as name + link line pairs (PLAN §7-11); other terminators still end a block early. */
+const MAX_BLOCK_LINES = 160;
 const HEADING_KEYWORD =
-  /^(非|未)?対応(あばたー|もでる|素体|ぼでぃ|きゃらくたー)(一覧|様|さま|りすと)?|^(un|not)?(supported|compatible)(avatar|model)s?(list)?|^対応(?=$)/;
+  /^(非|未)?対応(済み?の?)?(あばたー|もでる|素体|ぼでぃ|きゃらくたー)(一覧|様|さま|りすと)?|^(un|not)?(supported|compatible)(avatar|model)s?(list)?|^対応(?=$)/;
 const BARE_TAIOU_HEADING = /^\s*(?:[【[［]\s*対応\s*[】\]］]|対応\s*[:：])\s*/;
 const HEADING_LEAD_IN = /^(は以下|は下記|は次|について)/;
 const HEADING_SEPARATOR = /^[\s:：】\]］>＞→\-－=＝■□◆◇●○★☆|｜/]+/;
@@ -33,6 +34,10 @@ const BRACKET_LINE = /^(【[^】]*】|\[[^\]]*\])$/;
 const SECTION_KEYWORD =
   /^(注意|利用規約|規約|内容物|内容|仕様|更新|履歴|導入|使い方|お問い合わせ|問い合わせ|免責|くれじっと|credit|ぽりごん|polygon|価格|terms|notes?|caution|contents|changelog)/;
 const REDIRECT = /(こちら|別売|別商品|別ぺーじ|別途販売|別の商品|separately)/;
+/** Redirects that name a separately sold product (not 「こちら」, which also introduces 対応アバター link lists). */
+const TITLED_REDIRECT = /(別売|別商品|別途販売|別の商品|separately)/;
+/** Credits for the avatar / hair used in the thumbnails: 「下記のモデルを使用しています」「サムネで使用しているヘア」. */
+const CREDIT = /(下記の(もでる|あばたー)を使用|(画像|さむね|写真|撮影)[^。]{0,12}(使用して|お借りし))/;
 const BODY_LINK = /本体/;
 const SENTENCE_SPLIT = /[。！!？?]/;
 const CHAIN_GAP = /^(と|や|および|及び|and)?$/;
@@ -120,26 +125,39 @@ export function findHeadingBlocks(description: string, index: AvatarIndex): Head
 /**
  * Lines pointing to *other* products (「真冬用、サリア用はこちら」 + following URL lines).
  * Body links (「しなのちゃん本体はこちら」) are not redirects.
+ * After a separately-sold product or a thumbnail-model credit, a title line directly followed by its link
+ * (「【萌専用】台無しセット」 + URL, 「オリジナル3Dモデル「…」」 + URL) belongs to that other product too.
  */
 export function findRedirectLines(description: string): ReadonlySet<number> {
   const lines = splitLines(description);
   const redirect = new Set<number>();
-  let inRegion = false;
+  let region: "none" | "links" | "titled" = "none";
   lines.forEach((line, i) => {
     const compact = normalizeCompact(maskUrls(line));
-    if (REDIRECT.test(compact) && !BODY_LINK.test(compact)) {
+    if ((REDIRECT.test(compact) || CREDIT.test(compact)) && !BODY_LINK.test(compact)) {
       redirect.add(i);
-      inRegion = true;
+      region = TITLED_REDIRECT.test(compact) || CREDIT.test(compact) ? "titled" : "links";
       return;
     }
-    const isLinkLine = /https?:\/\//.test(line);
-    if (inRegion && (isBlank(line) || isLinkLine)) {
+    if (region !== "none" && (isBlank(line) || isLinkLine(line))) {
       redirect.add(i);
       return;
     }
-    inRegion = false;
+    if (region === "titled" && isLinkLine(nextNonBlank(lines, i + 1))) {
+      redirect.add(i);
+      return;
+    }
+    region = "none";
   });
   return redirect;
+}
+
+function isLinkLine(line: string | undefined): boolean {
+  return line !== undefined && /https?:\/\//.test(line);
+}
+
+function nextNonBlank(lines: readonly string[], from: number): string | undefined {
+  return lines.slice(from).find((line) => !isBlank(line));
 }
 
 /** Quote the original text of a match (masked text keeps offsets aligned with `original`). */

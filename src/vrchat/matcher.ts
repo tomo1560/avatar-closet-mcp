@@ -91,16 +91,87 @@ function lookupToken(token: string, index: AvatarIndex): string | null {
   return null;
 }
 
+export interface LabelMatchOptions {
+  /** Also try `OutfitShinano` → `Outfit Shinano` (file names). */
+  readonly splitCamel?: boolean;
+  /**
+   * Variation names only: accept names written together without a separator (`シフォンショコラライム`)
+   * and one swapped pair of adjacent letters in a latin name of 5+ letters (`Selesita`, `Mlify`).
+   * Both were seen on real purchased items (PLAN §7-11).
+   */
+  readonly lenient?: boolean;
+}
+
+const MIN_TYPO_TOLERANT_LENGTH = 5;
+const MIN_JOINED_PART_LENGTH = 2;
+/** A joined token must contain at least one name this long, so `しおまよ` (塩マヨ) is not read as しお + まよ. */
+const MIN_JOINED_ANCHOR_LENGTH = 3;
+
 /**
  * Avatars named in a short structured label (variation name, file name): whole tokens
  * after suffix stripping, so restricted names are allowed (`萌 - Moe`, `ばつ-Batsu-`).
  */
-export function matchLabelTokens(label: string, index: AvatarIndex, splitCamel = false): string[] {
-  const source = splitCamel ? `${label} ${splitCamelCase(label)}` : label;
-  const ids = tokenize(source)
-    .map((token) => lookupToken(token, index))
-    .filter((id): id is string => id !== null);
+export function matchLabelTokens(label: string, index: AvatarIndex, options: LabelMatchOptions = {}): string[] {
+  const source = options.splitCamel ? `${label} ${splitCamelCase(label)}` : label;
+  const ids = tokenize(source).flatMap((token) => {
+    const exact = lookupToken(token, index);
+    if (exact) return [exact];
+    return options.lenient ? lenientLookup(token, index) : [];
+  });
   return [...new Set(ids)];
+}
+
+function lenientLookup(token: string, index: AvatarIndex): string[] {
+  for (const candidate of stripLabelSuffix(token)) {
+    const joined = splitJoinedAliases(candidate, index);
+    if (joined.length > 0) return joined;
+    const typo = transposedAlias(candidate, index);
+    if (typo) return [typo];
+  }
+  return [];
+}
+
+/** `しふぉんしょこららいむ` → chiffon, chocolat, lime when the whole token is a sequence of 2+ aliases. */
+function splitJoinedAliases(token: string, index: AvatarIndex): string[] {
+  const memo = new Map<number, string[][] | null>();
+  const parts = (start: number): string[][] | null => {
+    if (start === token.length) return [];
+    if (memo.has(start)) return memo.get(start) ?? null;
+    let found: string[][] | null = null;
+    for (let end = token.length; end - start >= MIN_JOINED_PART_LENGTH && found === null; end -= 1) {
+      const alias = token.slice(start, end);
+      const entry = index.byAlias.get(alias)?.[0];
+      const rest = entry ? parts(end) : null;
+      if (entry && rest) found = [[alias, entry.avatarId], ...rest];
+    }
+    memo.set(start, found);
+    return found;
+  };
+  const segments = parts(0);
+  if (!segments || segments.length < 2) return [];
+  if (!segments.some(([alias]) => (alias ?? "").length >= MIN_JOINED_ANCHOR_LENGTH)) return [];
+  return segments.map(([, id]) => id).filter((id): id is string => id !== undefined);
+}
+
+/** A latin alias of 5+ letters that differs from `token` by exactly one swapped pair of adjacent letters. */
+function transposedAlias(token: string, index: AvatarIndex): string | null {
+  if (token.length < MIN_TYPO_TOLERANT_LENGTH || !isAsciiAlias(token)) return null;
+  for (const entry of index.aliases) {
+    if (entry.alias.length === token.length && isAsciiAlias(entry.alias) && isOneTransposition(token, entry.alias)) {
+      return entry.avatarId;
+    }
+  }
+  return null;
+}
+
+function isOneTransposition(a: string, b: string): boolean {
+  const diff: number[] = [];
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) diff.push(i);
+    if (diff.length > 2) return false;
+  }
+  const [i, j] = diff;
+  return i !== undefined && j === i + 1 && a[i] === b[j] && a[j] === b[i];
 }
 
 export interface TagMatch {

@@ -35,8 +35,12 @@ export const KNOWN_CATEGORY_NAMES: Readonly<Record<number, string>> = Object.fre
 
 export interface ItemViewerState {
   wished: boolean;
+  /** Truthiness of `order`. Null on every purchased digital item seen (2026-10-12), so not an ownership flag. */
   ordered: boolean;
+  /** Truthiness of `gift`. Null even on received gifts seen (2026-10-12). */
   gifted: boolean;
+  /** Variations whose logged-in `status` is `already_bought_digital`: the versions the viewer bought. */
+  owned_variation_ids: number[];
 }
 
 export interface ItemVariationSummary {
@@ -173,15 +177,21 @@ function summarizeVariation(variation: RawBoothVariation): ItemVariationSummary 
   };
 }
 
+const BOUGHT_DIGITAL_STATUS = "already_bought_digital";
+
 /**
- * The JSON has no explicit signed-in flag. Logged-out responses are exactly
- * `wished: false, order: null, gift: null`, so anything else is treated as viewer state.
- * TODO(PLAN §7-8): logged-in `order` / `gift` shapes are unverified; only their truthiness is used.
+ * The JSON has no explicit signed-in flag. Logged-out responses are `wished: false, order: null, gift: null` with
+ * no bought variation, so anything else is treated as viewer state.
+ * Verified 2026-10-12 (PLAN §7-8) on the purchased items of one account, fetched logged in: `wished` is a boolean,
+ * `order` and `gift` were null on every item (received gifts included), and on all but one purchased item the bought
+ * variation had `status: "already_bought_digital"` instead of `addable_to_cart`. That status is the usable,
+ * per-variation ownership signal; received gifts do not get it.
  */
 function viewerState(raw: RawBoothItem): ItemViewerState | null {
-  const hasViewerState = Boolean(raw.wished) || raw.order != null || raw.gift != null;
+  const owned = raw.variations.filter((variation) => variation.status === BOUGHT_DIGITAL_STATUS).map((variation) => variation.id);
+  const hasViewerState = Boolean(raw.wished) || raw.order != null || raw.gift != null || owned.length > 0;
   if (!hasViewerState) return null;
-  return { wished: Boolean(raw.wished), ordered: Boolean(raw.order), gifted: Boolean(raw.gift) };
+  return { wished: Boolean(raw.wished), ordered: Boolean(raw.order), gifted: Boolean(raw.gift), owned_variation_ids: owned };
 }
 
 function truncateText(text: string, maxChars: number): { text: string; truncated: boolean } {

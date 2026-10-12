@@ -10,6 +10,7 @@ import { RoutedFakeReader, type FakeRoute } from "./helpers/fake-reader.js";
 
 const LIBRARY = "https://accounts.booth.pm/library";
 const GIFTS = "https://accounts.booth.pm/library/gifts";
+const FREE = "https://accounts.booth.pm/library/free_downloads";
 const FIXTURE = fileURLToPath(new URL("./fixtures/unity-project", import.meta.url));
 const tempPaths: string[] = [];
 
@@ -33,6 +34,7 @@ function routes(): Record<string, FakeRoute> {
   return {
     [LIBRARY]: { html: libraryHtml(OWNED, { page: 1, lastPage: 1 }) },
     [GIFTS]: { html: libraryHtml(GIFTED, { page: 1, lastPage: 1, path: "/library/gifts" }) },
+    [FREE]: { html: libraryHtml([], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
   };
 }
 
@@ -54,7 +56,7 @@ describe("unityCheck (CLI unity-check)", () => {
     expect(data).toMatchObject({ owned_items: 3, truncated: false });
     expect(data.vpm_packages).toContainEqual({ id: "jp.lilxyzw.liltoon", version: "1.7.3" });
     expect(meta.sourceUrl).toBe(LIBRARY);
-    expect(reader.calls).toEqual([LIBRARY, GIFTS]);
+    expect(reader.calls).toEqual([LIBRARY, GIFTS, FREE]);
   });
 
   it("masks local and git package locations in the result", async () => {
@@ -76,6 +78,17 @@ describe("unityCheck (CLI unity-check)", () => {
       { id: "com.unity.ugui", version: "1.0.0" },
     ]);
     expect(JSON.stringify(data)).not.toContain("someone");
+  });
+
+  it("also compares free downloads (matched by item name: their cards list no files)", async () => {
+    const reader = new RoutedFakeReader({
+      ...routes(),
+      [FREE]: { html: libraryHtml([{ id: 1000009, name: "MysteryFolder" }], { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
+    });
+    const { data } = await (await service(reader)).unityCheck(FIXTURE);
+    expect(data.matches.map((match) => match.item_id)).toContain("1000009");
+    expect(data.unmatched_asset_folders).not.toContain("MysteryFolder");
+    expect(data.owned_items).toBe(4);
   });
 
   it("rejects a folder that is not a Unity project before reading the library", async () => {

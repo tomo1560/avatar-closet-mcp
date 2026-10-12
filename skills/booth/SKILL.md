@@ -1,6 +1,6 @@
 ---
 name: booth
-description: Use for requests about the user's own BOOTH account as a buyer (purchased library items, gifts, orders, signing in or out) and for BOOTH item lookups, searches, and VRChat avatar compatibility checks (for example "which of my outfits support Shinano?" or "does this item support Kikyo?"). Automatically use the bundled read-only BOOTH MCP tools without asking which MCP server is installed. Unofficial tool, not affiliated with pixiv or BOOTH. Do not use for BOOTH seller shop management, fees, or policies.
+description: Use for requests about the user's own BOOTH account as a buyer (purchased library items, gifts, free downloads, orders, wish list, signing in or out) and for BOOTH item lookups, searches, and VRChat avatar compatibility checks (for example "which of my outfits support Shinano?" or "does this item support Kikyo?"). Automatically use the bundled read-only BOOTH MCP tools without asking which MCP server is installed. Unofficial tool, not affiliated with pixiv or BOOTH. Do not use for BOOTH seller shop management, fees, or policies.
 ---
 
 # BOOTH library (buyer)
@@ -26,6 +26,14 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Results are evidence-based heuristics. Quote the returned `evidence` and its `confidence`.
 - Never claim that an item supports an avatar without evidence. `unknown` means no evidence was found, not "unsupported".
 - Library filters need cached item metadata. If `metadata_pending` is above zero, say that some items were not checked yet and offer `booth_sync_library_metadata` (repeat until `remaining` is 0) or the CLI command `booth-library-mcp sync` for large libraries.
+- `booth_list_wishlist` with `include_vrchat: true` adds the same evidence-based `vrchat` view to wished items. Wished items are not covered by the library sync: if `metadata_pending` is above zero, call it again with the same arguments to check the rest.
+- `is_vrchat` on wish-list items is BOOTH's own seller-set flag, not a compatibility verdict.
+
+## Wish list and free downloads
+
+- Wish list ("liked" items): `booth_list_wishlist` (20 items per page, `all: true` reads up to 20 pages). To read one named list, pass its name or code as `list`; `booth_list_wishlist_names` lists the names and codes. The wish list is read-only here: never claim to add or remove items.
+- Free items the user obtained from BOOTH: `booth_list_free_downloads` (same inputs as `booth_list_library`). That tab lists no files, so `downloadables` is always empty there; files are downloaded from the item page.
+- `booth_list_my_avatars`, `booth_sync_library_metadata` and the CLI `unity-check` include free downloads. `booth_check_updates` covers purchases and gifts only, because free downloads list no files to compare.
 
 ## Purchase updates
 
@@ -46,6 +54,8 @@ Unofficial tool, not affiliated with pixiv or BOOTH. Use the bundled `booth_*` t
 - Sign out, disconnect, or remove saved BOOTH credentials: `booth_logout`
 - Purchased items, optionally filtered by name, avatar, kind, or dependency: `booth_list_library` (use `all: true` for questions about the whole library)
 - Received gifts: `booth_list_gifts`
+- Free downloads obtained from BOOTH: `booth_list_free_downloads`
+- Wish list items, optionally one named list or with VRChat compatibility: `booth_list_wishlist`; the names and codes of the lists: `booth_list_wishlist_names`
 - Order history: `booth_list_orders`; one order: `booth_get_order`
 - Item details from an item id or URL: `booth_get_item` (set `include_vrchat` for avatar, dependency, and Quest information)
 - Does an item support an avatar: `booth_check_compatibility`

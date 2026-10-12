@@ -137,6 +137,31 @@ describe("restricted short / ambiguous names", () => {
     const description = "真冬用、サリア用はこちらにあります！\n\n（真冬）https://booth.pm/ja/items/1\n（サリア）https://booth.pm/ja/items/2";
     expect(extractCompatibility(makeItem({ description }), SEED_AVATARS).compatible_avatars).toEqual([]);
   });
+
+  it("ignores the title of a separately sold product and its link", () => {
+    const description = [
+      "別売りの専用セットを導入していると、手のジェスチャーが自動で切り替わります！",
+      "【萌専用】架空ジェスチャーセット",
+      "https://booth.pm/ja/items/3",
+      "本ギミックはどのアバターでも使えます。",
+    ].join("\n");
+    expect(extractCompatibility(makeItem({ description }), SEED_AVATARS).compatible_avatars).toEqual([]);
+  });
+
+  it("ignores thumbnail-model credits", () => {
+    const description = [
+      "※1枚目画像のアバターは付属しません。下記のモデルを使用しています。",
+      "■オリジナル3Dモデル『しなの』 - Shinano -",
+      "https://booth.pm/ja/items/4",
+      "・ポリゴン数: 6000",
+    ].join("\n");
+    expect(extractCompatibility(makeItem({ categoryId: 217, description }), SEED_AVATARS).compatible_avatars).toEqual([]);
+  });
+
+  it("still reads an avatar link list introduced by 「こちら」", () => {
+    const description = ["対応アバター本体はこちら", "しなのちゃん用", "https://booth.pm/ja/items/5"].join("\n");
+    expect(compatibleIds(extractCompatibility(makeItem({ description }), SEED_AVATARS))).toEqual(["shinano"]);
+  });
 });
 
 describe("negation", () => {
@@ -212,6 +237,62 @@ describe("avatar bodies", () => {
     const result = extractCompatibility(body, SEED_AVATARS);
     expect(result.self_avatar).toBe("shinano");
     expect(result.compatible_avatars).toEqual([]);
+  });
+
+  it("does not read a shared body base in an avatar body description as compatibility", () => {
+    const body = makeItem({
+      name: "オリジナル3Dモデル「カクウ」",
+      categoryId: 208,
+      description: "素体はしなのちゃんと共通なので、しなのちゃん対応の服はすべて着られると思います！",
+    });
+    expect(extractCompatibility(body, SEED_AVATARS).compatible_avatars).toEqual([]);
+  });
+});
+
+describe("variation label variants seen on real items (PLAN §7-11)", () => {
+  it("splits avatar names written together without a separator", () => {
+    const item = makeItem({ variations: ["フルセット", "しなの", "シフォンショコラライム", "ミルフィエク", "るるね瑞希"] });
+    expect(compatibleIds(extractCompatibility(item, SEED_AVATARS))).toEqual(
+      ["chiffon", "chocolat", "lime", "milfy", "eku", "rurune", "mizuki", "shinano"].sort(),
+    );
+  });
+
+  it("does not split a word into short restricted names only", () => {
+    const item = makeItem({ variations: ["しおまよ", "しなの"] });
+    expect(compatibleIds(extractCompatibility(item, SEED_AVATARS))).toEqual(["shinano"]);
+  });
+
+  it("tolerates one swapped pair of letters in a latin variation name", () => {
+    const item = makeItem({ variations: ["Full Pack", "Shinano", "Selesita", "-Mlify"] });
+    const result = extractCompatibility(item, SEED_AVATARS);
+    expect(compatibleIds(result)).toEqual(["milfy", "selestia", "shinano"]);
+    expect(find(result, "selestia")).toMatchObject({ confidence: "high", source: "variation", evidence: "Selesita" });
+  });
+
+  it("does not guess other typos or short names", () => {
+    // Karen / Selestea: one substituted letter; Manka: one missing letter; Iari: a swap, but shorter than 5 letters.
+    // Kikoy is Kikyo with one adjacent swap, so it is accepted.
+    const item = makeItem({ variations: ["Shinano", "Karen", "Selestea", "Manka", "Iari", "Kikoy"] });
+    expect(compatibleIds(extractCompatibility(item, SEED_AVATARS))).toEqual(["kikyo", "shinano"]);
+  });
+
+  it("reads hiragana / katakana spellings of 愛莉", () => {
+    const item = makeItem({ variations: ["あいり", "しなの"], tags: ["アイリ"] });
+    expect(compatibleIds(extractCompatibility(item, SEED_AVATARS))).toEqual(["airi", "shinano"]);
+    const prose = makeItem({ description: "アイリスの花をモチーフにしました。あいりす柄です。" });
+    expect(compatibleIds(extractCompatibility(prose, SEED_AVATARS))).toEqual([]);
+  });
+});
+
+describe("long support lists", () => {
+  it("treats 対応済みアバター as a heading and reads lists longer than 60 lines", () => {
+    const entry = (name: string, i: number): string[] => [name, `https://example.booth.pm/items/${i}`];
+    const filler = Array.from({ length: 40 }, (_, i) => entry(`架空アバター${i} Fictional${i}`, i)).flat();
+    const tail = [...entry("凪 Nagi", 41), ...entry("薄荷 Hakka", 42), ...entry("マヌカ Manuka", 43)];
+    const description = ["対応済みアバター", "現在 全43種", ...filler, ...tail, "", "", "利用規約"].join("\n");
+    const result = extractCompatibility(makeItem({ categoryId: 230, description }), SEED_AVATARS);
+    expect(compatibleIds(result)).toEqual(["hakka", "manuka", "nagi"]);
+    expect(result.compatible_avatars.every((c) => c.confidence === "high" && c.source === "description_heading")).toBe(true);
   });
 });
 

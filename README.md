@@ -3,13 +3,13 @@
 > [!IMPORTANT]
 > **非公式ツールです。pixiv / BOOTH とは一切関係ありません。** BOOTH の画面構造が変わると一部の機能が動かなくなることがあります。
 
-自分の BOOTH アカウントの購入データ（ライブラリ・ギフト・注文履歴）と BOOTH の公開商品データを、**読み取り専用**で扱う MCP サーバー + CLI です（BOOTH 上のデータは変更しません。購入ファイルのダウンロードは[オプトイン](#ダウンロードオプトイン)です）。VRChat 向けに「持っている衣装のうち しなの 対応のものは？」「この商品は 桔梗 に対応してる？」に根拠付きで答えるための機能があります。
+自分の BOOTH アカウントの購入データ（ライブラリ・ギフト・無料ダウンロード・注文履歴・ほしいものリスト）と BOOTH の公開商品データを、**読み取り専用**で扱う MCP サーバー + CLI です（BOOTH 上のデータは変更しません。購入ファイルのダウンロードは[オプトイン](#ダウンロードオプトイン)です）。VRChat 向けに「持っている衣装のうち しなの 対応のものは？」「この商品は 桔梗 に対応してる？」に根拠付きで答えるための機能があります。
 
 本プロジェクトは [cstria0106/booth-mcp](https://github.com/cstria0106/booth-mcp)（MIT License）のフォークです。原作者に感謝します。ライセンスは MIT です（[LICENSE](LICENSE)）。
 
 ## できること・できないこと
 
-- できること: ライブラリ・ギフト・注文履歴の一覧、注文詳細、商品詳細（公開 JSON）、商品検索、タグ候補、VRChat の対応アバター・依存ツール・Quest 対応の判定、購入品の[更新チェック](#更新チェック)（前回の確認からのダウンロードファイルの変化）、[Unity プロジェクトとの突き合わせ](#unity-プロジェクトとの突き合わせcli)（CLI）、購入したファイルのダウンロード（オプトイン・既定は無効）
+- できること: ライブラリ・ギフト・無料ダウンロード・注文履歴・[ほしいものリスト](#ほしいものリストと無料ダウンロード)の一覧、注文詳細、商品詳細（公開 JSON）、商品検索、タグ候補、VRChat の対応アバター・依存ツール・Quest 対応の判定、購入品の[更新チェック](#更新チェック)（前回の確認からのダウンロードファイルの変化）、[Unity プロジェクトとの突き合わせ](#unity-プロジェクトとの突き合わせcli)（CLI）、購入したファイルのダウンロード（オプトイン・既定は無効）
 - できないこと: 購入・カート・ウィッシュリストの変更など BOOTH 上のデータを変える操作（通信は GET のみ）、ストア全体の巡回
 - 注文詳細の氏名・住所・電話番号・メールアドレスは取得・表示しません
 
@@ -91,16 +91,19 @@ npx -y booth-library-mcp login
 | `booth_search_for_avatar` | `avatar`, `kind?`（既定 costume）, `query?`, `page?`（1〜3） | アバター向け商品の検索。先頭 10 件に対応度 | 不要 |
 | `booth_list_library` | `page?`, `all?`, `query?`, `avatar?`, `kind?`, `dependency?` | 購入した商品（ファイル名付き）。VRChat 条件で絞り込み可 | 要 |
 | `booth_list_gifts` | 同上 | 受け取ったギフト | 要 |
+| `booth_list_free_downloads` | 同上 | ライブラリの「無料ダウンロード」タブ（ファイル一覧は無し） | 要 |
 | `booth_list_orders` | `page?` | 注文履歴 | 要 |
 | `booth_get_order` | `order_id` | 注文詳細（商品・価格・ダウンロード ID） | 要 |
 | `booth_list_my_avatars` | — | 所持アバター本体と辞書 | 要 |
 | `booth_sync_library_metadata` | `max_items?`（既定 20、最大 100） | 購入品の商品データをキャッシュに取り込む | 要 |
 | `booth_check_updates` | `item_ids?`（最大 100）, `avatar?` | 前回の確認からダウンロードファイル構成が変わった購入品（[更新チェック](#更新チェック)） | 要 |
+| `booth_list_wishlist` | `page?`（1〜50）, `list?`（コードか名前）, `all?`, `include_vrchat?` | ほしいものリスト（スキ！した商品）。価格・売り切れ・BOOTH の VRChat フラグ。`include_vrchat` で対応アバター判定（[ほしいものリスト](#ほしいものリストと無料ダウンロード)） | 要 |
+| `booth_list_wishlist_names` | — | 名前付きのほしいものリスト（コードと名前） | 要 |
 | `booth_download` | `downloadable_id`, `variation_id?`, `dest_subdir?` | 購入したファイルを保存。**オプトイン**（有効にしたときだけ表示） | 要 |
 
 結果は `{ _notice, data, meta }` 形式の JSON です（`_notice` は BOOTH 側の文字列を信用しないよう促す注意書き）。失敗時は `{ _notice, error: { code, message } }` になります（[エラーコード](#エラーコードと終了コード)）。続きがある一覧は `meta.nextPage`、商品データが未取得の件数は `metadata_pending` / `remaining` で示します。`all=true` は最大 20 ページで打ち切ります。
 
-ツールは既定で 15 個、[ダウンロード](#ダウンロードオプトイン)を有効にすると `booth_download` が加わって 16 個です。
+ツールは既定で 18 個、[ダウンロード](#ダウンロードオプトイン)を有効にすると `booth_download` が加わって 19 個です。
 
 ## CLI
 
@@ -109,6 +112,9 @@ MCP と同じ処理を CLI からも使えます。既定は表形式、`--json`
 ```bash
 npx -y booth-library-mcp library [--all] [--page N] [--query Q] [--avatar A] [--kind K] [--dependency D] [--json]
 npx -y booth-library-mcp gifts   （library と同じオプション）
+npx -y booth-library-mcp free    （library と同じオプション。無料ダウンロードのタブ）
+npx -y booth-library-mcp wishlist [--page N] [--list <コード|名前>] [--all] [--vrchat] [--json]
+npx -y booth-library-mcp wishlist names [--json]
 npx -y booth-library-mcp orders [--page N] [--json]
 npx -y booth-library-mcp order <注文ID> [--json]
 npx -y booth-library-mcp item <商品ID|URL> [--vrchat] [--json]
@@ -129,7 +135,17 @@ npx -y booth-library-mcp login [--timeout <秒>] | status [--json] | logout | se
 
 `sync` はライブラリを 1 回読み込んだあと、未取得の商品データを 20 件ずつ取り込みます。`--max N` は 1 回の実行で送る商品データのリクエスト数の上限です（失敗も数えます。既定・最大 2000）。
 
+`wishlist` は `booth_list_wishlist`（`--vrchat` が `include_vrchat`）、`wishlist names` は `booth_list_wishlist_names` と同じ処理です。例: `wishlist --list 衣装候補 --all --vrchat`。
+
 `updates` は `booth_check_updates` と同じ処理です（`--item` は繰り返し指定できます）。例: `updates --avatar しなの`（しなの対応の購入品で更新があったもの）。`unity-check` は[後述](#unity-プロジェクトとの突き合わせcli)。
+
+## ほしいものリストと無料ダウンロード
+
+- **ほしいものリスト**（`booth_list_wishlist` / CLI `wishlist`）: `accounts.booth.pm/wish_list_name_items.json`（1 ページ 20 件）を GET で読みます。`all` は最大 20 ページで打ち切ります（`truncated`）。`list` に名前付きリストのコードか名前を指定すると、`wish_list_names.json` を 1 回読んでリストを特定し、そのリストだけを返します（見つからないときは `INVALID_INPUT` で、あるリストの名前とコードを示します）。リストの一覧は `booth_list_wishlist_names` / `wishlist names` です。リストへの追加・削除はしません（読み取り専用）。
+- 各商品は商品 ID・名前・URL・ショップ・価格（BOOTH の表示文字列。`~` はバリエーションによる最低価格）・カテゴリ・成人向け / 売り切れ / 販売終了の別と、BOOTH 自身の VRChat フラグ `is_vrchat`（出品者の設定で、対応判定ではありません）です。
+- `include_vrchat` を付けると商品データ（キャッシュ優先、1 回あたり最大 20 件取得）から根拠付きの対応アバター・依存ツール（`vrchat`）を付けます。ほしいものリストの商品は `sync` の対象外なので、`metadata_pending` が残ったときは同じ条件でもう一度呼ぶと続きを取得します。
+- **無料ダウンロード**（`booth_list_free_downloads` / CLI `free`）: ライブラリの「無料ダウンロード」タブです。入力と出力はライブラリと同じですが、このタブにはファイルの一覧が無いため `downloadables` は常に空です（ファイルは商品ページから入手します）。
+- 所持品をまとめて読む処理のうち、`booth_list_my_avatars`・`avatars init`・`booth_sync_library_metadata` / `sync`・`unity-check` は無料ダウンロードも含みます（そのぶんタブのページ数だけリクエストが増えます）。`booth_check_updates` / `updates` は比べるファイルが無いので含めず、これまでどおりライブラリとギフトだけを比べます（既存の基準もそのまま使えます）。
 
 ## 更新チェック
 
@@ -150,7 +166,7 @@ npx -y booth-library-mcp unity-check "D:/Unity/MyAvatar"
 npx -y booth-library-mcp unity-check ./MyAvatarProject --json
 ```
 
-- Unity プロジェクトの `Assets/` のフォルダ名（2 階層まで）と `Packages/vpm-manifest.json` / `Packages/manifest.json` だけを読み、ライブラリとギフトの商品名・ダウンロードファイル名と照合します。アセットの中身は読みません。
+- Unity プロジェクトの `Assets/` のフォルダ名（2 階層まで）と `Packages/vpm-manifest.json` / `Packages/manifest.json` だけを読み、ライブラリとギフトの商品名・ダウンロードファイル名、無料ダウンロードの商品名と照合します。アセットの中身は読みません。
 - 結果は一致した購入品の表（商品 ID・商品名・一致の種類 `matched_by`（ファイル名 / フォルダ名 / VPM）・確度 `confidence`・根拠 `evidence`）と、購入品と一致しなかったフォルダの一覧です。フォルダ名からの推定なので、確度が low / medium のものは中身で確認してください。
 - `Packages/manifest.json` のうちローカルパス（`file:…`）は `local`、git の URL は `git` と表示し、パスや URL そのものは出力しません。
 - これは CLI だけの機能です（MCP ツールはありません）。Claude などから使う場合は、`booth_list_library`（購入品のファイル名）と Unity 用の MCP サーバー（プロジェクトのフォルダやパッケージを読めるもの）を組み合わせて「このプロジェクトに入っている購入品は？」と聞くこともできます。

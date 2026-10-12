@@ -42,7 +42,7 @@ function hit(avatar: string, confidence: Confidence, source: CompatibilitySource
 }
 
 function variationAvatarIds(name: string, index: AvatarIndex): string[] {
-  const ids = matchLabelTokens(name, index);
+  const ids = matchLabelTokens(name, index, { lenient: true });
   if (ids.length > 0) return ids;
   return findAvatarMatches(normalizeText(maskUrls(name)), index, "strict").map((m) => m.avatarId);
 }
@@ -120,7 +120,7 @@ function analyzeDescription(description: string, index: AvatarIndex): Descriptio
 function fileHits(fileNames: readonly string[], index: AvatarIndex, known: ReadonlySet<string>): Hit[] {
   const restricted = new Set(index.aliases.filter((a) => a.restricted).map((a) => a.avatarId));
   return fileNames.flatMap((fileName) =>
-    matchLabelTokens(fileName.replace(FILE_EXTENSION, ""), index, true)
+    matchLabelTokens(fileName.replace(FILE_EXTENSION, ""), index, { splitCamel: true })
       .filter((id) => !restricted.has(id) || known.has(id))
       .map((id) => hit(id, "medium", "file_name", fileName)),
   );
@@ -186,7 +186,10 @@ function analyze(item: VrchatItemInput, dictionary: AvatarDictionary, ownership?
   const selfAvatar = detectSelfAvatar(item, index);
   const negations = [...tags.negations, ...description.negations].filter((n) => n.avatarId !== selfAvatar);
   const negated = new Set(negations.map((n) => n.avatarId));
-  const raw = [...variations.hits, ...tags.hits, ...description.headingHits, ...nameHits, ...files, ...description.freeHits];
+  // An avatar body's prose names other avatars for its shared base (「素体は〇〇と共通なので〇〇対応の服が着られます」),
+  // which is not a compatibility claim of the item itself (PLAN §7-11).
+  const freeHits = isAvatarBody(item) ? [] : description.freeHits;
+  const raw = [...variations.hits, ...tags.hits, ...description.headingHits, ...nameHits, ...files, ...freeHits];
   const hits = applyListPolicy(raw, variations, description.headingAvatars).filter(
     (h) => h.avatar !== selfAvatar && !negated.has(h.avatar),
   );

@@ -7,7 +7,7 @@ import {
   type UnityPackageRef,
 } from "../unity/unity-check.js";
 import type { ServiceContext } from "./context.js";
-import { collectOwnedItems } from "./library.js";
+import { collectOwnedWithFree } from "./library.js";
 import { wrap } from "./result.js";
 
 const LIBRARY_URL = `${ACCOUNTS_ORIGIN}/library`;
@@ -28,7 +28,7 @@ export interface UnityCheckResult {
   /** `Packages/manifest.json` dependencies; `file:` paths become `local`, git URLs `git`. */
   upm_packages: UnityPackageRef[];
   asset_folder_count: number;
-  /** Library + gift items compared. */
+  /** Library, gift and free-download items compared. */
   owned_items: number;
   /** The library walk hit the page cap: items beyond it were not compared. */
   truncated: boolean;
@@ -37,11 +37,11 @@ export interface UnityCheckResult {
 
 /**
  * Which purchased items are in a Unity project: reads `Assets/` folder names and the package manifests
- * (validated before any BOOTH request), then compares them with the owned library + gifts.
+ * (validated before any BOOTH request), then compares them with the owned library + gifts + free downloads.
  */
 export async function checkUnityProject(ctx: ServiceContext, projectPath: string): Promise<BoothResult<UnityCheckResult>> {
   const scan = await scanUnityProject(projectPath);
-  const owned = await collectOwnedItems(ctx);
+  const owned = await collectOwnedWithFree(ctx);
   const result = matchLibraryToProject(scan, owned.items);
   return wrap(
     {

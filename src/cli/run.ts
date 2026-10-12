@@ -17,6 +17,7 @@ import {
 } from "./print-library.js";
 import { formatUnityCheck } from "./print-unity.js";
 import { formatUpdates } from "./print-updates.js";
+import { formatWishlist, formatWishlistNames } from "./print-wishlist.js";
 
 export interface CliIo {
   stdout: (text: string) => void;
@@ -72,6 +73,12 @@ async function runDataCommand(command: DataCommand, service: BoothService, io: C
       return render(await service.listLibrary(command.query), formatLibrary);
     case "gifts":
       return render(await service.listGifts(command.query), formatLibrary);
+    case "free":
+      return render(await service.listFreeDownloads(command.query), formatLibrary);
+    case "wishlist":
+      return render(await service.listWishlist(command.query), formatWishlist);
+    case "wishlist-names":
+      return render(await service.listWishlistNames(), formatWishlistNames);
     case "orders":
       return render(await service.listOrders(command.page), formatOrders);
     case "order":
@@ -89,7 +96,7 @@ async function runDataCommand(command: DataCommand, service: BoothService, io: C
     case "avatars-init":
       return render(await service.initAvatarDictionary(), (result) => formatAvatarInit(result, service.avatarsFile));
     case "sync": {
-      io.stderr("ライブラリとギフトを読み込んでいます（1 秒に 1 リクエスト）…\n");
+      io.stderr("ライブラリ・ギフト・無料ダウンロードを読み込んでいます（1 秒に 1 リクエスト）…\n");
       const onProgress = (progress: Parameters<typeof formatSyncProgress>[0]): void => io.stderr(formatSyncProgress(progress));
       return render(await service.syncAllMetadata({ maxItems: command.max, onProgress }), formatSync);
     }

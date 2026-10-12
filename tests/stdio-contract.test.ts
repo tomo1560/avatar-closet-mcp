@@ -42,7 +42,7 @@ describe("stdio MCP contract", () => {
     await Promise.all(tempPaths.splice(0).map(async (path) => rm(path, { recursive: true, force: true })));
   });
 
-  it("publishes every buyer tool (15) with schemas and annotations (booth_download is opt-in and absent)", async () => {
+  it("publishes every buyer tool (18) with schemas and annotations (booth_download is opt-in and absent)", async () => {
     const { client } = await connect();
     expect(client.getServerVersion()).toMatchObject({ name: "booth-library-mcp", version: packageVersion });
     const response = await client.listTools();
@@ -57,11 +57,14 @@ describe("stdio MCP contract", () => {
       "booth_search_for_avatar",
       "booth_list_library",
       "booth_list_gifts",
+      "booth_list_free_downloads",
       "booth_list_orders",
       "booth_get_order",
       "booth_list_my_avatars",
       "booth_sync_library_metadata",
       "booth_check_updates",
+      "booth_list_wishlist",
+      "booth_list_wishlist_names",
     ]);
     const expectedAnnotations: Record<string, object> = {
       booth_login: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
@@ -85,11 +88,14 @@ describe("stdio MCP contract", () => {
       booth_search_for_avatar: ["avatar", "kind", "query", "page"],
       booth_list_library: ["page", "all", "query", "avatar", "kind", "dependency"],
       booth_list_gifts: ["page", "all", "query", "avatar", "kind", "dependency"],
+      booth_list_free_downloads: ["page", "all", "query", "avatar", "kind", "dependency"],
       booth_list_orders: ["page"],
       booth_get_order: ["order_id"],
       booth_list_my_avatars: [],
       booth_sync_library_metadata: ["max_items"],
       booth_check_updates: ["item_ids", "avatar"],
+      booth_list_wishlist: ["page", "list", "all", "include_vrchat"],
+      booth_list_wishlist_names: [],
     });
     for (const tool of response.tools.filter((entry) => !["booth_login", "booth_auth_status", "booth_logout"].includes(entry.name))) {
       expect(tool.description).toContain("非公式");
@@ -104,7 +110,7 @@ describe("stdio MCP contract", () => {
       BOOTH_MCP_DOWNLOAD_DIR: join(home, "downloads"),
     });
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(16);
+    expect(tools).toHaveLength(19);
     const tool = tools.find((entry) => entry.name === "booth_download");
     expect(tool?.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true });
     expect(Object.keys(tool?.inputSchema.properties ?? {})).toEqual(["downloadable_id", "variation_id", "dest_subdir"]);

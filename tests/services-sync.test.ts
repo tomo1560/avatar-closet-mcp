@@ -4,12 +4,14 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { BoothError } from "../src/errors.js";
 import { BoothService } from "../src/service.js";
+import { CACHE_SNAPSHOT_FILE_NAME } from "../src/library/update-snapshot.js";
 import { Memo } from "../src/services/context.js";
 import { libraryHtml, type FakeLibraryItem } from "./helpers/buyer-html.js";
 import { itemJsonUrlOf, itemRoutes, publicItem, RoutedFakeReader, type FakeRoute } from "./helpers/fake-reader.js";
 
 const LIBRARY = "https://accounts.booth.pm/library";
 const GIFTS = "https://accounts.booth.pm/library/gifts";
+const FREE = "https://accounts.booth.pm/library/free_downloads";
 const ITEMS = "https://booth.pm/ja/items/";
 const tempPaths: string[] = [];
 
@@ -23,10 +25,15 @@ async function setup(reader: RoutedFakeReader): Promise<{ service: BoothService;
   return { service: new BoothService(reader, { env: { BOOTH_MCP_HOME: home } }), home };
 }
 
-function ownedRoutes(library: readonly FakeLibraryItem[], gifts: readonly FakeLibraryItem[] = []): Record<string, FakeRoute> {
+function ownedRoutes(
+  library: readonly FakeLibraryItem[],
+  gifts: readonly FakeLibraryItem[] = [],
+  free: readonly FakeLibraryItem[] = [],
+): Record<string, FakeRoute> {
   return {
     [LIBRARY]: { html: libraryHtml(library, { page: 1, lastPage: 1 }) },
     [GIFTS]: { html: libraryHtml(gifts, { page: 1, lastPage: 1, path: "/library/gifts" }) },
+    [FREE]: { html: libraryHtml(free, { page: 1, lastPage: 1, path: "/library/free_downloads" }) },
   };
 }
 
@@ -106,9 +113,11 @@ describe("Memo", () => {
     const reader = new RoutedFakeReader(ownedRoutes([]));
     const { service } = await setup(reader);
     await Promise.all([service.listMyAvatars(), service.syncLibraryMetadata(), service.syncLibraryMetadata()]);
-    expect(reader.count(LIBRARY)).toBe(2);
+    // One page each of library, gifts and free downloads (all three tabs share the /library prefix).
+    expect(reader.count(LIBRARY)).toBe(3);
     expect(reader.calls.filter((url) => url === LIBRARY)).toHaveLength(1);
     expect(reader.calls.filter((url) => url === GIFTS)).toHaveLength(1);
+    expect(reader.calls.filter((url) => url === FREE)).toHaveLength(1);
   });
 });
 
@@ -121,7 +130,7 @@ describe("syncAllMetadata", () => {
     const result = await service.syncAllMetadata({ onProgress: (step) => progress.push(step.remaining) });
     expect(result.data).toMatchObject({ total_items: 45, fetched: 45, remaining: 0 });
     expect(progress).toEqual([25, 5, 0]);
-    expect(reader.count(LIBRARY)).toBe(2);
+    expect(reader.count(LIBRARY)).toBe(3);
     expect(reader.count(ITEMS)).toBe(45);
   });
 
@@ -171,6 +180,31 @@ const AVATARS: FakeLibraryItem[] = [
 function originalAvatar(id: number, name: string): FakeRoute {
   return { json: { ...(publicItem(6106863) as Record<string, unknown>), id, name } };
 }
+
+describe("free downloads in owned-item walks", () => {
+  it("syncs their metadata but keeps them out of the file-composition snapshot", async () => {
+    const { items, routes } = clones(8100, 3);
+    const reader = new RoutedFakeReader({ ...ownedRoutes(items.slice(0, 2), [], items.slice(1)), ...routes });
+    const { service, home } = await setup(reader);
+    const { data } = await service.syncLibraryMetadata();
+    expect(data).toMatchObject({ total_items: 3, fetched: 3, remaining: 0, truncated: false });
+    const snapshot = await readFile(join(home, "cache", CACHE_SNAPSHOT_FILE_NAME), "utf8");
+    expect(snapshot).toContain('"8101"');
+    expect(snapshot).not.toContain('"8102"');
+  });
+
+  it("lists avatar bodies obtained as free downloads, counting an item listed twice once", async () => {
+    const bikini = { id: 4866933, name: "流行りのビキニ" };
+    const reader = new RoutedFakeReader({
+      ...ownedRoutes([bikini], [], [{ id: 3681787, name: "オリジナル3Dモデル「桔梗」" }, bikini]),
+      ...itemRoutes([3681787, 4866933]),
+    });
+    const { service } = await setup(reader);
+    const { data } = await service.listMyAvatars();
+    expect(data.avatars.map((avatar) => [avatar.item_id, avatar.avatar_id])).toEqual([["3681787", "kikyo"]]);
+    expect(data).toMatchObject({ owned_items: 2, metadata_pending: 0 });
+  });
+});
 
 describe("listMyAvatars", () => {
   it("lists owned avatar bodies with dictionary ids and suggests unknown ones", async () => {

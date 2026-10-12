@@ -1,4 +1,5 @@
 import { ACCOUNTS_ORIGIN } from "../browser/url-policy.js";
+import { parseFreeDownloadsPage } from "../parsers/free-downloads.js";
 import { parseGiftsPage, parseLibraryPage, type LibraryItem, type LibraryPage } from "../parsers/library.js";
 import type { BoothResult, LibraryEntry, LibraryFilters, LibraryListing, LibrarySource, MetadataStatus } from "../types.js";
 import type { AvatarDictionary, VrchatKind } from "../vrchat/types.js";
@@ -18,6 +19,7 @@ export const SYNC_HINT =
 const SOURCES: Readonly<Record<LibrarySource, { url: string; parse: (html: string, url: string) => LibraryPage }>> = {
   library: { url: `${ACCOUNTS_ORIGIN}/library`, parse: parseLibraryPage },
   gifts: { url: `${ACCOUNTS_ORIGIN}/library/gifts`, parse: parseGiftsPage },
+  free_downloads: { url: `${ACCOUNTS_ORIGIN}/library/free_downloads`, parse: parseFreeDownloadsPage },
 };
 
 export interface LibraryQuery {
@@ -53,7 +55,7 @@ interface ResolvedFilters {
   readonly dependencyId: string | undefined;
 }
 
-/** Library / gifts listing with optional local and VRChat filters. Inputs are validated before any request. */
+/** Library / gifts / free-downloads listing with optional local and VRChat filters. Inputs are validated before any request. */
 export async function listLibrary(
   ctx: ServiceContext,
   source: LibrarySource,
@@ -118,6 +120,27 @@ export function collectOwnedItems(ctx: ServiceContext): Promise<OwnedItems> {
     for (const item of [...library.items, ...gifts.items]) byId.set(item.item_id, mergeItem(byId.get(item.item_id), item));
     return { items: [...byId.values()], truncated: library.truncated || gifts.truncated };
   });
+}
+
+/** Library + gifts + free downloads. `purchased` is the library + gifts part (the only one listing files). */
+export interface OwnedWithFree extends OwnedItems {
+  readonly purchased: OwnedItems;
+}
+
+/**
+ * Everything the user has, including free downloads, for "what do I own" questions (my avatars, avatars init,
+ * sync, unity-check). Free-download cards list no files, so update checks and the file-composition snapshots
+ * keep using `purchased`. The free walk is memoised like the library walk.
+ */
+export async function collectOwnedWithFree(ctx: ServiceContext): Promise<OwnedWithFree> {
+  const purchased = await collectOwnedItems(ctx);
+  const free = await ctx.freeItems.get(async () => {
+    const walk = await walkLibrary(ctx, "free_downloads");
+    return { items: walk.items, truncated: walk.truncated };
+  });
+  const known = new Set(purchased.items.map((item) => item.item_id));
+  const extra = free.items.filter((item) => !known.has(item.item_id));
+  return { items: [...purchased.items, ...extra], truncated: purchased.truncated || free.truncated, purchased };
 }
 
 /** Cache coverage summary shared by the tools that need owned item metadata. */
